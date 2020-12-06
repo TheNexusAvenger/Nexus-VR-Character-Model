@@ -1,0 +1,12 @@
+[submodule "module/Nexus-VR-Core"]
+	path = module/Nexus-VR-Core
+	url = https://github.com/TheNexusAvenger/Nexus-VR-Core.git
+[submodule "module/Nexus-Instance"]
+	path = module/Nexus-Instance
+	url = https://github.com/TheNexusAvenger/Nexus-Instance
+[submodule "module/Nexus-Button"]
+	path = module/Nexus-Button
+	url = https://github.com/TheNexusAvenger/Nexus-Button
+[submodule "module/Nexus-Project"]
+	path = module/Nexus-Project
+	url = https://github.com/TheNexusAvenger/Nexus-Project
