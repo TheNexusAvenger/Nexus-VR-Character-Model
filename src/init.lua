@@ -89,7 +89,7 @@ Intended for objects that can only have
 function NexusVRCharacterModel:GetInstance(Path)
     --Create the singleton instance if non exists.
     if not NexusVRCharacterModel.SingletonInstances[Path] then
-        NexusVRCharacterModel.SingletonInstances[Path] = NexusVRCharacterModel:GetInstance(Path).new()
+        NexusVRCharacterModel.SingletonInstances[Path] = NexusVRCharacterModel:GetResource(Path).new()
     end
 
     --Return the singleton instance.
