@@ -23,12 +23,18 @@ function Settings:__new()
     self.Defaults = {}
     self.Overrides = {}
     self.SettingsChangeEvents = {}
+    self.SettingsCache = {}
 end
 
 --[[
 Returns the value of a setting.
 --]]
 function Settings:GetSetting(Setting)
+    --Return a cached entry if one exists.
+    if self.SettingsCache[Setting] then
+        return self.SettingsCache[Setting]
+    end
+
     --Get the table containing the setting.
     local Defaults,Overrides = self.Defaults,self.Overrides
     local SplitSettingNames = string.split(Setting,".")
@@ -38,7 +44,9 @@ function Settings:GetSetting(Setting)
     end
 
     --Return the value.
-    return Overrides[SplitSettingNames[#SplitSettingNames]] or Defaults[SplitSettingNames[#SplitSettingNames]]
+    local Value = Overrides[SplitSettingNames[#SplitSettingNames]] or Defaults[SplitSettingNames[#SplitSettingNames]]
+    self.SettingsCache[Setting] = Value
+    return Value
 end
 
 --[[
@@ -55,6 +63,7 @@ function Settings:SetSetting(Setting,Value)
         Overrides = Overrides[SplitSettingNames[i]]
     end
     Overrides[SplitSettingNames[#SplitSettingNames]] = Value
+    self.SettingsCache[Setting] = Value
 
     --Fire the changed signal.
     local Event = self.SettingsChangeEvents[string.lower(Setting)]
@@ -69,6 +78,7 @@ Sets all the overrides.
 function Settings:SetOverrides(Overrides)
     --Set the overrides.
     self.Overrides = Overrides
+    self.SettingsCache = {}
 
     --Fire all the event changes.
     for _,Event in pairs(self.SettingsChangeEvents) do
