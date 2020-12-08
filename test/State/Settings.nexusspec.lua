@@ -7,8 +7,8 @@ Tests the Settings class.
 local NexusUnitTesting = require("NexusUnitTesting")
 local ServerScriptService = game:GetService("ServerScriptService")
 
-local NexusVRCharaacterModel = require(ServerScriptService:WaitForChild("NexusVRCharacterModelLoader"):WaitForChild("MainModule"))
-local Settings = NexusVRCharaacterModel:GetResource("State.Settings")
+local NexusVRCharacterModel = require(ServerScriptService:WaitForChild("NexusVRCharacterModelLoader"):WaitForChild("MainModule"))
+local Settings = NexusVRCharacterModel:GetResource("State.Settings")
 local SettingsTest = NexusUnitTesting.UnitTest:Extend()
 
 
@@ -45,6 +45,7 @@ end
 Tears down the test.
 --]]
 function SettingsTest:Teardown()
+    NexusVRCharacterModel:ClearInstances()
     if self.CuT then
         self.CuT:Destroy()
     end

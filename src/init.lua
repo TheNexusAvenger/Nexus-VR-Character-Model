@@ -12,6 +12,7 @@ local StarterPlayer = game:GetService("StarterPlayer")
 local NexusProject = require(script:WaitForChild("NexusProject"))
 
 local NexusVRCharacterModel = NexusProject.new(script)
+NexusVRCharacterModel.SingletonInstances = {}
 
 
 
@@ -43,6 +44,7 @@ function NexusVRCharacterModel:Load()
 
     --Rename and move the script to ReplicatedStorage.
     script.Name = "NexusVRCharacterModel"
+    script:WaitForChild("NexusVRCore").Parent = ReplicatedStorage
     script.Parent = ReplicatedStorage
 
     --Set up the client scripts.
@@ -77,6 +79,34 @@ function NexusVRCharacterModel:Load()
             end
         end
     end)
+end
+
+--[[
+Returns a static instance of a class.
+Intended for objects that can only have
+1 instance.
+--]]
+function NexusVRCharacterModel:GetInstance(Path)
+    --Create the singleton instance if non exists.
+    if not NexusVRCharacterModel.SingletonInstances[Path] then
+        NexusVRCharacterModel.SingletonInstances[Path] = NexusVRCharacterModel:GetInstance(Path).new()
+    end
+
+    --Return the singleton instance.
+    return NexusVRCharacterModel.SingletonInstances[Path]
+end
+
+--[[
+Clears the static instances. Only
+intended for use at the end of tests.
+--]]
+function NexusVRCharacterModel:ClearInstances()
+    for _,Ins in pairs(NexusVRCharacterModel.SingletonInstances) do
+        if Ins.Destroy then
+            Ins:Destroy()
+        end
+    end
+    NexusVRCharacterModel.SingletonInstances = {}
 end
 
 
