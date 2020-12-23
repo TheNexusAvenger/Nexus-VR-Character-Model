@@ -22,7 +22,7 @@ local Configuration = {
         MaxNeckTilt = math.rad(60),
 
         --Maximum angle the center of the torso can bend.
-        MaxTorsoBend = math.rad(5),
+        MaxTorsoBend = math.rad(10),
     },
     Camera = {
         --Options for the camera that can be enabled by the user.
