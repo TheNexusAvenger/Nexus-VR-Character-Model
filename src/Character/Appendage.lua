@@ -69,7 +69,10 @@ function Appendage:SolveJoint(OriginCFrame,TargetPosition,Length1,Length2)
     else
         local Angle1 = -math.acos((-(Length2 * Length2) + (Length1 * Length1) + (Hypotenuse * Hypotenuse)) / (2 * Length1 * Hypotenuse))
         local Angle2 = math.acos(((Length2  * Length2) - (Length1 * Length1) + (Hypotenuse * Hypotenuse)) / (2 * Length2 * Hypotenuse))
-
+        if self.InvertBendDirection then
+            Angle1 = -Angle1
+            Angle2 = -Angle2
+        end
         return PlaneCFrame,Angle1 + math.pi/2,Angle2 - Angle1
     end
 end
