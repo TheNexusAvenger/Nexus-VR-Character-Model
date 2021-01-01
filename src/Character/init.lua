@@ -201,6 +201,11 @@ end
 Updates the character from the inputs.
 --]]
 function Character:UpdateFromInputs(HeadControllerCFrame,LeftHandControllerCFrame,RightHandControllerCFrame)
+    --Return if the humanoid is dead.
+    if self.Humanoid.Health <= 0 then
+        return
+    end
+    
     --Get the CFrames.
     local HeadCFrame = self.Head:GetHeadCFrame(HeadControllerCFrame)
     local NeckCFrame = self.Head:GetNeckCFrame(HeadControllerCFrame)
