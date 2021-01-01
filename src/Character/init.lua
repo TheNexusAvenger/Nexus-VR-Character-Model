@@ -157,13 +157,17 @@ function Character:__new(CharacterModel)
 
     --Stop the character animations.
     local Animator = CharacterModel:WaitForChild("Humanoid"):WaitForChild("Animator")
-    CharacterModel:WaitForChild("Animate"):Destroy()
-    for _,Track in pairs(Animator:GetPlayingAnimationTracks()) do
-        Track:Stop()
+    if Players.LocalPlayer and Players.LocalPlayer.Character == CharacterModel then
+        CharacterModel:WaitForChild("Animate"):Destroy()
+        for _,Track in pairs(Animator:GetPlayingAnimationTracks()) do
+            Track:Stop()
+        end
+        Animator.AnimationPlayed:Connect(function(Track)
+            Track:Stop()
+        end)
+    else
+        Animator:Destroy()
     end
-    Animator.AnimationPlayed:Connect(function(Track)
-        Track:Stop()
-    end)
 end
 
 --[[
