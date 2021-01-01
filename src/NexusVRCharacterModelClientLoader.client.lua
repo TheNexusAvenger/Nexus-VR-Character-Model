@@ -19,7 +19,7 @@ local UpdateInputs = NexusVRCharacterModel:GetResource("UpdateInputs")
 Settings:SetOverrides(HttpService:JSONDecode(NexusVRCharacterModel:GetResource("Configuration").Value))
 
 --Connect replication for other players.
-UpdateInputs.OnClientEvents:Connect(function(Player,HeadCFrame,LeftHandCFrame,RightHandCFrame)
+UpdateInputs.OnClientEvent:Connect(function(Player,HeadCFrame,LeftHandCFrame,RightHandCFrame)
     local Character = CharacterService:GetCharacter(Player)
     if Character then
         Character:UpdateFromInputs(HeadCFrame,LeftHandCFrame,RightHandCFrame)
