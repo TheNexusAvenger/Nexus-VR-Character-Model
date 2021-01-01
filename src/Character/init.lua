@@ -157,6 +157,7 @@ function Character:__new(CharacterModel)
 
     --Stop the character animations.
     local Animator = CharacterModel:WaitForChild("Humanoid"):WaitForChild("Animator")
+    CharacterModel:WaitForChild("Animate"):Destroy()
     for _,Track in pairs(Animator:GetPlayingAnimationTracks()) do
         Track:Stop()
     end
