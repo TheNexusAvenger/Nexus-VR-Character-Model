@@ -137,6 +137,15 @@ function Character:__new(CharacterModel)
     self.RightLeg = Appendage.new(CharacterModel:WaitForChild("RightUpperLeg"),CharacterModel:WaitForChild("RightLowerLeg"),CharacterModel:WaitForChild("RightFoot"),"RightHipRigAttachment","RightKneeRigAttachment","RightAnkleRigAttachment","RightFootAttachment",false)
     self.RightLeg.InvertBendDirection = true
     self.FootPlanter = FootPlanter:CreateSolver(CharacterModel:WaitForChild("LowerTorso"))
+
+    --Stop the character animations.
+    local Animator = CharacterModel:WaitForChild("Humanoid"):WaitForChild("Animator")
+    for _,Track in pairs(Animator:GetPlayingAnimationTracks()) do
+        Track:Stop()
+    end
+    Animator.AnimationPlayed:Connect(function(Track)
+        Track:Stop()
+    end)
 end
 
 --[[
