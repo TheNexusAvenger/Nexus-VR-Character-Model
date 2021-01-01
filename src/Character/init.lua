@@ -4,6 +4,7 @@ TheNexusAvenger
 Manipulates a character model.
 --]]
 
+local Players = game:GetService("Players")
 local TweenService = game:GetService("TweenService")
 
 local NexusVRCharacterModel = require(script.Parent)
@@ -12,6 +13,7 @@ local Head = NexusVRCharacterModel:GetResource("Character.Head")
 local Torso = NexusVRCharacterModel:GetResource("Character.Torso")
 local Appendage = NexusVRCharacterModel:GetResource("Character.Appendage")
 local FootPlanter = NexusVRCharacterModel:GetResource("Character.FootPlanter")
+local Settings = NexusVRCharacterModel:GetInstance("State.Settings")
 
 local Character = NexusObject:Extend()
 Character:SetClassName("Character")
@@ -25,6 +27,21 @@ function Character:__new(CharacterModel)
     self:InitializeSuper()
     self.CharacterModel = CharacterModel
     self.TweenComponents = true
+
+    --Determine if the arms can be disconnected.
+    --Checking for the setting to be explicitly false is done in case the setting is undefined (default is true).
+    local PreventArmDisconnection = false
+    if Players.LocalPlayer and Players.LocalPlayer.Character == CharacterModel then
+        local Setting = Settings:GetSetting("Appearance.LocalAllowArmDisconnection")
+        if Setting == false then
+            PreventArmDisconnection = true
+        end
+    else
+        local Setting = Settings:GetSetting("Appearance.NonLocalAllowArmDisconnection")
+        if Setting == false then
+            PreventArmDisconnection = true
+        end
+    end
 
     --Store the body parts.
     self.Parts = {
@@ -130,11 +147,11 @@ function Character:__new(CharacterModel)
     --Store the limbs.
     self.Head = Head.new(self.Parts.Head)
     self.Torso = Torso.new(self.Parts.LowerTorso,self.Parts.UpperTorso)
-    self.LeftArm = Appendage.new(CharacterModel:WaitForChild("LeftUpperArm"),CharacterModel:WaitForChild("LeftLowerArm"),CharacterModel:WaitForChild("LeftHand"),"LeftShoulderRigAttachment","LeftElbowRigAttachment","LeftWristRigAttachment","LeftGripAttachment")
-    self.RightArm = Appendage.new(CharacterModel:WaitForChild("RightUpperArm"),CharacterModel:WaitForChild("RightLowerArm"),CharacterModel:WaitForChild("RightHand"),"RightShoulderRigAttachment","RightElbowRigAttachment","RightWristRigAttachment","RightGripAttachment")
-    self.LeftLeg = Appendage.new(CharacterModel:WaitForChild("LeftUpperLeg"),CharacterModel:WaitForChild("LeftLowerLeg"),CharacterModel:WaitForChild("LeftFoot"),"LeftHipRigAttachment","LeftKneeRigAttachment","LeftAnkleRigAttachment","LeftFootAttachment",false)
+    self.LeftArm = Appendage.new(CharacterModel:WaitForChild("LeftUpperArm"),CharacterModel:WaitForChild("LeftLowerArm"),CharacterModel:WaitForChild("LeftHand"),"LeftShoulderRigAttachment","LeftElbowRigAttachment","LeftWristRigAttachment","LeftGripAttachment",PreventArmDisconnection)
+    self.RightArm = Appendage.new(CharacterModel:WaitForChild("RightUpperArm"),CharacterModel:WaitForChild("RightLowerArm"),CharacterModel:WaitForChild("RightHand"),"RightShoulderRigAttachment","RightElbowRigAttachment","RightWristRigAttachment","RightGripAttachment",PreventArmDisconnection)
+    self.LeftLeg = Appendage.new(CharacterModel:WaitForChild("LeftUpperLeg"),CharacterModel:WaitForChild("LeftLowerLeg"),CharacterModel:WaitForChild("LeftFoot"),"LeftHipRigAttachment","LeftKneeRigAttachment","LeftAnkleRigAttachment","LeftFootAttachment",true)
     self.LeftLeg.InvertBendDirection = true
-    self.RightLeg = Appendage.new(CharacterModel:WaitForChild("RightUpperLeg"),CharacterModel:WaitForChild("RightLowerLeg"),CharacterModel:WaitForChild("RightFoot"),"RightHipRigAttachment","RightKneeRigAttachment","RightAnkleRigAttachment","RightFootAttachment",false)
+    self.RightLeg = Appendage.new(CharacterModel:WaitForChild("RightUpperLeg"),CharacterModel:WaitForChild("RightLowerLeg"),CharacterModel:WaitForChild("RightFoot"),"RightHipRigAttachment","RightKneeRigAttachment","RightAnkleRigAttachment","RightFootAttachment",true)
     self.RightLeg.InvertBendDirection = true
     self.FootPlanter = FootPlanter:CreateSolver(CharacterModel:WaitForChild("LowerTorso"))
 
