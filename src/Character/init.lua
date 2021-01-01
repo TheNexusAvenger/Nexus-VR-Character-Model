@@ -156,7 +156,8 @@ function Character:__new(CharacterModel)
     self.FootPlanter = FootPlanter:CreateSolver(CharacterModel:WaitForChild("LowerTorso"))
 
     --Stop the character animations.
-    local Animator = CharacterModel:WaitForChild("Humanoid"):WaitForChild("Animator")
+    self.Humanoid = CharacterModel:WaitForChild("Humanoid")
+    local Animator = self.Humanoid:WaitForChild("Animator")
     if Players.LocalPlayer and Players.LocalPlayer.Character == CharacterModel then
         CharacterModel:WaitForChild("Animate"):Destroy()
         for _,Track in pairs(Animator:GetPlayingAnimationTracks()) do
@@ -212,7 +213,9 @@ function Character:UpdateFromInputs(HeadControllerCFrame,LeftHandControllerCFram
 	local RightUpperLegCFrame,RightLowerLegCFrame,RightFootCFrame = self.RightLeg:GetAppendageCFrames(JointCFrames["RightHip"],RightFoot * CFrame.Angles(0,math.pi,0))
     
     --Set the character CFrames.
-    self.Parts.HumanoidRootPart.CFrame = LowerTorsoCFrame * self.Attachments.LowerTorso.RootRigAttachment.CFrame * self.Attachments.HumanoidRootPart.RootRigAttachment.CFrame:Inverse()
+    if not self.Humanoid.Occupant then
+        self.Parts.HumanoidRootPart.CFrame = LowerTorsoCFrame * self.Attachments.LowerTorso.RootRigAttachment.CFrame * self.Attachments.HumanoidRootPart.RootRigAttachment.CFrame:Inverse()
+    end
     self:SetTransform("Neck","NeckRigAttachment","UpperTorso","Head",UpperTorsoCFrame,HeadCFrame)
     self:SetTransform("Waist","WaistRigAttachment","LowerTorso","UpperTorso",LowerTorsoCFrame,UpperTorsoCFrame)
     self:SetTransform("RightShoulder","RightShoulderRigAttachment","UpperTorso","RightUpperArm",UpperTorsoCFrame,RightUpperArmCFrame)
