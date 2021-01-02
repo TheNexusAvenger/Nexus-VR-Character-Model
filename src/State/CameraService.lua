@@ -7,6 +7,7 @@ Manages the local camera.
 local NexusVRCharacterModel = require(script.Parent.Parent)
 local NexusObject = NexusVRCharacterModel:GetResource("NexusInstance.NexusObject")
 local DefaultCamera = NexusVRCharacterModel:GetResource("Character.Camera.DefaultCamera")
+local ThirdPersonTrackCamera = NexusVRCharacterModel:GetResource("Character.Camera.ThirdPersonTrackCamera")
 
 local CameraService = NexusObject:Extend()
 CameraService:SetClassName("CameraService")
@@ -22,6 +23,7 @@ function CameraService:__new()
     --Register the default controllers.
     self.RegisteredCameras = {}
     self:RegisterCamera("Default",DefaultCamera.new())
+    self:RegisterCamera("ThirdPersonTrack",ThirdPersonTrackCamera.new())
 end
 
 --[[

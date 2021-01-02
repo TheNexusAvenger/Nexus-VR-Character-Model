@@ -29,7 +29,6 @@ local Configuration = {
         EnabledCameraOptions = {
             "Default",
             "ThirdPersonTrack",
-            "ThirdPersonFixed",
         },
 
         --Default camera option.
