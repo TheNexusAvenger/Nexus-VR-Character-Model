@@ -1,0 +1,99 @@
+--[[
+TheNexusAvenger
+
+Default camera that follows the character.
+--]]
+
+ --[[
+TheNexusAvenger
+
+Base class for controlling the local character.
+--]]
+
+local Workspace = game:GetService("Workspace")
+local Players = game:GetService("Players")
+
+local NexusVRCharacterModel = require(script.Parent.Parent.Parent)
+local NexusObject = NexusVRCharacterModel:GetResource("NexusInstance.NexusObject")
+local CharacterService = NexusVRCharacterModel:GetInstance("State.CharacterService")
+local Settings = NexusVRCharacterModel:GetInstance("State.Settings")
+local VRInputService = NexusVRCharacterModel:GetInstance("State.VRInputService")
+
+local DefaultCamera = NexusObject:Extend()
+DefaultCamera:SetClassName("DefaultCamera")
+
+
+
+--[[
+Enables the camera.
+--]]
+function DefaultCamera:Enable()
+    self.TransparencyEvents = {}
+    if Players.LocalPlayer.Character then
+        --Connect children being added.
+        local Transparency = Settings:GetSetting("Appearance.LocalCharacterTransparency")
+        table.insert(self.TransparencyEvents,Players.LocalPlayer.Character.DescendantAdded:Connect(function(Part)
+            if Part:IsA("BasePart") then
+                if Part.Parent:IsA("Accoutrement") then
+                    Part.LocalTransparencyModifier = 1
+                else
+                    Part.LocalTransparencyModifier = Transparency
+                end
+            end
+        end))
+        for _,Part in pairs(Players.LocalPlayer.Character:GetDescendants()) do
+            if Part:IsA("BasePart") then
+                if Part.Parent:IsA("Accoutrement") then
+                    Part.LocalTransparencyModifier = 1
+                else
+                    Part.LocalTransparencyModifier = Transparency
+                end
+            end
+        end
+    end
+
+    --Connect the character and local transparency changing.
+    table.insert(self.TransparencyEvents,Players.LocalPlayer:GetPropertyChangedSignal("Character"):Connect(function()
+        self:Disable()
+        self:Enable()
+    end))
+    table.insert(self.TransparencyEvents,Settings:GetSettingsChangedSignal("Appearance.LocalCharacterTransparency"):Connect(function()
+        self:Disable()
+        self:Enable()
+    end))
+end
+
+--[[
+Disables the camera.
+--]]
+function DefaultCamera:Disable()
+    --Disconnect the character events.
+    if self.TransparencyEvents then
+        for _,Event in pairs(self.TransparencyEvents) do
+            Event:Disconnect()
+        end
+        self.TransparencyEvents = {}
+    end
+
+    --Reset the local transparency modifiers.
+    if Players.LocalPlayer.Character then
+        for _,Part in pairs(Players.LocalPlayer.Character:GetDescendants()) do
+            if Part:IsA("BasePart") then
+                Part.LocalTransparencyModifier = 0
+            end
+        end
+    end
+end
+
+--[[
+Updates the camera.
+--]]
+function DefaultCamera:UpdateCamera(HeadsetCFrameWorld)
+    Workspace.CurrentCamera.CameraType = "Scriptable"
+    Workspace.CurrentCamera.HeadLocked = false
+    Workspace.CurrentCamera.CFrame = HeadsetCFrameWorld
+end
+
+
+
+return DefaultCamera

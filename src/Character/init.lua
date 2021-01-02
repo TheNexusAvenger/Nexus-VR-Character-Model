@@ -130,6 +130,7 @@ function Character:__new(CharacterModel)
         },
         RightFoot = {
             RightAnkleRigAttachment = self.Parts.RightFoot:WaitForChild("RightAnkleRigAttachment"),
+            RightFootAttachment = self.Parts.RightFoot:WaitForChild("RightFootAttachment"),
         },
         LeftUpperLeg = {
             LeftHipRigAttachment = self.Parts.LeftUpperLeg:WaitForChild("LeftHipRigAttachment"),
@@ -141,6 +142,7 @@ function Character:__new(CharacterModel)
         },
         LeftFoot = {
             LeftAnkleRigAttachment = self.Parts.LeftFoot:WaitForChild("LeftAnkleRigAttachment"),
+            LeftFootAttachment = self.Parts.LeftFoot:WaitForChild("LeftFootAttachment"),
         },
     }
 
@@ -218,7 +220,7 @@ function Character:UpdateFromInputs(HeadControllerCFrame,LeftHandControllerCFram
 	local RightUpperLegCFrame,RightLowerLegCFrame,RightFootCFrame = self.RightLeg:GetAppendageCFrames(JointCFrames["RightHip"],RightFoot * CFrame.Angles(0,math.pi,0))
     
     --Set the character CFrames.
-    if not self.Humanoid.Occupant then
+    if not self.Humanoid.SeatPart then
         self.Parts.HumanoidRootPart.CFrame = LowerTorsoCFrame * self.Attachments.LowerTorso.RootRigAttachment.CFrame * self.Attachments.HumanoidRootPart.RootRigAttachment.CFrame:Inverse()
     end
     self:SetTransform("Neck","NeckRigAttachment","UpperTorso","Head",UpperTorsoCFrame,HeadCFrame)
