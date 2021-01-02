@@ -50,6 +50,8 @@ end
 Enables the controller.
 --]]
 function BaseController:Enable()
+    self.VelocityY = 0
+
     --Update the character and return if the character is nil.
     self:UpdateCharacterReference()
     if not self.Character then
@@ -67,6 +69,7 @@ Disables the controller.
 function BaseController:Disable()
     self.Character = nil
     self.ReferenceWorldCFrame = nil
+    self.VelocityY = nil
 end
 
 --[[
@@ -126,18 +129,22 @@ function BaseController:UpdateReferenceWorldCFrame()
                 self.LastPositionUpdate = CurrentTime
 
                 --Update height.
-                local NewVelocity = self.Character.Parts.HumanoidRootPart.Velocity - Vector3.new(0,-Workspace.Gravity * DeltaTime,0)
-                if self.ReferenceWorldCFrame.Y + NewVelocity.Y > HitPosition.Y + LegHeight then
-                    self.ReferenceWorldCFrame = CFrame.new(0,ClampOffset,0) * self.ReferenceWorldCFrame
-                    self.Character.Parts.HumanoidRootPart.Velocity = Vector3.new(0,0,0)
+                local NewVelocity = self.VelocityY + (Workspace.Gravity * DeltaTime)
+                if self.ReferenceWorldCFrame.Y + NewVelocity > HitPosition.Y + CharacterHeight then
+                    self.ReferenceWorldCFrame = CFrame.new(0,NewVelocity,0) * self.ReferenceWorldCFrame
+                    self.VelocityY = NewVelocity
                 else
-                    self.ReferenceWorldCFrame = CFrame.new(0,NewVelocity.Y,0) * self.ReferenceWorldCFrame
-                    self.Character.Parts.HumanoidRootPart.Velocity = NewVelocity
+                    self.ReferenceWorldCFrame = CFrame.new(0,ClampOffset,0) * self.ReferenceWorldCFrame
+                    self.VelocityY = 0
                 end
+            else
+                --Set the last time for the next update.
+                self.LastPositionUpdate = tick()
             end
         else
             --Clamp the player to the hit part.
             self.ReferenceWorldCFrame = CFrame.new(0,ClampOffset,0) * self.ReferenceWorldCFrame
+            self.VelocityY = 0
         end
     else
         if HitPart then
