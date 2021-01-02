@@ -28,7 +28,7 @@ function TeleportController:UpdateCharacter()
     --Get the VR inputs and convert them to world space.
     local VRInputs = VRInputService:GetVRInputs()
     for _,InputEnum in pairs({Enum.UserCFrame.Head,Enum.UserCFrame.LeftHand,Enum.UserCFrame.RightHand}) do
-        VRInputs[InputEnum] = self.ReferenceWorldCFrame * VRInputs[InputEnum]
+        VRInputs[InputEnum] = self.ReferenceWorldCFrame * self:ScaleInput(VRInputs[InputEnum])
     end
 
     --Update the character.

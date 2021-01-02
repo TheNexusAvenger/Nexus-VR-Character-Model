@@ -70,6 +70,20 @@ function BaseController:Disable()
 end
 
 --[[
+Scales the local-space input CFrame based on
+the height multiplier of the character.
+--]]
+function BaseController:ScaleInput(InputCFrame)
+    --Return the original CFrame if there is no character.
+    if not self.Character then
+        return InputCFrame
+    end
+
+    --Return the modified CFrame.
+    return CFrame.new(InputCFrame.Position * (self.Character.ScaleValues.BodyHeightScale.Value - 1)) * InputCFrame
+end
+
+--[[
 Updates the reference world CFrame.
 --]]
 function BaseController:UpdateReferenceWorldCFrame()

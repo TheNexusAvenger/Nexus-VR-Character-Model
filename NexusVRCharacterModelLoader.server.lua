@@ -32,7 +32,7 @@ local Configuration = {
         },
 
         --Default camera option.
-        DefaultCameraOption = "Default",
+        DefaultCameraOption = "ThirdPersonTrack",
     },
     Movement = {
         --Movement methods that can be enabled by the user.

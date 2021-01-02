@@ -44,6 +44,7 @@ function Character:__new(CharacterModel)
     end
 
     --Store the body parts.
+    self.Humanoid = CharacterModel:WaitForChild("Humanoid")
     self.Parts = {
         Head = CharacterModel:WaitForChild("Head"),
         UpperTorso = CharacterModel:WaitForChild("UpperTorso"),
@@ -145,6 +146,12 @@ function Character:__new(CharacterModel)
             LeftFootAttachment = self.Parts.LeftFoot:WaitForChild("LeftFootAttachment"),
         },
     }
+    self.ScaleValues = {
+        BodyDepthScale = self.Humanoid:WaitForChild("BodyDepthScale"),
+        BodyWidthScale = self.Humanoid:WaitForChild("BodyWidthScale"),
+        BodyHeightScale = self.Humanoid:WaitForChild("BodyHeightScale"),
+        HeadScale = self.Humanoid:WaitForChild("HeadScale"),
+    }
 
     --Store the limbs.
     self.Head = Head.new(self.Parts.Head)
@@ -155,10 +162,9 @@ function Character:__new(CharacterModel)
     self.LeftLeg.InvertBendDirection = true
     self.RightLeg = Appendage.new(CharacterModel:WaitForChild("RightUpperLeg"),CharacterModel:WaitForChild("RightLowerLeg"),CharacterModel:WaitForChild("RightFoot"),"RightHipRigAttachment","RightKneeRigAttachment","RightAnkleRigAttachment","RightFootAttachment",true)
     self.RightLeg.InvertBendDirection = true
-    self.FootPlanter = FootPlanter:CreateSolver(CharacterModel:WaitForChild("LowerTorso"))
+    self.FootPlanter = FootPlanter:CreateSolver(CharacterModel:WaitForChild("LowerTorso"),self.ScaleValues.BodyHeightScale)
 
     --Stop the character animations.
-    self.Humanoid = CharacterModel:WaitForChild("Humanoid")
     local Animator = self.Humanoid:WaitForChild("Animator")
     if Players.LocalPlayer and Players.LocalPlayer.Character == CharacterModel then
         CharacterModel:WaitForChild("Animate"):Destroy()

@@ -19,7 +19,7 @@ local min,max,abs,log = math.min,math.max,math.abs,math.log
 
 
 
-function FootPlanter:CreateSolver(CenterPart)
+function FootPlanter:CreateSolver(CenterPart,ScaleValue)
 	--Heavily modified code from Stravant
 	local FootPlanterClass = {}
 	
@@ -125,8 +125,10 @@ function FootPlanter:CreateSolver(CenterPart)
 	-- Leg data
 	local mRightLeg, mLeftLeg, mRightArm, mLeftArm;
 	local mLegs = {}
+	local lastCF
 	local function initLegs()
 		local cf = flatten(getBaseCFrame(CenterPart.CFrame))
+		lastCF = cf
 		mRightLeg = {
 			OffsetModifier = CFnew(-LEG_GAP/2, 0, 0);
 			Side = -1;
@@ -150,6 +152,46 @@ function FootPlanter:CreateSolver(CenterPart)
 		mLegs = {mLeftLeg, mRightLeg}
 	end
 	
+	local LastScale = 1
+	local function UpdateScaling()
+		local Multiplier = ScaleValue.Value / LastScale
+		LastScale = ScaleValue.Value
+
+		LEG_GAP = LEG_GAP * Multiplier
+		STRIDE_FORWARD = STRIDE_FORWARD * Multiplier
+		STRIDE_BACKWARD = STRIDE_BACKWARD * Multiplier
+		STRIDE_HEIGHT = STRIDE_HEIGHT * Multiplier
+		STRIDE_RESTING = STRIDE_RESTING * Multiplier
+
+		mRightLeg.OffsetModifier = CFnew(-LEG_GAP/2, 0, 0)
+		--[[mRightLeg.FootPosition
+		mRightLeg.LastStepTo
+		mRightLeg.Takeoff
+			 = ;
+			Side = -1;
+			--
+			StepCycle = 0;
+			 = lastCF*CFnew(-LEG_GAP/2, 0, 0).p;
+			 = lastCF*CFnew(-LEG_GAP/2, 0, 0).p;
+			 = lastCF*CFnew(-LEG_GAP/2, 0, 0).p;
+		}
+		mLeftLeg = {
+			OffsetModifier = CFnew( LEG_GAP/2, 0, 0);
+			Side = 1;
+			--
+			StepCycle = 0;
+			FootPosition = lastCF*CFnew( LEG_GAP/2, 0, 0).p;
+			LastStepTo = lastCF*CFnew(-LEG_GAP/2, 0, 0).p;
+			Takeoff = lastCF*CFnew(-LEG_GAP/2, 0, 0).p;
+		}]]
+	end
+	ScaleValue.Changed:Connect(function()
+		if mRightLeg then
+			UpdateScaling()
+		end
+	end)
+
+
 	local mAirborneFraction = 0
 	local mLandedFraction = 0
 	local mCurrentSpeed = 1
@@ -204,6 +246,7 @@ function FootPlanter:CreateSolver(CenterPart)
 	function FootPlanterClass:GetFeetCFrames()
 		if not mLeftLeg then
 			initLegs()
+			UpdateScaling()
 		end
 		
 		local curTime = tick()
