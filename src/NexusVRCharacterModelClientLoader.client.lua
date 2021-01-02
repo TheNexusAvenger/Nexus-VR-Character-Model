@@ -5,6 +5,7 @@ Loads Nexus VR Character Model on the client.
 --]]
 
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local StarterGui = game:GetService("StarterGui")
 local HttpService = game:GetService("HttpService")
 local RunService = game:GetService("RunService")
 local VRService = game:GetService("VRService")
@@ -31,6 +32,20 @@ end)
 
 --Connect the local player if VR is enabled.
 if VRService.VREnabled then
+    --Disable the native VR pointer.
+    --Done in a pcall in case the SetCore is not registered or is removed.
+    coroutine.wrap(function()
+        for i = 1,600 do
+            local Worked = pcall(function()
+                StarterGui:SetCore("VRLaserPointerMode",0)
+                StarterGui:SetCore("VREnableControllerModels",false)
+            end)
+            if Worked then break end
+            wait(0.1)
+        end
+    end)()
+    
+
     --Set the initial controller and camera.
     ControlService:SetActiveController(Settings:GetSetting("Movement.DefaultMovementMethod"))
     CameraService:SetActiveCamera(Settings:GetSetting("Camera.DefaultCameraOption"))
