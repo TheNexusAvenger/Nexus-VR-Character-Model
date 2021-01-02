@@ -15,9 +15,7 @@ local Players = game:GetService("Players")
 
 local NexusVRCharacterModel = require(script.Parent.Parent.Parent)
 local NexusObject = NexusVRCharacterModel:GetResource("NexusInstance.NexusObject")
-local CharacterService = NexusVRCharacterModel:GetInstance("State.CharacterService")
 local Settings = NexusVRCharacterModel:GetInstance("State.Settings")
-local VRInputService = NexusVRCharacterModel:GetInstance("State.VRInputService")
 
 local DefaultCamera = NexusObject:Extend()
 DefaultCamera:SetClassName("DefaultCamera")
