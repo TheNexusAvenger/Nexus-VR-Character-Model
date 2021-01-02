@@ -4,12 +4,6 @@ TheNexusAvenger
 Default camera that follows the character.
 --]]
 
- --[[
-TheNexusAvenger
-
-Base class for controlling the local character.
---]]
-
 local Workspace = game:GetService("Workspace")
 local Players = game:GetService("Players")
 
