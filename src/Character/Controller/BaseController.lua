@@ -61,6 +61,13 @@ function BaseController:Enable()
     --Update the reference world CFrame.
     local BaseReferenceCFrame = self.Character.Parts.Head.CFrame * VRInputService:GetVRInputs()[Enum.UserCFrame.Head]:Inverse()
     self.ReferenceWorldCFrame = CFrame.new(BaseReferenceCFrame.Position) * CFrame.Angles(0,math.atan2(-BaseReferenceCFrame.LookVector.X,-BaseReferenceCFrame.LookVector.Z),0)
+
+    --Connect the character teleporting.
+    self.Character.CharacterTeleported:Connect(function()
+        local HeadCFrame = self.Character.Parts.HumanoidRootPart.CFrame * self.Character.Attachments.HumanoidRootPart.RootRigAttachment.CFrame * self.Character.Attachments.LowerTorso.RootRigAttachment.CFrame:Inverse() * self.Character.Attachments.LowerTorso.WaistRigAttachment.CFrame * self.Character.Attachments.UpperTorso.WaistRigAttachment.CFrame * self.Character.Attachments.UpperTorso.NeckRigAttachment.CFrame * self.Character.Attachments.Head.NeckRigAttachment.CFrame
+        local HeadsetCFrame = self:ScaleInput(VRInputService:GetVRInputs()[Enum.UserCFrame.Head])
+        self.ReferenceWorldCFrame = HeadCFrame * CFrame.new(-HeadsetCFrame.X,0,-HeadsetCFrame.Z) * CFrame.Angles(0,-math.atan2(-HeadsetCFrame.LookVector.X,-HeadsetCFrame.LookVector.Z),0)
+    end)
 end
 
 --[[

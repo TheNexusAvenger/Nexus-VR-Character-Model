@@ -5,10 +5,12 @@ Manipulates a character model.
 --]]
 
 local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
 local TweenService = game:GetService("TweenService")
 
 local NexusVRCharacterModel = require(script.Parent)
 local NexusObject = NexusVRCharacterModel:GetResource("NexusInstance.NexusObject")
+local NexusEventCreator = NexusVRCharacterModel:GetResource("NexusInstance.Event.NexusEventCreator")
 local Head = NexusVRCharacterModel:GetResource("Character.Head")
 local Torso = NexusVRCharacterModel:GetResource("Character.Torso")
 local Appendage = NexusVRCharacterModel:GetResource("Character.Appendage")
@@ -164,6 +166,31 @@ function Character:__new(CharacterModel)
     self.RightLeg.InvertBendDirection = true
     self.FootPlanter = FootPlanter:CreateSolver(CharacterModel:WaitForChild("LowerTorso"),self.ScaleValues.BodyHeightScale)
 
+    if Players.LocalPlayer and Players.LocalPlayer.Character == CharacterModel then
+        --Connect the HumanoidRootPart teleporting.
+        --Done as a while true loop because the Changed event does not fire for CFrames.
+        self.CharacterTeleported = NexusEventCreator:CreateEvent()
+        coroutine.wrap(function()
+            RunService:BindToRenderStep("NexusVRCharacterModelLocalTeleportCheck",Enum.RenderPriority.First.Value,function()
+                if self.LastHumanoidRootPartCFrame ~= self.Parts.HumanoidRootPart.CFrame then
+                    self.CharacterTeleported:Fire()
+                end
+            end)
+        end)()
+
+        --Connect the character dieing.
+        self.Humanoid.Died:Connect(function()
+            RunService:UnbindFromRenderStep("NexusVRCharacterModelLocalTeleportCheck")
+            self.CharacterTeleported:Disconnect()
+        end)
+    end
+
+    --Connect anchoring and unanchoring the HumanoidRootPart.
+    self.Humanoid:GetPropertyChangedSignal("SeatPart"):Connect(function()
+        self.Parts.HumanoidRootPart.Anchored = (self.Humanoid.SeatPart == nil)
+    end)
+    self.Parts.HumanoidRootPart.Anchored = (self.Humanoid.SeatPart == nil)
+
     --Stop the character animations.
     local Animator = self.Humanoid:WaitForChild("Animator")
     if Players.LocalPlayer and Players.LocalPlayer.Character == CharacterModel then
@@ -206,6 +233,15 @@ function Character:SetTransform(MotorName,AttachmentName,StartLimbName,EndLimbNa
 end
 
 --[[
+Sets the CFrame of the HumanoidRootPart. Prevents invoking
+the CharacterTeleported event.
+--]]
+function Character:SetHumanoidRootPartCFrame(NewCFrame)
+    self.LastHumanoidRootPartCFrame = NewCFrame
+    self.Parts.HumanoidRootPart.CFrame = NewCFrame
+end
+
+--[[
 Updates the character from the inputs.
 --]]
 function Character:UpdateFromInputs(HeadControllerCFrame,LeftHandControllerCFrame,RightHandControllerCFrame)
@@ -227,7 +263,7 @@ function Character:UpdateFromInputs(HeadControllerCFrame,LeftHandControllerCFram
     
     --Set the character CFrames.
     if not self.Humanoid.SeatPart then
-        self.Parts.HumanoidRootPart.CFrame = LowerTorsoCFrame * self.Attachments.LowerTorso.RootRigAttachment.CFrame * self.Attachments.HumanoidRootPart.RootRigAttachment.CFrame:Inverse()
+        self:SetHumanoidRootPartCFrame(LowerTorsoCFrame * self.Attachments.LowerTorso.RootRigAttachment.CFrame * self.Attachments.HumanoidRootPart.RootRigAttachment.CFrame:Inverse())
     end
     self:SetTransform("Neck","NeckRigAttachment","UpperTorso","Head",UpperTorsoCFrame,HeadCFrame)
     self:SetTransform("Waist","WaistRigAttachment","LowerTorso","UpperTorso",LowerTorsoCFrame,UpperTorsoCFrame)
