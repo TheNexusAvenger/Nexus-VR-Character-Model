@@ -4,6 +4,10 @@ TheNexusAvenger
 Base class for controlling the local character.
 --]]
 
+local SEAT_COOLDOWN = 3
+
+
+
 local Workspace = game:GetService("Workspace")
 local Players = game:GetService("Players")
 
@@ -67,6 +71,13 @@ function BaseController:Enable()
         local HeadCFrame = self.Character.Parts.HumanoidRootPart.CFrame * self.Character.Attachments.HumanoidRootPart.RootRigAttachment.CFrame * self.Character.Attachments.LowerTorso.RootRigAttachment.CFrame:Inverse() * self.Character.Attachments.LowerTorso.WaistRigAttachment.CFrame * self.Character.Attachments.UpperTorso.WaistRigAttachment.CFrame * self.Character.Attachments.UpperTorso.NeckRigAttachment.CFrame * self.Character.Attachments.Head.NeckRigAttachment.CFrame
         local HeadsetCFrame = self:ScaleInput(VRInputService:GetVRInputs()[Enum.UserCFrame.Head])
         self.ReferenceWorldCFrame = HeadCFrame * CFrame.new(-HeadsetCFrame.X,0,-HeadsetCFrame.Z) * CFrame.Angles(0,-math.atan2(-HeadsetCFrame.LookVector.X,-HeadsetCFrame.LookVector.Z),0)
+    end)
+
+    --Connect the humanoid leaving the seat.
+    self.Character.Humanoid:GetPropertyChangedSignal("SeatPart"):Connect(function()
+        if not self.Character.Humanoid.SeatPart then
+            self.SeatCooldown = tick() + SEAT_COOLDOWN
+        end
     end)
 end
 
@@ -181,7 +192,7 @@ function BaseController:UpdateReferenceWorldCFrame()
         end
 
         --Allow the player to sit if the hit part was a seat.
-        if AllowSit and HitPart and HitPart:IsA("Seat") and not HitPart.Occupant then
+        if AllowSit and HitPart and tick() >= (self.SeatCooldown or 0) and HitPart:IsA("Seat") and not HitPart.Occupant then
             self.Character.Anchored = false
             HitPart:Sit(self.Character.Humanoid)
         end
