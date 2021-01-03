@@ -113,50 +113,77 @@ function BaseController:UpdateReferenceWorldCFrame()
     local LeftHeight = (self.Character.Attachments.LeftUpperLeg.LeftHipRigAttachment.Position.Y - self.Character.Attachments.LeftUpperLeg.LeftKneeRigAttachment.Position.Y) + (self.Character.Attachments.LeftLowerLeg.LeftKneeRigAttachment.Position.Y - self.Character.Attachments.LeftLowerLeg.LeftAnkleRigAttachment.Position.Y) + (self.Character.Attachments.LeftFoot.LeftAnkleRigAttachment.Position.Y - self.Character.Attachments.LeftFoot.LeftFootAttachment.Position.Y)
     local LeftHitPart,LeftHitPosition = FindCollidablePartOnRay(LeftHipPosition,Vector3.new(0,-500,0),self.Character.CharacterModel)
     local RightHitPart,RightHitPosition = FindCollidablePartOnRay(RightHipPosition,Vector3.new(0,-500,0),self.Character.CharacterModel)
-    local CharacterHeight = RightHeight + (self.Character.Attachments.LowerTorso.WaistRigAttachment.Position.Y - self.Character.Attachments.LowerTorso.RightHipRigAttachment.Position.Y) + (self.Character.Attachments.UpperTorso.NeckRigAttachment.Position.Y - self.Character.Attachments.UpperTorso.WaistRigAttachment.Position.Y) - self.Character.Attachments.Head.NeckRigAttachment.Position.Y
+    local CharacterHeightWithoutLegs = (self.Character.Attachments.LowerTorso.WaistRigAttachment.Position.Y - self.Character.Attachments.LowerTorso.RightHipRigAttachment.Position.Y) + (self.Character.Attachments.UpperTorso.NeckRigAttachment.Position.Y - self.Character.Attachments.UpperTorso.WaistRigAttachment.Position.Y) - self.Character.Attachments.Head.NeckRigAttachment.Position.Y
+    local CharacterHeight = RightHeight + CharacterHeightWithoutLegs
 
-    --Determine the highest target position.
-    local HitPart,HitPosition,LegHeight,HipPosition
-    if LeftHitPosition.Y > RightHitPosition.Y then
-        HitPart,HitPosition,LegHeight,HipPosition = LeftHitPart,LeftHitPosition,LeftHeight,LeftHipPosition
+    if self.Character.Humanoid.SeatPart then
+        --Store the headset CFrame.
+        if not self.SeatInitialHeadsetCFrame then
+            self.SeatInitialHeadsetCFrame = VRInputService:GetVRInputs()[Enum.UserCFrame.Head]
+        end
+
+        --Set the offeset based on the seat.
+        local Seat = self.Character.Humanoid.SeatPart
+        self.ReferenceWorldCFrame = Seat.CFrame * CFrame.new(0,(Seat.Size.Y/2) + (self.Character.Parts.LowerTorso.Size.X/2) + CharacterHeightWithoutLegs,0) * CFrame.new(-self.SeatInitialHeadsetCFrame.Position) * CFrame.Angles(0,-math.atan2(-self.SeatInitialHeadsetCFrame.LookVector.X,-self.SeatInitialHeadsetCFrame.LookVector.Z),0)
     else
-        HitPart,HitPosition,LegHeight,HipPosition = RightHitPart,RightHitPosition,RightHeight,RightHipPosition
-    end
+        --Unset the seat headset CFrame.
+        if self.SeatInitialHeadsetCFrame then
+            self.SeatInitialHeadsetCFrame = nil
+        end
 
-    --Update the reference world position.
-    local RayCastHeightDifference = HipPosition.Y - (HitPosition.Y + LegHeight)
-    local ClampOffset = (CharacterHeight + HitPosition.Y) - self.ReferenceWorldCFrame.Y
-    if Settings:GetSetting("Movement.UseFallingSimulation") then
-        if RayCastHeightDifference > 0 then
-            --Simulate falling.
-            if self.LastPositionUpdate then
-                --Calculate the delta time.
-                local CurrentTime = tick()
-                local DeltaTime = self.LastPositionUpdate - CurrentTime
-                self.LastPositionUpdate = CurrentTime
+        --Determine the highest target position.
+        local HitPart,HitPosition,LegHeight,HipPosition
+        if LeftHitPosition.Y > RightHitPosition.Y then
+            HitPart,HitPosition,LegHeight,HipPosition = LeftHitPart,LeftHitPosition,LeftHeight,LeftHipPosition
+        else
+            HitPart,HitPosition,LegHeight,HipPosition = RightHitPart,RightHitPosition,RightHeight,RightHipPosition
+        end
 
-                --Update height.
-                local NewVelocity = self.VelocityY + (Workspace.Gravity * DeltaTime)
-                if self.ReferenceWorldCFrame.Y + NewVelocity > HitPosition.Y + CharacterHeight then
-                    self.ReferenceWorldCFrame = CFrame.new(0,NewVelocity,0) * self.ReferenceWorldCFrame
-                    self.VelocityY = NewVelocity
+        --Update the reference world position.
+        local RayCastHeightDifference = HipPosition.Y - (HitPosition.Y + LegHeight)
+        local ClampOffset = (CharacterHeight + HitPosition.Y) - self.ReferenceWorldCFrame.Y
+        local AllowSit = false
+        if Settings:GetSetting("Movement.UseFallingSimulation") then
+            if RayCastHeightDifference > 0 then
+                --Simulate falling.
+                if self.LastPositionUpdate then
+                    --Calculate the delta time.
+                    local CurrentTime = tick()
+                    local DeltaTime = self.LastPositionUpdate - CurrentTime
+                    self.LastPositionUpdate = CurrentTime
+
+                    --Update height.
+                    local NewVelocity = self.VelocityY + (Workspace.Gravity * DeltaTime)
+                    if self.ReferenceWorldCFrame.Y + NewVelocity > HitPosition.Y + CharacterHeight then
+                        self.ReferenceWorldCFrame = CFrame.new(0,NewVelocity,0) * self.ReferenceWorldCFrame
+                        self.VelocityY = NewVelocity
+                    else
+                        self.ReferenceWorldCFrame = CFrame.new(0,ClampOffset,0) * self.ReferenceWorldCFrame
+                        self.VelocityY = 0
+                        AllowSit = true
+                    end
                 else
-                    self.ReferenceWorldCFrame = CFrame.new(0,ClampOffset,0) * self.ReferenceWorldCFrame
-                    self.VelocityY = 0
+                    --Set the last time for the next update.
+                    self.LastPositionUpdate = tick()
                 end
             else
-                --Set the last time for the next update.
-                self.LastPositionUpdate = tick()
+                --Clamp the player to the hit part.
+                self.ReferenceWorldCFrame = CFrame.new(0,ClampOffset,0) * self.ReferenceWorldCFrame
+                self.VelocityY = 0
+                AllowSit = true
             end
         else
-            --Clamp the player to the hit part.
-            self.ReferenceWorldCFrame = CFrame.new(0,ClampOffset,0) * self.ReferenceWorldCFrame
-            self.VelocityY = 0
+            if HitPart then
+                --Clamp the player to the hit part.
+                self.ReferenceWorldCFrame = CFrame.new(0,ClampOffset,0) * self.ReferenceWorldCFrame
+                AllowSit = true
+            end
         end
-    else
-        if HitPart then
-            --Clamp the player to the hit part.
-            self.ReferenceWorldCFrame = CFrame.new(0,ClampOffset,0) * self.ReferenceWorldCFrame
+
+        --Allow the player to sit if the hit part was a seat.
+        if AllowSit and HitPart and HitPart:IsA("Seat") and not HitPart.Occupant then
+            self.Character.Anchored = false
+            HitPart:Sit(self.Character.Humanoid)
         end
     end
 end
