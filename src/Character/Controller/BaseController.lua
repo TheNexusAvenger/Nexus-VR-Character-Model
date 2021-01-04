@@ -120,7 +120,7 @@ function BaseController:UpdateReferenceWorldCFrame(OverrideRaycastStartPosition)
 
     --Raycast from the torso down.
     local LowerTorsoCFrame = self.Character.Parts.LowerTorso.CFrame
-    local LeftHipPosition,RightHipPosition = (LowerTorsoCFrame * self.Character.Attachments.LowerTorso.LeftHipRigAttachment.CFrame).Position,(LowerTorsoCFrame * LowerTorsoCFrame * self.Character.Attachments.LowerTorso.RightHipRigAttachment.CFrame).Position
+    local LeftHipPosition,RightHipPosition = (LowerTorsoCFrame * self.Character.Attachments.LowerTorso.LeftHipRigAttachment.CFrame).Position,(LowerTorsoCFrame * self.Character.Attachments.LowerTorso.RightHipRigAttachment.CFrame).Position
     local RightHeight = (self.Character.Attachments.RightUpperLeg.RightHipRigAttachment.Position.Y - self.Character.Attachments.RightUpperLeg.RightKneeRigAttachment.Position.Y) + (self.Character.Attachments.RightLowerLeg.RightKneeRigAttachment.Position.Y - self.Character.Attachments.RightLowerLeg.RightAnkleRigAttachment.Position.Y) + (self.Character.Attachments.RightFoot.RightAnkleRigAttachment.Position.Y - self.Character.Attachments.RightFoot.RightFootAttachment.Position.Y)
     local LeftHeight = (self.Character.Attachments.LeftUpperLeg.LeftHipRigAttachment.Position.Y - self.Character.Attachments.LeftUpperLeg.LeftKneeRigAttachment.Position.Y) + (self.Character.Attachments.LeftLowerLeg.LeftKneeRigAttachment.Position.Y - self.Character.Attachments.LeftLowerLeg.LeftAnkleRigAttachment.Position.Y) + (self.Character.Attachments.LeftFoot.LeftAnkleRigAttachment.Position.Y - self.Character.Attachments.LeftFoot.LeftFootAttachment.Position.Y)
     local LeftHitPart,LeftHitPosition,RightHitPart,RightHitPosition
