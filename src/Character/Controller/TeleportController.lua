@@ -10,8 +10,6 @@ local THUMBSTICK_MANUAL_ROTATION_ANGLE = math.rad(22.5)
 
 
 
-local RunService = game:GetService("RunService")
-
 local NexusVRCharacterModel = require(script.Parent.Parent.Parent)
 local BaseController = NexusVRCharacterModel:GetInstance("Character.Controller.BaseController")
 local ArcWithBeacon = NexusVRCharacterModel:GetInstance("Character.Controller.Visual.ArcWithBeacon")
