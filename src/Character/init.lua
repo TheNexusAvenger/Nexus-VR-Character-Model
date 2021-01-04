@@ -270,6 +270,7 @@ function Character:UpdateFromInputs(HeadControllerCFrame,LeftHandControllerCFram
         self:SetTransform("LeftHip","LeftHipRigAttachment","LowerTorso","LeftUpperLeg",LowerTorsoCFrame,LeftUpperLegCFrame)
         self:SetTransform("LeftKnee","LeftKneeRigAttachment","LeftUpperLeg","LeftLowerLeg",LeftUpperLegCFrame,LeftLowerLegCFrame)
         self:SetTransform("LeftAnkle","LeftAnkleRigAttachment","LeftLowerLeg","LeftFoot",LeftLowerLegCFrame,LeftFootCFrame)
+        self.Motors.Root.Transform = CFrame.new()
     else
         self:SetTransform("Root","RootRigAttachment","HumanoidRootPart","LowerTorso",self.Parts.HumanoidRootPart.CFrame,LowerTorsoCFrame)
         self.Motors.RightHip.Transform = CFrame.Angles(math.pi/2,0,math.rad(5))

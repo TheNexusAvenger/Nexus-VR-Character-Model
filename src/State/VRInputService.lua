@@ -6,6 +6,10 @@ the headsets as the Y position of the inputs is arbitrary,
 meaning it can be the floor, eye level, or random.
 --]]
 
+local THUMBSTICK_SAMPLES_TO_RESET = 5
+
+
+
 local NexusVRCharacterModel = require(script.Parent.Parent)
 local NexusObject = NexusVRCharacterModel:GetResource("NexusInstance.NexusObject")
 
@@ -17,9 +21,31 @@ VRInputService:SetClassName("VRInputService")
 --[[
 Creates a settings object.
 --]]
-function VRInputService:__new(VRService)
+function VRInputService:__new(VRService,UserInputService)
     self:InitializeSuper()
+
+    --Store the services for testing.
     self.VRService = VRService or game:GetService("VRService")
+    self.UserInputService = UserInputService or game:GetService("UserInputService")
+
+    --Connect updating the thumbsticks.
+    self.ThumbstickValues = {
+        [Enum.KeyCode.Thumbstick1] = Vector3.new(),
+        [Enum.KeyCode.Thumbstick2] = Vector3.new(),
+    }
+    self.PreviousThumbstickValues = {
+        [Enum.KeyCode.Thumbstick1] = {},
+        [Enum.KeyCode.Thumbstick2] = {},
+    }
+    self.CurrentThumbstickPointers = {
+        [Enum.KeyCode.Thumbstick1] = 1,
+        [Enum.KeyCode.Thumbstick2] = 1,
+    }
+    self.UserInputService.InputChanged:Connect(function(Input)
+        if Input.KeyCode == Enum.KeyCode.Thumbstick1 or Input.KeyCode == Enum.KeyCode.Thumbstick2 then
+            self.ThumbstickValues[Input.KeyCode] = Input.Position
+        end
+    end)
 end
 
 --[[
@@ -59,6 +85,39 @@ function VRInputService:GetVRInputs()
 
     --Return the CFrames.
     return VRInputs
+end
+
+--[[
+Returns the current value for a thumbstick.
+--]]
+function VRInputService:GetThumbstickPosition(Thumbsick)
+    --Return if the value isn't supported.
+    if not self.ThumbstickValues[Thumbsick] then
+        return
+    end
+
+    --Store the polled value.
+    self.PreviousThumbstickValues[Thumbsick][self.CurrentThumbstickPointers[Thumbsick]] = self.ThumbstickValues[Thumbsick]
+    self.CurrentThumbstickPointers[Thumbsick] = (self.CurrentThumbstickPointers[Thumbsick] % THUMBSTICK_SAMPLES_TO_RESET) + 1
+
+    --Determine if the polled values are exactly the same.
+    --Closeness is not used as the thumbstick being held in place will register as slightly different values.
+    --This happens if the trigger is released (such as a touchpad, which may not automatically reset).
+    local ValuesSame = true
+    local InitialValue = self.PreviousThumbstickValues[Thumbsick][1]
+    for i = 2,THUMBSTICK_SAMPLES_TO_RESET do
+        if self.PreviousThumbstickValues[Thumbsick][i] ~= InitialValue then
+            ValuesSame = false
+            break
+        end
+    end
+
+    --Return either the stored value or the empty vector if the last polled samples are the same.
+    if ValuesSame then
+        return Vector3.new(0,0,0)
+    else
+        return self.ThumbstickValues[Thumbsick]
+    end
 end
 
 

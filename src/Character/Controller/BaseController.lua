@@ -68,6 +68,7 @@ function BaseController:Enable()
 
     --Connect the character teleporting.
     self.Character.CharacterTeleported:Connect(function()
+        if self.IgnoreNextExternalTeleport then self.IgnoreNextExternalTeleport = nil return end
         local HeadCFrame = self.Character.Parts.HumanoidRootPart.CFrame * self.Character.Attachments.HumanoidRootPart.RootRigAttachment.CFrame * self.Character.Attachments.LowerTorso.RootRigAttachment.CFrame:Inverse() * self.Character.Attachments.LowerTorso.WaistRigAttachment.CFrame * self.Character.Attachments.UpperTorso.WaistRigAttachment.CFrame * self.Character.Attachments.UpperTorso.NeckRigAttachment.CFrame * self.Character.Attachments.Head.NeckRigAttachment.CFrame
         local HeadsetCFrame = self:ScaleInput(VRInputService:GetVRInputs()[Enum.UserCFrame.Head])
         self.ReferenceWorldCFrame = HeadCFrame * CFrame.new(-HeadsetCFrame.X,0,-HeadsetCFrame.Z) * CFrame.Angles(0,-math.atan2(-HeadsetCFrame.LookVector.X,-HeadsetCFrame.LookVector.Z),0)
@@ -107,7 +108,7 @@ end
 --[[
 Updates the reference world CFrame.
 --]]
-function BaseController:UpdateReferenceWorldCFrame()
+function BaseController:UpdateReferenceWorldCFrame(OverrideRaycastStartPosition)
     --Return if the character is nil.
     local CharacterChanged = self:UpdateCharacterReference()
     if not self.Character then
@@ -122,12 +123,18 @@ function BaseController:UpdateReferenceWorldCFrame()
     local LeftHipPosition,RightHipPosition = (LowerTorsoCFrame * self.Character.Attachments.LowerTorso.LeftHipRigAttachment.CFrame).Position,(LowerTorsoCFrame * LowerTorsoCFrame * self.Character.Attachments.LowerTorso.RightHipRigAttachment.CFrame).Position
     local RightHeight = (self.Character.Attachments.RightUpperLeg.RightHipRigAttachment.Position.Y - self.Character.Attachments.RightUpperLeg.RightKneeRigAttachment.Position.Y) + (self.Character.Attachments.RightLowerLeg.RightKneeRigAttachment.Position.Y - self.Character.Attachments.RightLowerLeg.RightAnkleRigAttachment.Position.Y) + (self.Character.Attachments.RightFoot.RightAnkleRigAttachment.Position.Y - self.Character.Attachments.RightFoot.RightFootAttachment.Position.Y)
     local LeftHeight = (self.Character.Attachments.LeftUpperLeg.LeftHipRigAttachment.Position.Y - self.Character.Attachments.LeftUpperLeg.LeftKneeRigAttachment.Position.Y) + (self.Character.Attachments.LeftLowerLeg.LeftKneeRigAttachment.Position.Y - self.Character.Attachments.LeftLowerLeg.LeftAnkleRigAttachment.Position.Y) + (self.Character.Attachments.LeftFoot.LeftAnkleRigAttachment.Position.Y - self.Character.Attachments.LeftFoot.LeftFootAttachment.Position.Y)
-    local LeftHitPart,LeftHitPosition = FindCollidablePartOnRay(LeftHipPosition,Vector3.new(0,-500,0),self.Character.CharacterModel)
-    local RightHitPart,RightHitPosition = FindCollidablePartOnRay(RightHipPosition,Vector3.new(0,-500,0),self.Character.CharacterModel)
+    local LeftHitPart,LeftHitPosition,RightHitPart,RightHitPosition
+    if OverrideRaycastStartPosition then
+        LeftHitPart,LeftHitPosition = FindCollidablePartOnRay(OverrideRaycastStartPosition,Vector3.new(0,-500,0),self.Character.CharacterModel)
+        RightHitPart,RightHitPosition = LeftHitPart,LeftHitPosition
+    else
+        LeftHitPart,LeftHitPosition = FindCollidablePartOnRay(LeftHipPosition,Vector3.new(0,-500,0),self.Character.CharacterModel)
+        RightHitPart,RightHitPosition = FindCollidablePartOnRay(RightHipPosition,Vector3.new(0,-500,0),self.Character.CharacterModel)
+    end
     local CharacterHeightWithoutLegs = (self.Character.Attachments.LowerTorso.WaistRigAttachment.Position.Y - self.Character.Attachments.LowerTorso.RightHipRigAttachment.Position.Y) + (self.Character.Attachments.UpperTorso.NeckRigAttachment.Position.Y - self.Character.Attachments.UpperTorso.WaistRigAttachment.Position.Y) - self.Character.Attachments.Head.NeckRigAttachment.Position.Y
     local CharacterHeight = RightHeight + CharacterHeightWithoutLegs
 
-    if self.Character.Humanoid.SeatPart then
+    if self.Character.Humanoid.Sit and self.Character.Humanoid.SeatPart then
         --Store the headset CFrame.
         if not self.SeatInitialHeadsetCFrame then
             self.SeatInitialHeadsetCFrame = VRInputService:GetVRInputs()[Enum.UserCFrame.Head]
@@ -193,7 +200,7 @@ function BaseController:UpdateReferenceWorldCFrame()
 
         --Allow the player to sit if the hit part was a seat.
         if AllowSit and HitPart and tick() >= (self.SeatCooldown or 0) and HitPart:IsA("Seat") and not HitPart.Occupant then
-            self.Character.Anchored = false
+            self.Character.Parts.HumanoidRootPart.Anchored = false
             HitPart:Sit(self.Character.Humanoid)
         end
     end
