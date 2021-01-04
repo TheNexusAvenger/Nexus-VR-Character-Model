@@ -172,7 +172,7 @@ function Character:__new(CharacterModel)
         self.CharacterTeleported = NexusEventCreator:CreateEvent()
         coroutine.wrap(function()
             RunService:BindToRenderStep("NexusVRCharacterModelLocalTeleportCheck",Enum.RenderPriority.First.Value,function()
-                if self.LastHumanoidRootPartCFrame.Position ~= self.Parts.HumanoidRootPart.Position then
+                if self.LastHumanoidRootPartCFrame and self.LastHumanoidRootPartCFrame.Position ~= self.Parts.HumanoidRootPart.Position then
                     self.CharacterTeleported:Fire()
                 end
             end)
