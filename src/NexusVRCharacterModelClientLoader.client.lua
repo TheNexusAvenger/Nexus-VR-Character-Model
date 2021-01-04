@@ -4,6 +4,7 @@ TheNexusAvenger
 Loads Nexus VR Character Model on the client.
 --]]
 
+local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local StarterGui = game:GetService("StarterGui")
 local HttpService = game:GetService("HttpService")
@@ -45,16 +46,28 @@ if VRService.VREnabled then
         end
     end)()
 
-    --Set the initial controller and camera.
-    --Must happen before loading the settings in the main menu.
-    ControlService:SetActiveController(Settings:GetSetting("Movement.DefaultMovementMethod"))
-    CameraService:SetActiveCamera(Settings:GetSetting("Camera.DefaultCameraOption"))
-
     --Enable Nexus VR pointing.
     local NexusVRCore = require(ReplicatedStorage:WaitForChild("NexusVRCore"))
     local VRPointing = NexusVRCore:GetResource("Interaction.VRPointing")
     VRPointing:ConnectEvents()
     VRPointing:RunUpdating()
+
+    --Display a message if R6 is used.
+    local Character = Players.LocalPlayer.Character
+    while not Character do
+        Character = Players.LocalPlayer.Character
+        wait()
+    end
+    if Character:WaitForChild("Humanoid").RigType == Enum.HumanoidRigType.R6 then
+        local R6Message = NexusVRCharacterModel:GetInstance("UI.R6Message")
+        R6Message:Open()
+        return
+    end
+
+    --Set the initial controller and camera.
+    --Must happen before loading the settings in the main menu.
+    ControlService:SetActiveController(Settings:GetSetting("Movement.DefaultMovementMethod"))
+    CameraService:SetActiveCamera(Settings:GetSetting("Camera.DefaultCameraOption"))
 
     --Load the menu.
     local MainMenu = NexusVRCharacterModel:GetInstance("UI.MainMenu")
