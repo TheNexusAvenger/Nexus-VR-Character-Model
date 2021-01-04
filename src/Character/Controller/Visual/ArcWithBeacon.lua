@@ -33,7 +33,7 @@ function ArcWithBeacon:Update(StartCFrame)
 
     --Update the beacon.
     if HitPart then
-        self.Beacon:Update(CFrame.new(HitPosition) * CFrame.new(0,0.001,0))
+        self.Beacon:Update(CFrame.new(HitPosition) * CFrame.new(0,0.001,0),HitPart)
     else
         self.Beacon:Hide()
     end
