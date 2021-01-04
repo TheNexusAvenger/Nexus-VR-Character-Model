@@ -78,7 +78,7 @@ function SettingsView:__new()
     RecenterButton.Parent = self
     RecenterText.Text = "Recenter"
 
-    RecenterButton.MouseButton1Down:Connect(function()
+    RecenterButton.MouseButton1Click:Connect(function()
         VRInputService:Recenter()
     end)
 
@@ -89,7 +89,7 @@ function SettingsView:__new()
     SetEyeLevelButton.Parent = self
     SetEyeLevelText.Text = " Set Eye Level "
 
-    SetEyeLevelButton.MouseButton1Down:Connect(function()
+    SetEyeLevelButton.MouseButton1Click:Connect(function()
         VRInputService:SetEyeLevel()
     end)
 end
@@ -178,10 +178,10 @@ function SettingsView:PopulateSettingsFrame(ContainerFrame,HeaderName,OptionsSet
 
     --Connect the events.
     Settings:GetSettingsChangedSignal(OptionsSetting):Connect(UpdateSettings)
-    LeftButton.MouseButton1Down:Connect(function()
+    LeftButton.MouseButton1Click:Connect(function()
         UpdateSettings(-1)
     end)
-    RightButton.MouseButton1Down:Connect(function()
+    RightButton.MouseButton1Click:Connect(function()
         UpdateSettings(1)
     end)
 

@@ -90,7 +90,7 @@ function MainMenu:__new()
     self:UpdateVisibleView()
 
     --Connect changing views.
-    LeftButton.MouseButton1Down:Connect(function()
+    LeftButton.MouseButton1Click:Connect(function()
         --De-increment the current view.
         self.CurrentView = self.CurrentView - 1
         if self.CurrentView == 0 then
@@ -100,7 +100,7 @@ function MainMenu:__new()
         --Update the views.
         self:UpdateVisibleView()
     end)
-    RightButton.MouseButton1Down:Connect(function()
+    RightButton.MouseButton1Click:Connect(function()
         --Increment the current view.
         self.CurrentView = self.CurrentView + 1
         if self.CurrentView > #self.Views then

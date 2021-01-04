@@ -75,7 +75,7 @@ function R6Message:__new()
     CloseButton.Parent = self
     CloseText.Text = "Ok"
 
-    CloseButton.MouseButton1Down:Connect(function()
+    CloseButton.MouseButton1Click:Connect(function()
         self:SetOpen(false)
         self:Destroy()
     end)
