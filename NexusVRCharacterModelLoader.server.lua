@@ -39,7 +39,6 @@ local Configuration = {
         EnabledMovementMethods = {
             "Teleport",
             "SmoothLocomotion",
-            "ComfortLocomotion",
         },
 
         --Default movement method.
