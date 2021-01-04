@@ -155,10 +155,12 @@ function MainMenu:SetUpOpening()
     local MenuToggleReached = false
     coroutine.wrap(function()
         while true do
-            --Get the inputs and determine if the hands are both upside down.
+            --Get the inputs and determine if the hands are both upside down and pointing forward.
             local VRInputs = VRInputService:GetVRInputs()
-            local LeftHandFacingUp,RightHandFacingUp = VRInputs[Enum.UserCFrame.LeftHand].UpVector.Y < 0,VRInputs[Enum.UserCFrame.RightHand].UpVector.Y < 0
-            local BothHandsUp = LeftHandFacingUp and RightHandFacingUp
+            local LeftHandCFrameRelative,RightHandCFrameRelative = VRInputs[Enum.UserCFrame.Head]:Inverse() * VRInputs[Enum.UserCFrame.LeftHand],VRInputs[Enum.UserCFrame.Head]:Inverse() * VRInputs[Enum.UserCFrame.RightHand]
+            local LeftHandFacingUp,RightHandFacingUp = LeftHandCFrameRelative.UpVector.Y < 0,RightHandCFrameRelative.UpVector.Y < 0
+            local LeftHandFacingForward,RightHandFacingForward = LeftHandCFrameRelative.LookVector.Z < 0,RightHandCFrameRelative.LookVector.Z < 0
+            local BothHandsUp = LeftHandFacingUp and RightHandFacingUp and LeftHandFacingForward and RightHandFacingForward
             if BothHandsUp then
                 BothControllersUpStartTime = BothControllersUpStartTime or tick()
             else
