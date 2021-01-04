@@ -67,6 +67,46 @@ NexusUnitTesting:RegisterUnitTest(VRInputServiceTest.new("GetVRInputs"):SetRun(f
 end))
 
 --[[
+Tests the Recenter method.
+--]]
+NexusUnitTesting:RegisterUnitTest(VRInputServiceTest.new("Recenter"):SetRun(function(self)
+    self.HeadCFrame = CFrame.new(1,2,1)
+    self:AssertClose(self.CuT:GetVRInputs()[Enum.UserCFrame.Head],CFrame.new(1,0,1),0.01)
+
+    --Recenter without rotation twice and assert the results are correct.
+    self.CuT:Recenter()
+    self:AssertClose(self.CuT:GetVRInputs()[Enum.UserCFrame.Head],CFrame.new(0,0,0),0.01)
+    self.HeadCFrame = CFrame.new(2,2,2)
+    self:AssertClose(self.CuT:GetVRInputs()[Enum.UserCFrame.Head],CFrame.new(1,0,1),0.01)
+    self.CuT:Recenter()
+    self:AssertClose(self.CuT:GetVRInputs()[Enum.UserCFrame.Head],CFrame.new(0,0,0),0.01)
+    self.HeadCFrame = CFrame.new(3,2,3) * CFrame.Angles(0,math.rad(45),0)
+    self:AssertClose(self.CuT:GetVRInputs()[Enum.UserCFrame.Head],CFrame.new(1,0,1) * CFrame.Angles(0,math.rad(45),0),0.01)
+
+    --Recenter with rotation and assert the results are correct.
+    self.CuT:Recenter()
+    self:AssertClose(self.CuT:GetVRInputs()[Enum.UserCFrame.Head],CFrame.new(0,0,0),0.01)
+    self.HeadCFrame = CFrame.new(3,2,3) * CFrame.Angles(0,math.rad(45),0) * CFrame.new(1,0,1)
+    self:AssertClose(self.CuT:GetVRInputs()[Enum.UserCFrame.Head],CFrame.new(1,0,1),0.01)
+end))
+
+--[[
+Tests the SetEyeLevel method.
+--]]
+NexusUnitTesting:RegisterUnitTest(VRInputServiceTest.new("SetEyeLevel"):SetRun(function(self)
+    self.HeadCFrame = CFrame.new(1,2,1)
+    self:AssertClose(self.CuT:GetVRInputs()[Enum.UserCFrame.Head],CFrame.new(1,0,1),0.01)
+
+    --Set the eye level and assert the values are normalized to it.
+    self.CuT:SetEyeLevel()
+    self:AssertClose(self.CuT:GetVRInputs()[Enum.UserCFrame.Head],CFrame.new(1,0,1),0.01)
+    self.HeadCFrame = CFrame.new(1,1,1)
+    self:AssertClose(self.CuT:GetVRInputs()[Enum.UserCFrame.Head],CFrame.new(1,-1,1),0.01)
+    self.HeadCFrame = CFrame.new(1,3,1)
+    self:AssertClose(self.CuT:GetVRInputs()[Enum.UserCFrame.Head],CFrame.new(1,1,1),0.01)
+end))
+
+--[[
 Tests the GetThumbstickPosition method.
 --]]
 NexusUnitTesting:RegisterUnitTest(VRInputServiceTest.new("GetThumbstickPosition"):SetRun(function(self)

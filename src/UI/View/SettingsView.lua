@@ -10,6 +10,7 @@ local NexusVRCharacterModel = require(script.Parent.Parent.Parent)
 local CameraService = NexusVRCharacterModel:GetInstance("State.CameraService")
 local ControlService = NexusVRCharacterModel:GetInstance("State.ControlService")
 local Settings = NexusVRCharacterModel:GetInstance("State.Settings")
+local VRInputService = NexusVRCharacterModel:GetInstance("State.VRInputService")
 local BaseView = NexusVRCharacterModel:GetInstance("UI.View.BaseView")
 local TextButtonFactory = NexusVRCharacterModel:GetResource("NexusButton.Factory.TextButtonFactory").CreateDefault(Color3.new(0,170/255,255/255))
 local NexusVRCore = require(ReplicatedStorage:WaitForChild("NexusVRCore"))
@@ -68,6 +69,29 @@ function SettingsView:__new()
         return ControlService.ActiveController
     end,function(NewValue)
         ControlService:SetActiveController(NewValue)
+    end)
+
+    --Create the callibration settings.
+    local RecenterButton,RecenterText = TextButtonFactory:Create()
+    RecenterButton.Size = UDim2.new(0.4,0,0.075,0)
+    RecenterButton.Position = UDim2.new(0.075,0,0.8,0)
+    RecenterButton.SizeConstraint = Enum.SizeConstraint.RelativeYY
+    RecenterButton.Parent = self
+    RecenterText.Text = "Recenter"
+
+    RecenterButton.MouseButton1Down:Connect(function()
+        VRInputService:Recenter()
+    end)
+
+    local SetEyeLevelButton,SetEyeLevelText = TextButtonFactory:Create()
+    SetEyeLevelButton.Size = UDim2.new(0.4,0,0.075,0)
+    SetEyeLevelButton.Position = UDim2.new(0.525,0,0.8,0)
+    SetEyeLevelButton.SizeConstraint = Enum.SizeConstraint.RelativeYY
+    SetEyeLevelButton.Parent = self
+    SetEyeLevelText.Text = " Set Eye Level "
+
+    SetEyeLevelButton.MouseButton1Down:Connect(function()
+        VRInputService:SetEyeLevel()
     end)
 end
 

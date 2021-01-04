@@ -23,6 +23,7 @@ Creates a settings object.
 --]]
 function VRInputService:__new(VRService,UserInputService)
     self:InitializeSuper()
+    self.RecenterOffset = CFrame.new()
 
     --Store the services for testing.
     self.VRService = VRService or game:GetService("VRService")
@@ -70,21 +71,45 @@ function VRInputService:GetVRInputs()
         VRInputs[Enum.UserCFrame.RightHand] = VRInputs[Enum.UserCFrame.Head] * CFrame.new(1,-2.5,0.5)
     end
 
-    --Adjust the normalize height.
-    --The head CFrame is moved back 0.5 studs for when the headset suddenly goes up (like putting on and taking off).
-    local CurrentVRHeadHeight = (VRInputs[Enum.UserCFrame.Head] * CFrame.new(0,0,0.5)).Y
-    if not self.HighestHeadHeight or CurrentVRHeadHeight > self.HighestHeadHeight then
-        self.HighestHeadHeight = CurrentVRHeadHeight
+    --Determine the height offset.
+    local HeightOffset = 0
+    if self.ManualNormalHeadLevel then
+        --Adjust to normalize the height around the set value.
+        HeightOffset = -self.ManualNormalHeadLevel
+    else
+        --Adjust to normalize the height around the highest value.
+        --The head CFrame is moved back 0.5 studs for when the headset suddenly goes up (like putting on and taking off).
+        local CurrentVRHeadHeight = (VRInputs[Enum.UserCFrame.Head] * CFrame.new(0,0,0.5)).Y
+        if not self.HighestHeadHeight or CurrentVRHeadHeight > self.HighestHeadHeight then
+            self.HighestHeadHeight = CurrentVRHeadHeight
+        end
+        HeightOffset = -self.HighestHeadHeight
     end
 
     --Normalize the CFrame heights.
     --A list of enums is used instead of VRInputs because modifying a table stops pairs().
     for _,InputEnum in pairs({Enum.UserCFrame.Head,Enum.UserCFrame.LeftHand,Enum.UserCFrame.RightHand}) do
-        VRInputs[InputEnum] = CFrame.new(0,-self.HighestHeadHeight,0) * VRInputs[InputEnum]
+        VRInputs[InputEnum] = CFrame.new(0,HeightOffset,0) * self.RecenterOffset * VRInputs[InputEnum]
     end
 
     --Return the CFrames.
     return VRInputs
+end
+
+--[[
+Recenters the service.
+Does not alter the Y axis.
+--]]
+function VRInputService:Recenter()
+    local HeadCFrame = self.VRService:GetUserCFrame(Enum.UserCFrame.Head)
+    self.RecenterOffset = CFrame.Angles(0,-math.atan2(-HeadCFrame.LookVector.X,-HeadCFrame.LookVector.Z),0) * CFrame.new(-HeadCFrame.X,0,-HeadCFrame.Z)
+end
+
+--[[
+Sets the eye level.
+--]]
+function VRInputService:SetEyeLevel()
+    self.ManualNormalHeadLevel = self.VRService:GetUserCFrame(Enum.UserCFrame.Head).Y
 end
 
 --[[
