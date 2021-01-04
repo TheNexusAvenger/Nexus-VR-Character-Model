@@ -44,7 +44,6 @@ if VRService.VREnabled then
             wait(0.1)
         end
     end)()
-    
 
     --Set the initial controller and camera.
     ControlService:SetActiveController(Settings:GetSetting("Movement.DefaultMovementMethod"))
