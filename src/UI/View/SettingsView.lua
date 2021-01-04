@@ -11,7 +11,7 @@ local CameraService = NexusVRCharacterModel:GetInstance("State.CameraService")
 local ControlService = NexusVRCharacterModel:GetInstance("State.ControlService")
 local Settings = NexusVRCharacterModel:GetInstance("State.Settings")
 local VRInputService = NexusVRCharacterModel:GetInstance("State.VRInputService")
-local BaseView = NexusVRCharacterModel:GetInstance("UI.View.BaseView")
+local BaseView = NexusVRCharacterModel:GetResource("UI.View.BaseView")
 local TextButtonFactory = NexusVRCharacterModel:GetResource("NexusButton.Factory.TextButtonFactory").CreateDefault(Color3.new(0,170/255,255/255))
 local NexusVRCore = require(ReplicatedStorage:WaitForChild("NexusVRCore"))
 local NexusWrappedInstance = NexusVRCore:GetResource("NexusWrappedInstance")
@@ -28,7 +28,6 @@ function SettingsView:__new()
     self:InitializeSuper()
 
     --Create the header.
-    self.BackgroundTransparency = 0
     local HeaderLogo = NexusWrappedInstance.new("ImageLabel")
     HeaderLogo.BackgroundTransparency = 1
     HeaderLogo.Size = UDim2.new(0.4,0,0.4,0)

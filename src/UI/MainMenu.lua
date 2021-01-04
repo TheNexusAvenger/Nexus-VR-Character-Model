@@ -16,6 +16,7 @@ local RunService = game:GetService("RunService")
 
 local NexusVRCharacterModel = require(script.Parent.Parent)
 local VRInputService = NexusVRCharacterModel:GetInstance("State.VRInputService")
+local ChatView = NexusVRCharacterModel:GetResource("UI.View.ChatView")
 local SettingsView = NexusVRCharacterModel:GetResource("UI.View.SettingsView")
 local TextButtonFactory = NexusVRCharacterModel:GetResource("NexusButton.Factory.TextButtonFactory").CreateDefault(Color3.new(0,170/255,255/255))
 local NexusVRCore = require(ReplicatedStorage:WaitForChild("NexusVRCore"))
@@ -85,6 +86,7 @@ function MainMenu:__new()
     self.CurrentView = 1
     self.Views = {}
     self:RegisterView("Settings",SettingsView.new())
+    self:RegisterView("Chat",ChatView.new())
     self:UpdateVisibleView()
 
     --Connect changing views.
@@ -232,7 +234,7 @@ Registers a view.
 function MainMenu:RegisterView(ViewName,ViewInstance)
     --Set up the view instance.
     ViewInstance.Visible = false
-    ViewInstance:GetWrappedInstance().Parent = self.ViewAdornFrame:GetWrappedInstance() --TODO: Unknown bug with Nexus Wrapped Instance (in Nexus VR Core)? ViewInstance.Parent = self.ViewAdornFrame is stored but doesn't replicate.
+    ViewInstance.Parent = self.ViewAdornFrame
 
     --Store the view.
     table.insert(self.Views,{
@@ -254,7 +256,7 @@ function MainMenu:UpdateVisibleView()
 
     --Update the view visibilites.
     for i,View in pairs(self.Views) do
-        View.Visible = (i == self.CurrentView)
+        View.View.Visible = (i == self.CurrentView)
     end
 end
 
