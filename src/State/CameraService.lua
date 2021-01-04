@@ -37,6 +37,10 @@ end
 Sets the active camera.
 --]]
 function CameraService:SetActiveCamera(Name)
+    --Return if the camera didn't change.
+    if self.ActiveCamera == Name then return end
+    self.ActiveCamera = Name
+    
     --Disable the current camera.
     if self.CurrentCamera then
         self.CurrentCamera:Disable()

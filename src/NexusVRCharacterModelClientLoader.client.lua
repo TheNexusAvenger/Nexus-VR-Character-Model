@@ -46,8 +46,19 @@ if VRService.VREnabled then
     end)()
 
     --Set the initial controller and camera.
+    --Must happen before loading the settings in the main menu.
     ControlService:SetActiveController(Settings:GetSetting("Movement.DefaultMovementMethod"))
     CameraService:SetActiveCamera(Settings:GetSetting("Camera.DefaultCameraOption"))
+
+    --Enable Nexus VR pointing.
+    local NexusVRCore = require(ReplicatedStorage:WaitForChild("NexusVRCore"))
+    local VRPointing = NexusVRCore:GetResource("Interaction.VRPointing")
+    VRPointing:ConnectEvents()
+    VRPointing:RunUpdating()
+
+    --Load the menu.
+    local MainMenu = NexusVRCharacterModel:GetInstance("UI.MainMenu")
+    MainMenu:SetUpOpening()
 
     --Start updating the VR character.
     RunService:BindToRenderStep("NexusVRCharacterModelUpdate",Enum.RenderPriority.Camera.Value - 1,function()
