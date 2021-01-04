@@ -147,8 +147,8 @@ end
 Destroys the arc.
 --]]
 function Arc:Destroy()
-    for i = 0,#self.BeamParts do
-        self.BeamParts[i]:Destroy()
+    for _,BeamPart in pairs(self.BeamParts) do
+        BeamPart:Destroy()
     end
     self.BeamParts = {}
 end
