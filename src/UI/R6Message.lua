@@ -8,15 +8,11 @@ local MESSAGE_OPEN_TIME = 0.25
 
 
 
-local Workspace = game:GetService("Workspace")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 
 local NexusVRCharacterModel = require(script.Parent.Parent)
-local VRInputService = NexusVRCharacterModel:GetInstance("State.VRInputService")
-local ChatView = NexusVRCharacterModel:GetResource("UI.View.ChatView")
-local SettingsView = NexusVRCharacterModel:GetResource("UI.View.SettingsView")
 local TextButtonFactory = NexusVRCharacterModel:GetResource("NexusButton.Factory.TextButtonFactory").CreateDefault(Color3.new(0,170/255,255/255))
 local NexusVRCore = require(ReplicatedStorage:WaitForChild("NexusVRCore"))
 local ScreenGui = NexusVRCore:GetResource("Container.ScreenGui")
