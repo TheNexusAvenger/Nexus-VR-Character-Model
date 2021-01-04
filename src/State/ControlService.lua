@@ -7,6 +7,7 @@ Manages controlling the local characters.
 local NexusVRCharacterModel = require(script.Parent.Parent)
 local NexusObject = NexusVRCharacterModel:GetResource("NexusInstance.NexusObject")
 local TeleportController = NexusVRCharacterModel:GetResource("Character.Controller.TeleportController")
+local SmoothLocomotionController = NexusVRCharacterModel:GetResource("Character.Controller.SmoothLocomotionController")
 
 local ControlService = NexusObject:Extend()
 ControlService:SetClassName("ControlService")
@@ -22,6 +23,7 @@ function ControlService:__new()
     --Register the default controllers.
     self.RegisteredControllers = {}
     self:RegisterController("Teleport",TeleportController.new())
+    self:RegisterController("SmoothLocomotion",SmoothLocomotionController.new())
 end
 
 --[[
