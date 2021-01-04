@@ -113,12 +113,6 @@ function MainMenu:__new()
 
     --Parent the menu.
     self.Parent = Players.LocalPlayer:WaitForChild("PlayerGui")
-
-
-
-    --TODO: Testing only
-    self.FieldOfView = math.rad(40)
-    self.Enabled = true
 end
 
 --[[
