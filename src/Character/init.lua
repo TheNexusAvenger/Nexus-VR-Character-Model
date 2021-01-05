@@ -134,7 +134,7 @@ function Character:__new(CharacterModel)
         },
         RightFoot = {
             RightAnkleRigAttachment = self.Parts.RightFoot:WaitForChild("RightAnkleRigAttachment"),
-            RightFootAttachment = self.Parts.RightFoot:WaitForChild("RightFootAttachment"),
+            RightFootAttachment = self.Parts.RightFoot:FindFirstChild("RightFootAttachment"),
         },
         LeftUpperLeg = {
             LeftHipRigAttachment = self.Parts.LeftUpperLeg:WaitForChild("LeftHipRigAttachment"),
@@ -146,7 +146,7 @@ function Character:__new(CharacterModel)
         },
         LeftFoot = {
             LeftAnkleRigAttachment = self.Parts.LeftFoot:WaitForChild("LeftAnkleRigAttachment"),
-            LeftFootAttachment = self.Parts.LeftFoot:WaitForChild("LeftFootAttachment"),
+            LeftFootAttachment = self.Parts.LeftFoot:FindFirstChild("LeftFootAttachment"),
         },
     }
     self.ScaleValues = {
@@ -155,6 +155,32 @@ function Character:__new(CharacterModel)
         BodyHeightScale = self.Humanoid:WaitForChild("BodyHeightScale"),
         HeadScale = self.Humanoid:WaitForChild("HeadScale"),
     }
+
+    --Add the missing attachments that not all rigs have.
+    if not self.Attachments.RightFoot.RightFootAttachment then
+        local NewAttachment = Instance.new("Attachment")
+        NewAttachment.Position = Vector3.new(0,-self.Parts.RightFoot.Size.Y/2,0)
+        NewAttachment.Name = "RightFootAttachment"
+
+        local OriginalPositionValue = Instance.new("Vector3Value")
+        OriginalPositionValue.Name = "OriginalPosition"
+        OriginalPositionValue.Value = NewAttachment.Position
+        OriginalPositionValue.Parent = NewAttachment
+        NewAttachment.Parent = self.Parts.RightFoot
+        self.Attachments.RightFoot.RightFootAttachment = NewAttachment
+    end
+    if not self.Attachments.LeftFoot.LeftFootAttachment then
+        local NewAttachment = Instance.new("Attachment")
+        NewAttachment.Position = Vector3.new(0,-self.Parts.LeftFoot.Size.Y/2,0)
+        NewAttachment.Name = "LeftFootAttachment"
+
+        local OriginalPositionValue = Instance.new("Vector3Value")
+        OriginalPositionValue.Name = "OriginalPosition"
+        OriginalPositionValue.Value = NewAttachment.Position
+        OriginalPositionValue.Parent = NewAttachment
+        NewAttachment.Parent = self.Parts.LeftFoot
+        self.Attachments.LeftFoot.LeftFootAttachment = NewAttachment
+    end
 
     --Store the limbs.
     self.Head = Head.new(self.Parts.Head)
