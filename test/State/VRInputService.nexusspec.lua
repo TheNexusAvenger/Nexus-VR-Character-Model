@@ -106,6 +106,32 @@ NexusUnitTesting:RegisterUnitTest(VRInputServiceTest.new("SetEyeLevel"):SetRun(f
     self:AssertClose(self.CuT:GetVRInputs()[Enum.UserCFrame.Head],CFrame.new(1,1,1),0.01)
 end))
 
+--[[
+Tests the GetThumbstickPosition method.
+--]]
+NexusUnitTesting:RegisterUnitTest(VRInputServiceTest.new("GetThumbstickPosition"):SetRun(function(self)
+    --Assert nil is returned for an invalid input.
+    self:AssertNil(self.CuT:GetThumbstickPosition())
+    self:AssertNil(self.CuT:GetThumbstickPosition(Enum.KeyCode.ButtonX))
+
+    --Assert that the stored value is returned when it changes.
+    self:AssertEquals(self.CuT:GetThumbstickPosition(Enum.KeyCode.Thumbstick1),Vector3.new(0,0,0))
+    self.CuT.ThumbstickValues[Enum.KeyCode.Thumbstick1] = Vector3.new(0,1,0)
+    self:AssertEquals(self.CuT:GetThumbstickPosition(Enum.KeyCode.Thumbstick1),Vector3.new(0,1,0))
+    self.CuT.ThumbstickValues[Enum.KeyCode.Thumbstick1] = Vector3.new(0,0.5,0)
+    self:AssertEquals(self.CuT:GetThumbstickPosition(Enum.KeyCode.Thumbstick1),Vector3.new(0,0.5,0))
+
+    --Assert that the value is reset correctly.
+    for _ = 1,3 do
+        self:AssertEquals(self.CuT:GetThumbstickPosition(Enum.KeyCode.Thumbstick1),Vector3.new(0,0.5,0))
+    end
+    self:AssertEquals(self.CuT:GetThumbstickPosition(Enum.KeyCode.Thumbstick1),Vector3.new(0,0,0))
+
+    --Assert that changing the value returns a new result.
+    self.CuT.ThumbstickValues[Enum.KeyCode.Thumbstick1] = Vector3.new(0,1,0)
+    self:AssertEquals(self.CuT:GetThumbstickPosition(Enum.KeyCode.Thumbstick1),Vector3.new(0,1,0))
+end))
+
 
 
 return true
