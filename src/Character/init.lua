@@ -252,7 +252,7 @@ function Character:UpdateFromInputs(HeadControllerCFrame,LeftHandControllerCFram
     
     --Get the CFrames.
     local HeadCFrame = self.Head:GetHeadCFrame(HeadControllerCFrame)
-    local NeckCFrame = self.Head:GetNeckCFrame(HeadControllerCFrame,self.Humanoid.SeatPart and math.atan2(-self.Humanoid.SeatPart.CFrame.LookVector.X,-self.Humanoid.SeatPart.CFrame.LookVector.Z))
+    local NeckCFrame = self.Head:GetNeckCFrame(HeadControllerCFrame,self.Humanoid.SeatPart and self.Humanoid.SeatPart.CFrame)
 	local LowerTorsoCFrame,UpperTorsoCFrame = self.Torso:GetTorsoCFrames(NeckCFrame)
 	local JointCFrames = self.Torso:GetAppendageJointCFrames(LowerTorsoCFrame,UpperTorsoCFrame)
 	local LeftUpperArmCFrame,LeftLowerArmCFrame,LeftHandCFrame = self.LeftArm:GetAppendageCFrames(JointCFrames["LeftShoulder"],LeftHandControllerCFrame)
