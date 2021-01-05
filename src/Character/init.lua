@@ -16,6 +16,7 @@ local Torso = NexusVRCharacterModel:GetResource("Character.Torso")
 local Appendage = NexusVRCharacterModel:GetResource("Character.Appendage")
 local FootPlanter = NexusVRCharacterModel:GetResource("Character.FootPlanter")
 local Settings = NexusVRCharacterModel:GetInstance("State.Settings")
+local UpdateInputs = NexusVRCharacterModel:GetResource("UpdateInputs")
 
 local Character = NexusObject:Extend()
 Character:SetClassName("Character")
@@ -288,6 +289,11 @@ function Character:UpdateFromInputs(HeadControllerCFrame,LeftHandControllerCFram
     self:SetTransform("LeftShoulder","LeftShoulderRigAttachment","UpperTorso","LeftUpperArm",UpperTorsoCFrame,LeftUpperArmCFrame)
     self:SetTransform("LeftElbow","LeftElbowRigAttachment","LeftUpperArm","LeftLowerArm",LeftUpperArmCFrame,LeftLowerArmCFrame)
     self:SetTransform("LeftWrist","LeftWristRigAttachment","LeftLowerArm","LeftHand",LeftLowerArmCFrame,LeftHandCFrame)
+
+    --Replicate the changes to the server.
+    if Players.LocalPlayer and Players.LocalPlayer.Character == self.CharacterModel then
+        UpdateInputs:FireServer(HeadControllerCFrame,LeftHandControllerCFrame,RightHandControllerCFrame)
+    end
 end
 
 
