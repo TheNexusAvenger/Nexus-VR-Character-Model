@@ -139,7 +139,7 @@ function TeleportController:UpdateCharacter()
                         self.Character.Humanoid.Sit = false
                     end
 
-                    if ArcData.LastHitPart:IsA("Seat") then
+                    if ArcData.LastHitPart:IsA("Seat") and not ArcData.LastHitPart.Occupant then
                         --Sit in the seat.
                         --Waiting is done if the player was in an existing seat because the player no longer sitting will prevent sitting.
                         if WasSitting then
