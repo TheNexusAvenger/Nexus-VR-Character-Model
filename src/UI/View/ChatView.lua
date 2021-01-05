@@ -140,6 +140,13 @@ function ChatView:__new()
 
         --Destroy the loading text.
         LoadingText:Destroy()
+
+        --Force the GUI to always be visible.
+        --Bit hacky and relies on checking for the passed value to be not false and not nil instead of checking if it true.
+        while true do
+            Chat:SetVisible(tick())
+            wait(0.1)
+        end
     end)()
 end
 
