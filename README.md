@@ -52,5 +52,5 @@ with by VR users.
 Both issues and pull requests are accepted for this project.
 
 ## License
-Nexus Button is available under the terms of the MIT 
+Nexus VR Character Model is available under the terms of the MIT 
 License. See [LICENSE](LICENSE) for details.
