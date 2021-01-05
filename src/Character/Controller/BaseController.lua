@@ -212,7 +212,7 @@ end
 --[[
 Updates the local character. Must also update the camara.
 --]]
-function BaseController:UpdateCharacter(UpdateInputsRemotEvent)
+function BaseController:UpdateCharacter()
     error("Not implemented in base class")
 end
 
