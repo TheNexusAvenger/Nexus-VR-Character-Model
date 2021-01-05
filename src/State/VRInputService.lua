@@ -34,16 +34,22 @@ function VRInputService:__new(VRService,UserInputService)
         [Enum.KeyCode.Thumbstick1] = Vector3.new(),
         [Enum.KeyCode.Thumbstick2] = Vector3.new(),
     }
-    self.PreviousThumbstickValues = {
-        [Enum.KeyCode.Thumbstick1] = {},
-        [Enum.KeyCode.Thumbstick2] = {},
+    self.InputsDown = {
+        [Enum.KeyCode.Thumbstick1] = false,
+        [Enum.KeyCode.Thumbstick2] = false,
     }
-    self.CurrentThumbstickPointers = {
-        [Enum.KeyCode.Thumbstick1] = 1,
-        [Enum.KeyCode.Thumbstick2] = 1,
-    }
+    self.UserInputService.InputBegan:Connect(function(Input)
+        if self.InputsDown[Input.KeyCode] ~= nil then
+            self.InputsDown[Input.KeyCode] = true
+        end
+    end)
+    self.UserInputService.InputEnded:Connect(function(Input)
+        if self.InputsDown[Input.KeyCode] ~= nil then
+            self.InputsDown[Input.KeyCode] = false
+        end
+    end)
     self.UserInputService.InputChanged:Connect(function(Input)
-        if Input.KeyCode == Enum.KeyCode.Thumbstick1 or Input.KeyCode == Enum.KeyCode.Thumbstick2 then
+        if self.ThumbstickValues[Input.KeyCode] ~= nil then
             self.ThumbstickValues[Input.KeyCode] = Input.Position
         end
     end)
@@ -121,24 +127,8 @@ function VRInputService:GetThumbstickPosition(Thumbsick)
         return
     end
 
-    --Store the polled value.
-    self.PreviousThumbstickValues[Thumbsick][self.CurrentThumbstickPointers[Thumbsick]] = self.ThumbstickValues[Thumbsick]
-    self.CurrentThumbstickPointers[Thumbsick] = (self.CurrentThumbstickPointers[Thumbsick] % THUMBSTICK_SAMPLES_TO_RESET) + 1
-
-    --Determine if the polled values are exactly the same.
-    --Closeness is not used as the thumbstick being held in place will register as slightly different values.
-    --This happens if the trigger is released (such as a touchpad, which may not automatically reset).
-    local ValuesSame = true
-    local InitialValue = self.PreviousThumbstickValues[Thumbsick][1]
-    for i = 2,THUMBSTICK_SAMPLES_TO_RESET do
-        if self.PreviousThumbstickValues[Thumbsick][i] ~= InitialValue then
-            ValuesSame = false
-            break
-        end
-    end
-
-    --Return either the stored value or the empty vector if the last polled samples are the same.
-    if ValuesSame then
+    --Return either the stored value or the empty vector if the thumbstick isn't in use.
+    if not self.InputsDown[Thumbsick] then
         return Vector3.new(0,0,0)
     else
         return self.ThumbstickValues[Thumbsick]
