@@ -28,7 +28,7 @@ function DefaultCamera:Enable()
             if Part:IsA("BasePart") then
                 if Part.Parent:IsA("Accoutrement") then
                     Part.LocalTransparencyModifier = 1
-                else
+                elseif not Part.Parent:IsA("Tool") then
                     Part.LocalTransparencyModifier = Transparency
                 end
             end
@@ -37,7 +37,7 @@ function DefaultCamera:Enable()
             if Part:IsA("BasePart") then
                 if Part.Parent:IsA("Accoutrement") then
                     Part.LocalTransparencyModifier = 1
-                else
+                elseif not Part.Parent:IsA("Tool") then
                     Part.LocalTransparencyModifier = Transparency
                 end
             end
