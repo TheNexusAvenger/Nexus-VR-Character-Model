@@ -16,25 +16,10 @@ local NexusObject = NexusVRCharacterModel:GetResource("NexusInstance.NexusObject
 local CharacterService = NexusVRCharacterModel:GetInstance("State.CharacterService")
 local Settings = NexusVRCharacterModel:GetInstance("State.Settings")
 local VRInputService = NexusVRCharacterModel:GetInstance("State.VRInputService")
+local FindCollidablePartOnRay = NexusVRCharacterModel:GetResource("Util.FindCollidablePartOnRay")
 
 local BaseController = NexusObject:Extend()
 BaseController:SetClassName("BaseController")
-
-
-
---[[
-Raycasts to a collidable part.
---]]
-local function FindCollidablePartOnRay(Start,Direction,Ignore)
-    --Raycast and continue if the hit part isn't collidable.
-	local Hit,End = Workspace:FindPartOnRayWithIgnoreList(Ray.new(Start,Direction),{Workspace.CurrentCamera,Ignore})
-	if Hit and not Hit.CanCollide then
-		return FindCollidablePartOnRay(End + (Direction * 0.01),Direction - (Start - End),Ignore)
-	end
-    
-    --Return the hit result.
-	return Hit,End
-end
 
 
 

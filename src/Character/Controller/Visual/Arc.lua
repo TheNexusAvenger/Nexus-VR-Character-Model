@@ -16,25 +16,10 @@ local Players = game:GetService("Players")
 
 local NexusVRCharacterModel = require(script.Parent.Parent.Parent.Parent)
 local NexusObject = NexusVRCharacterModel:GetResource("NexusInstance.NexusObject")
+local FindCollidablePartOnRay = NexusVRCharacterModel:GetResource("Util.FindCollidablePartOnRay")
 
 local Arc = NexusObject:Extend()
 Arc:SetClassName("Arc")
-
-
-
---[[
-Raycasts to a collidable part.
---]]
-local function FindCollidablePartOnRay(Start,Direction,Ignore)
-    --Raycast and continue if the hit part isn't collidable.
-	local Hit,End = Workspace:FindPartOnRayWithIgnoreList(Ray.new(Start,Direction),{Workspace.CurrentCamera,Ignore})
-	if Hit and not Hit.CanCollide then
-		return FindCollidablePartOnRay(End + (Direction * 0.01),Direction - (Start - End),Ignore)
-	end
-    
-    --Return the hit result.
-	return Hit,End
-end
 
 
 

@@ -103,20 +103,9 @@ function FootPlanter:CreateSolver(CenterPart,ScaleValue)
 		return atan2(lookVector.X,lookVector.Z)
 	end
 	
-	local workspaceFindPartOnRay = workspace.FindPartOnRay
+	local FindCollidablePartOnRay = require(script.Parent.Parent:WaitForChild("Util"):WaitForChild("FindCollidablePartOnRay"))
 	local function FindPartOnRay(ray,ignore)
-		local hit,pos = workspaceFindPartOnRay(workspace,ray,ignore)
-		
-		if hit and pos then
-			if hit.CanCollide == false then
-				local origin,dir = ray.Origin,ray.Direction
-				local delta = (pos - origin)
-				local distanceCovered = delta.magnitude
-				
-				return FindPartOnRay(Ray.new(pos * 1.01,(dir * (1 - (distanceCovered/dir.magnitude)))),ignore)
-			end
-		end
-		return hit,pos		
+		return FindCollidablePartOnRay(ray.Origin,ray.Direction,ignore)
 	end
 	
 	
