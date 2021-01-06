@@ -4,8 +4,15 @@ TheNexusAvenger
 Default camera that follows the character.
 --]]
 
+--Workaround for Roblox's CoreGuis relying on HeadLocked.
+--https://devforum.roblox.com/t/coregui-vr-components-rely-on-headlocked-being-true/100460
+local USE_HEAD_LOCKED_WORKAROUND = true
+
+
+
 local Workspace = game:GetService("Workspace")
 local Players = game:GetService("Players")
+local VRService = game:GetService("VRService")
 
 local NexusVRCharacterModel = require(script.Parent.Parent.Parent)
 local NexusObject = NexusVRCharacterModel:GetResource("NexusInstance.NexusObject")
@@ -82,8 +89,13 @@ Updates the camera.
 --]]
 function DefaultCamera:UpdateCamera(HeadsetCFrameWorld)
     Workspace.CurrentCamera.CameraType = "Scriptable"
-    Workspace.CurrentCamera.HeadLocked = false
-    Workspace.CurrentCamera.CFrame = HeadsetCFrameWorld
+    if USE_HEAD_LOCKED_WORKAROUND then
+        Workspace.CurrentCamera.HeadLocked = true
+        Workspace.CurrentCamera.CFrame = HeadsetCFrameWorld * game:GetService("VRService"):GetUserCFrame(Enum.UserCFrame.Head):Inverse()
+    else
+        Workspace.CurrentCamera.HeadLocked = false
+        Workspace.CurrentCamera.CFrame = HeadsetCFrameWorld
+    end
 end
 
 

@@ -4,12 +4,17 @@ TheNexusAvenger
 Third person camera that moves with the player.
 --]]
 
+--Workaround for Roblox's CoreGuis relying on HeadLocked.
+--https://devforum.roblox.com/t/coregui-vr-components-rely-on-headlocked-being-true/100460
+local USE_HEAD_LOCKED_WORKAROUND = true
+
 local THIRD_PERSON_ZOOM = 10
 
 
 
 local Workspace = game:GetService("Workspace")
 local Players = game:GetService("Players")
+local VRService = game:GetService("VRService")
 
 local NexusVRCharacterModel = require(script.Parent.Parent.Parent)
 local NexusObject = NexusVRCharacterModel:GetResource("NexusInstance.NexusObject")
@@ -57,13 +62,20 @@ function ThirdPersonTrackCamera:UpdateCamera(HeadsetCFrameWorld)
         end
     end
 
-    --Set the third person CFrame.
+    --Calculate the third person CFrame.
     local HeadsetRelative = self.BaseCFrame:Inverse() * HeadsetCFrameWorld
-    Workspace.CurrentCamera.CFrame = self.BaseCFrame * CFrame.new(0,0,-THIRD_PERSON_ZOOM * Scale) * CFrame.Angles(0,math.pi,0) * HeadsetRelative
+    local TargetCFrame = self.BaseCFrame * CFrame.new(0,0,-THIRD_PERSON_ZOOM * Scale) * CFrame.Angles(0,math.pi,0) * HeadsetRelative
 
-    --Set the other camera requirements.
+    --Update the camaera.
     Workspace.CurrentCamera.CameraType = "Scriptable"
     Workspace.CurrentCamera.HeadLocked = false
+    if USE_HEAD_LOCKED_WORKAROUND then
+        Workspace.CurrentCamera.HeadLocked = true
+        Workspace.CurrentCamera.CFrame = TargetCFrame * VRService:GetUserCFrame(Enum.UserCFrame.Head):Inverse()
+    else
+        Workspace.CurrentCamera.HeadLocked = false
+        Workspace.CurrentCamera.CFrame = TargetCFrame
+    end
 end
 
 
