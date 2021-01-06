@@ -139,12 +139,13 @@ function TeleportController:UpdateCharacter()
                         self.Character.Humanoid.Sit = false
                     end
 
+                    self.Character.Parts.HumanoidRootPart.Anchored = true
                     if ArcData.LastHitPart:IsA("Seat") and not ArcData.LastHitPart.Occupant then
                         --Sit in the seat.
                         --Waiting is done if the player was in an existing seat because the player no longer sitting will prevent sitting.
                         if WasSitting then
                             coroutine.wrap(function()
-                                wait()
+                                while self.Character.Humanoid.SeatPart do wait() end
                                 self.Character.Parts.HumanoidRootPart.Anchored = false
                                 ArcData.LastHitPart:Sit(self.Character.Humanoid)
                             end)()
@@ -154,8 +155,17 @@ function TeleportController:UpdateCharacter()
                         end
                     else
                         --Teleport the player.
-                        self.ReferenceWorldCFrame = CFrame.new(ArcData.LastHitPosition) * CFrame.new(0,4.5 * self.Character.ScaleValues.BodyHeightScale.Value,0) * (CFrame.new(-self.ReferenceWorldCFrame.Position) * self.ReferenceWorldCFrame)
-                        self:UpdateReferenceWorldCFrame((CFrame.new(ArcData.LastHitPosition) * CFrame.new(0,2 * self.Character.ScaleValues.BodyHeightScale.Value,0)).Position)
+                        --Waiting is done if the player was in an existing seat because the player will teleport the seat.
+                        if WasSitting then
+                            coroutine.wrap(function()
+                                while self.Character.Humanoid.SeatPart do wait() end
+                                self.ReferenceWorldCFrame = CFrame.new(ArcData.LastHitPosition) * CFrame.new(0,4.5 * self.Character.ScaleValues.BodyHeightScale.Value,0) * (CFrame.new(-self.ReferenceWorldCFrame.Position) * self.ReferenceWorldCFrame)
+                                self:UpdateReferenceWorldCFrame((CFrame.new(ArcData.LastHitPosition) * CFrame.new(0,2 * self.Character.ScaleValues.BodyHeightScale.Value,0)).Position)
+                            end)()
+                        else
+                            self.ReferenceWorldCFrame = CFrame.new(ArcData.LastHitPosition) * CFrame.new(0,4.5 * self.Character.ScaleValues.BodyHeightScale.Value,0) * (CFrame.new(-self.ReferenceWorldCFrame.Position) * self.ReferenceWorldCFrame)
+                            self:UpdateReferenceWorldCFrame((CFrame.new(ArcData.LastHitPosition) * CFrame.new(0,2 * self.Character.ScaleValues.BodyHeightScale.Value,0)).Position)
+                        end
                     end
                 end
             end
