@@ -133,7 +133,7 @@ function TeleportController:UpdateCharacter()
                     --Unsit the player.
                     --The teleport event is set to ignored since the CFrame will be different when the player gets out of the seat.
                     local WasSitting = false
-                    if self.Character.Humanoid.SeatPart then
+                    if self.Character:GetHumanoidSeatPart() then
                         WasSitting = true
                         self.IgnoreNextExternalTeleport = true
                         self.Character.Humanoid.Sit = false

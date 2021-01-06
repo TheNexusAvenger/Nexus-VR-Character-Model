@@ -214,9 +214,9 @@ function Character:__new(CharacterModel)
 
     --Connect anchoring and unanchoring the HumanoidRootPart.
     self.Humanoid:GetPropertyChangedSignal("SeatPart"):Connect(function()
-        self.Parts.HumanoidRootPart.Anchored = (self.Humanoid.SeatPart == nil)
+        self.Parts.HumanoidRootPart.Anchored = (self:GetHumanoidSeatPart() == nil)
     end)
-    self.Parts.HumanoidRootPart.Anchored = (self.Humanoid.SeatPart == nil)
+    self.Parts.HumanoidRootPart.Anchored = (self:GetHumanoidSeatPart() == nil)
 
     --Stop the character animations.
     local Animator = self.Humanoid:WaitForChild("Animator")
@@ -233,6 +233,31 @@ function Character:__new(CharacterModel)
     end
 end
 
+--[[
+Returns the SeatPart of the humanoid.
+SeatPart is not replicated to new players, which results in
+strange movements of character.
+https://devforum.roblox.com/t/seat-occupant-and-humanoid-seatpart-not-replicating-to-new-players-to-a-server/261545
+--]]
+function Character:GetHumanoidSeatPart()
+    --Return nil if the Humanoid is not sitting.
+    if not self.Humanoid.Sit then
+        return nil
+    end
+
+    --Return if the seat part is defined.
+    if self.Humanoid.SeatPart then
+        return self.Humanoid.SeatPart
+    end
+
+    --Iterated through the connected parts and return if a seat exists.
+    --While SeatPart may not be set, a SeatWeld does exist.
+    for _,ConnectedPart in pairs(self.Parts.HumanoidRootPart:GetConnectedParts()) do
+        if ConnectedPart:IsA("Seat") then
+            return ConnectedPart
+        end
+    end
+end
 --[[
 Sets a property. The property will either be
 set instantly or tweened depending on how
@@ -278,15 +303,16 @@ function Character:UpdateFromInputs(HeadControllerCFrame,LeftHandControllerCFram
     end
     
     --Get the CFrames.
+    local SeatPart = self:GetHumanoidSeatPart()
     local HeadCFrame = self.Head:GetHeadCFrame(HeadControllerCFrame)
-    local NeckCFrame = self.Head:GetNeckCFrame(HeadControllerCFrame,self.Humanoid.SeatPart and self.Humanoid.SeatPart.CFrame)
+    local NeckCFrame = self.Head:GetNeckCFrame(HeadControllerCFrame,SeatPart and SeatPart.CFrame)
 	local LowerTorsoCFrame,UpperTorsoCFrame = self.Torso:GetTorsoCFrames(NeckCFrame)
 	local JointCFrames = self.Torso:GetAppendageJointCFrames(LowerTorsoCFrame,UpperTorsoCFrame)
 	local LeftUpperArmCFrame,LeftLowerArmCFrame,LeftHandCFrame = self.LeftArm:GetAppendageCFrames(JointCFrames["LeftShoulder"],LeftHandControllerCFrame)
 	local RightUpperArmCFrame,RightLowerArmCFrame,RightHandCFrame = self.RightArm:GetAppendageCFrames(JointCFrames["RightShoulder"],RightHandControllerCFrame)
     
     --Set the character CFrames.
-    if not self.Humanoid.SeatPart then
+    if not SeatPart then
         local LeftFoot,RightFoot = self.FootPlanter:GetFeetCFrames()
         local LeftUpperLegCFrame,LeftLowerLegCFrame,LeftFootCFrame = self.LeftLeg:GetAppendageCFrames(JointCFrames["LeftHip"],LeftFoot * CFrame.Angles(0,math.pi,0))
         local RightUpperLegCFrame,RightLowerLegCFrame,RightFootCFrame = self.RightLeg:GetAppendageCFrames(JointCFrames["RightHip"],RightFoot * CFrame.Angles(0,math.pi,0))

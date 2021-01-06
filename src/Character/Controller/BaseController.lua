@@ -61,7 +61,7 @@ function BaseController:Enable()
 
     --Connect the humanoid leaving the seat.
     self.Character.Humanoid:GetPropertyChangedSignal("SeatPart"):Connect(function()
-        if not self.Character.Humanoid.SeatPart then
+        if not self.Character:GetHumanoidSeatPart() then
             self.SeatCooldown = tick() + SEAT_COOLDOWN
         end
     end)
@@ -119,14 +119,15 @@ function BaseController:UpdateReferenceWorldCFrame(OverrideRaycastStartPosition)
     local CharacterHeightWithoutLegs = (self.Character.Attachments.LowerTorso.WaistRigAttachment.Position.Y - self.Character.Attachments.LowerTorso.RightHipRigAttachment.Position.Y) + (self.Character.Attachments.UpperTorso.NeckRigAttachment.Position.Y - self.Character.Attachments.UpperTorso.WaistRigAttachment.Position.Y) - self.Character.Attachments.Head.NeckRigAttachment.Position.Y
     local CharacterHeight = RightHeight + CharacterHeightWithoutLegs
 
-    if self.Character.Humanoid.Sit and self.Character.Humanoid.SeatPart then
+    local SeatPart = self.Character:GetHumanoidSeatPart()
+    if self.Character.Humanoid.Sit and SeatPart then
         --Store the headset CFrame.
         if not self.SeatInitialHeadsetCFrame then
             self.SeatInitialHeadsetCFrame = VRInputService:GetVRInputs()[Enum.UserCFrame.Head]
         end
 
         --Set the offeset based on the seat.
-        local Seat = self.Character.Humanoid.SeatPart
+        local Seat = SeatPart
         self.ReferenceWorldCFrame = Seat.CFrame * CFrame.new(0,(Seat.Size.Y/2) + (self.Character.Parts.LowerTorso.Size.X/2) + CharacterHeightWithoutLegs,0) * CFrame.new(-self.SeatInitialHeadsetCFrame.Position) * CFrame.Angles(0,-math.atan2(-self.SeatInitialHeadsetCFrame.LookVector.X,-self.SeatInitialHeadsetCFrame.LookVector.Z),0)
     else
         --Unset the seat headset CFrame.
