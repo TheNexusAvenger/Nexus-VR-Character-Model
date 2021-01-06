@@ -97,7 +97,7 @@ function Arc:Update(StartCFrame)
         --Cast the ray to the end.
         --Return if an end was hit and make the arc blue.
         local HitPart,HitPosition = FindCollidablePartOnRay(SegmentStartPosition,SegmentEndPosition - SegmentStartPosition,Players.LocalPlayer and Players.LocalPlayer.Character)
-        self.BeamParts[i].CFrame = CFrame.new(SegmentStartPosition)
+        self.BeamParts[i].CFrame = CFrame.new(SegmentStartPosition) * CFrame.Angles(0,FaceAngle,0)
         self.BeamParts[i + 1].Beam.Enabled = true
         if HitPart then
             self.BeamParts[i + 1].CFrame = CFrame.new(HitPosition)
