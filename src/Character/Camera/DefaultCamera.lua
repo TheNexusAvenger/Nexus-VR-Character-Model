@@ -91,7 +91,7 @@ function DefaultCamera:UpdateCamera(HeadsetCFrameWorld)
     Workspace.CurrentCamera.CameraType = "Scriptable"
     if USE_HEAD_LOCKED_WORKAROUND then
         Workspace.CurrentCamera.HeadLocked = true
-        Workspace.CurrentCamera.CFrame = HeadsetCFrameWorld * game:GetService("VRService"):GetUserCFrame(Enum.UserCFrame.Head):Inverse()
+        Workspace.CurrentCamera.CFrame = HeadsetCFrameWorld * VRService:GetUserCFrame(Enum.UserCFrame.Head):Inverse()
     else
         Workspace.CurrentCamera.HeadLocked = false
         Workspace.CurrentCamera.CFrame = HeadsetCFrameWorld
