@@ -231,6 +231,22 @@ function Character:__new(CharacterModel)
     else
         Animator:Destroy()
     end
+
+    --Set up replication at 30hz.
+    if Players.LocalPlayer and Players.LocalPlayer.Character == CharacterModel then
+        coroutine.wrap(function()
+            while self.Humanoid.Health > 0 do
+                --Send the new CFrames if the CFrames changed.
+                if self.LastReplicationCFrames ~= self.ReplicationCFrames then
+                    self.LastReplicationCFrames = self.ReplicationCFrames
+                    UpdateInputs:FireServer(unpack(self.ReplicationCFrames))
+                end
+
+                --Wait 1/30th of a second to send the next set of CFrames.
+                wait(1/30)
+            end
+        end)()
+    end
 end
 
 --[[
@@ -344,7 +360,7 @@ function Character:UpdateFromInputs(HeadControllerCFrame,LeftHandControllerCFram
 
     --Replicate the changes to the server.
     if Players.LocalPlayer and Players.LocalPlayer.Character == self.CharacterModel then
-        UpdateInputs:FireServer(HeadControllerCFrame,LeftHandControllerCFrame,RightHandControllerCFrame)
+        self.ReplicationCFrames = {HeadControllerCFrame,LeftHandControllerCFrame,RightHandControllerCFrame}
     end
 end
 
