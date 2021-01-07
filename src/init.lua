@@ -4,6 +4,13 @@ TheNexusAvenger
 Loads Nexus VR Character Model.
 --]]
 
+--Client should send replication at 30hz.
+--A buffer is added in case this rate is exceeded
+--briefly, such as an unstable connection.
+local REPLICATION_RATE_LIMIT = 35
+
+
+
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Players = game:GetService("Players")
 local HttpService = game:GetService("HttpService")
@@ -63,6 +70,8 @@ function NexusVRCharacterModel:Load()
     NexusVRCharacterModelClientLoader:Clone().Parent = StarterPlayer:WaitForChild("StarterPlayerScripts")
 
     --Set up replication.
+    local RateLimter = NexusVRCharacterModel:GetResource("State.RateLimiter")
+    local UpdateRateLimiter = RateLimter.new(REPLICATION_RATE_LIMIT)
     local UpdateInputsEvent = Instance.new("RemoteEvent")
     UpdateInputsEvent.Name = "UpdateInputs"
     UpdateInputsEvent.Parent = script
@@ -71,6 +80,9 @@ function NexusVRCharacterModel:Load()
         if typeof(HeadCFrame) ~= "CFrame" then return end
         if typeof(LeftHandCFrame) ~= "CFrame" then return end
         if typeof(RightHandCFrame) ~= "CFrame" then return end
+
+        --Ignore if the rate limit was reached.
+        if UpdateRateLimiter:RateLimitReached(Player) then return end
 
         --Replicate the CFrames to the other players.
         for _,OtherPlayer in pairs(Players:GetPlayers()) do
