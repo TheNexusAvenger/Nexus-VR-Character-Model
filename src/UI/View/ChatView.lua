@@ -8,6 +8,8 @@ add any additional functionality.
 
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local RunService = game:GetService("RunService")
+local UserInputService = game:GetService("UserInputService")
 
 local NexusVRCharacterModel = require(script.Parent.Parent.Parent)
 local BaseView = NexusVRCharacterModel:GetResource("UI.View.BaseView")
@@ -140,6 +142,18 @@ function ChatView:__new()
 
         --Destroy the loading text.
         LoadingText:Destroy()
+
+        --Connect starting chat.
+        --For some reason, it is not done when VR is enabled.
+        UserInputService.InputBegan:Connect(function(Input,Processed)
+            if Processed then return end
+            if not UserInputService:GetFocusedTextBox() and Input.KeyCode == Enum.KeyCode.Slash and self.Visible then
+                --Focus the chat bar.
+                --Done the next frame so that the slash is not inputted.
+                RunService.Stepped:Wait()
+                Chat:FocusChatBar()
+            end
+        end)
 
         --Force the GUI to always be visible.
         --Bit hacky and relies on checking for the passed value to be not false and not nil instead of checking if it true.
