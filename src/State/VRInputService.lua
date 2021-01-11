@@ -12,6 +12,7 @@ local THUMBSTICK_SAMPLES_TO_RESET = 5
 
 local NexusVRCharacterModel = require(script.Parent.Parent)
 local NexusObject = NexusVRCharacterModel:GetResource("NexusInstance.NexusObject")
+local NexusEventCreator = NexusVRCharacterModel:GetResource("NexusInstance.Event.NexusEventCreator")
 
 local VRInputService = NexusObject:Extend()
 VRInputService:SetClassName("VRInputService")
@@ -28,6 +29,10 @@ function VRInputService:__new(VRService,UserInputService)
     --Store the services for testing.
     self.VRService = VRService or game:GetService("VRService")
     self.UserInputService = UserInputService or game:GetService("UserInputService")
+
+    --Create the events.
+    self.Recentered = NexusEventCreator:CreateEvent()
+    self.EyeLevelSet = NexusEventCreator:CreateEvent()
 
     --Connect updating the thumbsticks.
     self.ThumbstickValues = {
@@ -117,6 +122,7 @@ Does not alter the Y axis.
 function VRInputService:Recenter()
     local HeadCFrame = self.VRService:GetUserCFrame(Enum.UserCFrame.Head)
     self.RecenterOffset = CFrame.Angles(0,-math.atan2(-HeadCFrame.LookVector.X,-HeadCFrame.LookVector.Z),0) * CFrame.new(-HeadCFrame.X,0,-HeadCFrame.Z)
+    self.Recentered:Fire()
 end
 
 --[[
@@ -124,6 +130,7 @@ Sets the eye level.
 --]]
 function VRInputService:SetEyeLevel()
     self.ManualNormalHeadLevel = self.VRService:GetUserCFrame(Enum.UserCFrame.Head).Y
+    self.EyeLevelSet:Fire()
 end
 
 --[[

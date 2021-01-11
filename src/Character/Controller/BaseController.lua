@@ -52,19 +52,25 @@ function BaseController:Enable()
     self.ReferenceWorldCFrame = CFrame.new(BaseReferenceCFrame.Position) * CFrame.Angles(0,math.atan2(-BaseReferenceCFrame.LookVector.X,-BaseReferenceCFrame.LookVector.Z),0)
 
     --Connect the character teleporting.
-    self.Character.CharacterTeleported:Connect(function()
+    if not self.Connections then self.Connections = {} end
+    table.insert(self.Connections,self.Character.CharacterTeleported:Connect(function()
         if self.IgnoreNextExternalTeleport then self.IgnoreNextExternalTeleport = nil return end
         local HeadCFrame = self.Character.Parts.HumanoidRootPart.CFrame * self.Character.Attachments.HumanoidRootPart.RootRigAttachment.CFrame * self.Character.Attachments.LowerTorso.RootRigAttachment.CFrame:Inverse() * self.Character.Attachments.LowerTorso.WaistRigAttachment.CFrame * self.Character.Attachments.UpperTorso.WaistRigAttachment.CFrame * self.Character.Attachments.UpperTorso.NeckRigAttachment.CFrame * self.Character.Attachments.Head.NeckRigAttachment.CFrame
         local HeadsetCFrame = self:ScaleInput(VRInputService:GetVRInputs()[Enum.UserCFrame.Head])
         self.ReferenceWorldCFrame = HeadCFrame * CFrame.new(-HeadsetCFrame.X,0,-HeadsetCFrame.Z) * CFrame.Angles(0,-math.atan2(-HeadsetCFrame.LookVector.X,-HeadsetCFrame.LookVector.Z),0)
-    end)
+    end))
 
     --Connect the humanoid leaving the seat.
-    self.Character.Humanoid:GetPropertyChangedSignal("SeatPart"):Connect(function()
+    table.insert(self.Connections,self.Character.Humanoid:GetPropertyChangedSignal("SeatPart"):Connect(function()
         if not self.Character:GetHumanoidSeatPart() then
             self.SeatCooldown = tick() + SEAT_COOLDOWN
         end
-    end)
+    end))
+
+    --Connect the player recentering.
+    table.insert(self.Connections,VRInputService.Recentered:Connect(function()
+        self.SeatInitialHeadsetCFrame = nil
+    end))
 end
 
 --[[
@@ -74,6 +80,10 @@ function BaseController:Disable()
     self.Character = nil
     self.ReferenceWorldCFrame = nil
     self.VelocityY = nil
+    for _,Connection in pairs(self.Connections) do
+        Connection:Disconnect()
+    end
+    self.Connections = nil
 end
 
 --[[
