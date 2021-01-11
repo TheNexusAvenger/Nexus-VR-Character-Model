@@ -306,7 +306,7 @@ the CharacterTeleported event.
 --]]
 function Character:SetHumanoidRootPartCFrame(NewCFrame)
     self.LastHumanoidRootPartCFrame = NewCFrame
-    self.Parts.HumanoidRootPart.CFrame = NewCFrame
+    self:SetCFrameProperty(self.Parts.HumanoidRootPart,"CFrame",NewCFrame)
 end
 
 --[[
