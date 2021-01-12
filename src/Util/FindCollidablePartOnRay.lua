@@ -6,13 +6,19 @@ find a collidable part.
 --]]
 
 local Workspace = game:GetService("Workspace")
+local PhysicsService = game:GetService("PhysicsService")
 
 
 
 --[[
 Ray casts to find a collidable part.
 --]]
-local function FindCollidablePartOnRay(StartPosition,Direction,IgnoreList)
+local function FindCollidablePartOnRay(StartPosition,Direction,IgnoreList,CollisionGroup)
+    --Convert the collision group.
+    if typeof(CollisionGroup) == "Instance" and CollisionGroup:IsA("BasePart") then
+        CollisionGroup = PhysicsService:GetCollisionGroupName(CollisionGroup.CollisionGroupId)
+    end
+
     --Create the ignore list.
     local Camera = Workspace.CurrentCamera
     local NewIgnoreList = {Camera}
@@ -31,6 +37,9 @@ local function FindCollidablePartOnRay(StartPosition,Direction,IgnoreList)
     RaycastParameters.FilterType = Enum.RaycastFilterType.Blacklist
     RaycastParameters.FilterDescendantsInstances = NewIgnoreList
     RaycastParameters.IgnoreWater = true
+    if CollisionGroup then
+        RaycastParameters.CollisionGroup = CollisionGroup
+    end
 
     --Raycast and continue if the hit part isn't collidable.
     local RaycastResult = Workspace:Raycast(StartPosition,Direction,RaycastParameters)
@@ -40,7 +49,7 @@ local function FindCollidablePartOnRay(StartPosition,Direction,IgnoreList)
     local HitPart,EndPosition = RaycastResult.Instance,RaycastResult.Position
     if HitPart and not HitPart.CanCollide then
         table.insert(NewIgnoreList,HitPart)
-        return FindCollidablePartOnRay(EndPosition,Direction + (EndPosition - StartPosition),NewIgnoreList)
+        return FindCollidablePartOnRay(EndPosition,Direction + (EndPosition - StartPosition),NewIgnoreList,CollisionGroup)
     end
 
     --Return the hit result.

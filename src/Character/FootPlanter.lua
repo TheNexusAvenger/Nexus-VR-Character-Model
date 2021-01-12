@@ -105,7 +105,7 @@ function FootPlanter:CreateSolver(CenterPart,ScaleValue)
 	
 	local FindCollidablePartOnRay = require(script.Parent.Parent:WaitForChild("Util"):WaitForChild("FindCollidablePartOnRay"))
 	local function FindPartOnRay(ray,ignore)
-		return FindCollidablePartOnRay(ray.Origin,ray.Direction,ignore)
+		return FindCollidablePartOnRay(ray.Origin,ray.Direction,ignore,CenterPart)
 	end
 	
 	

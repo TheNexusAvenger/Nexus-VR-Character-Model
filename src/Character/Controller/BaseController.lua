@@ -120,11 +120,11 @@ function BaseController:UpdateReferenceWorldCFrame(OverrideRaycastStartPosition)
     local LeftHeight = (self.Character.Attachments.LeftUpperLeg.LeftHipRigAttachment.Position.Y - self.Character.Attachments.LeftUpperLeg.LeftKneeRigAttachment.Position.Y) + (self.Character.Attachments.LeftLowerLeg.LeftKneeRigAttachment.Position.Y - self.Character.Attachments.LeftLowerLeg.LeftAnkleRigAttachment.Position.Y) + (self.Character.Attachments.LeftFoot.LeftAnkleRigAttachment.Position.Y - self.Character.Attachments.LeftFoot.LeftFootAttachment.Position.Y)
     local LeftHitPart,LeftHitPosition,RightHitPart,RightHitPosition
     if OverrideRaycastStartPosition then
-        LeftHitPart,LeftHitPosition = FindCollidablePartOnRay(OverrideRaycastStartPosition,Vector3.new(0,-500,0),self.Character.CharacterModel)
+        LeftHitPart,LeftHitPosition = FindCollidablePartOnRay(OverrideRaycastStartPosition,Vector3.new(0,-500,0),self.Character.CharacterModel,self.Character.Parts.LowerTorso)
         RightHitPart,RightHitPosition = LeftHitPart,LeftHitPosition
     else
-        LeftHitPart,LeftHitPosition = FindCollidablePartOnRay(LeftHipPosition,Vector3.new(0,-500,0),self.Character.CharacterModel)
-        RightHitPart,RightHitPosition = FindCollidablePartOnRay(RightHipPosition,Vector3.new(0,-500,0),self.Character.CharacterModel)
+        LeftHitPart,LeftHitPosition = FindCollidablePartOnRay(LeftHipPosition,Vector3.new(0,-500,0),self.Character.CharacterModel,self.Character.Parts.LowerTorso)
+        RightHitPart,RightHitPosition = FindCollidablePartOnRay(RightHipPosition,Vector3.new(0,-500,0),self.Character.CharacterModel,self.Character.Parts.LowerTorso)
     end
     local CharacterHeightWithoutLegs = (self.Character.Attachments.LowerTorso.WaistRigAttachment.Position.Y - self.Character.Attachments.LowerTorso.RightHipRigAttachment.Position.Y) + (self.Character.Attachments.UpperTorso.NeckRigAttachment.Position.Y - self.Character.Attachments.UpperTorso.WaistRigAttachment.Position.Y) - self.Character.Attachments.Head.NeckRigAttachment.Position.Y
     local CharacterHeight = RightHeight + CharacterHeightWithoutLegs
@@ -138,7 +138,7 @@ function BaseController:UpdateReferenceWorldCFrame(OverrideRaycastStartPosition)
 
         --Set the offeset based on the seat.
         local Seat = SeatPart
-        self.ReferenceWorldCFrame = Seat.CFrame * CFrame.new(0,(Seat.Size.Y/2) + (self.Character.Parts.LowerTorso.Size.X/2) + CharacterHeightWithoutLegs,0) * CFrame.new(-self.SeatInitialHeadsetCFrame.Position) * CFrame.Angles(0,-math.atan2(-self.SeatInitialHeadsetCFrame.LookVector.X,-self.SeatInitialHeadsetCFrame.LookVector.Z),0)
+        self.ReferenceWorldCFrame = Seat.CFrame * CFrame.new(0,(Seat.Size.Y/2) + (self.Character.Parts.LowerTorso.Size.Z/2) + CharacterHeightWithoutLegs,0) * CFrame.new(-self.SeatInitialHeadsetCFrame.Position) * CFrame.Angles(0,-math.atan2(-self.SeatInitialHeadsetCFrame.LookVector.X,-self.SeatInitialHeadsetCFrame.LookVector.Z),0)
     else
         --Unset the seat headset CFrame.
         if self.SeatInitialHeadsetCFrame then
