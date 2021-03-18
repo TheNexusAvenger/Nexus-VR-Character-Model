@@ -198,7 +198,7 @@ function BaseController:UpdateReferenceWorldCFrame(OverrideRaycastStartPosition)
         self.ReferenceWorldCFrame = CFrame.new(self.ReferenceWorldCFrame.Position) * CFrame.Angles(0,math.atan2(-self.ReferenceWorldCFrame.LookVector.X,-self.ReferenceWorldCFrame.LookVector.Z),0)
 
         --Allow the player to sit if the hit part was a seat.
-        if AllowSit and HitPart and tick() >= (self.SeatCooldown or 0) and HitPart:IsA("Seat") and not HitPart.Occupant then
+        if AllowSit and HitPart and tick() >= (self.SeatCooldown or 0) and HitPart:IsA("Seat") and not HitPart.Occupant and not HitPart.Disabled then
             self.Character.Parts.HumanoidRootPart.Anchored = false
             HitPart:Sit(self.Character.Humanoid)
         end

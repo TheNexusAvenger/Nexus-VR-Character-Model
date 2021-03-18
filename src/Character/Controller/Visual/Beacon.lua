@@ -72,7 +72,7 @@ function Beacon:Update(CenterCFrame,HoverPart)
         local VRBeaconColor = HoverPart:FindFirstChild("VRBeaconColor")
         if VRBeaconColor then
             BeaconColor = VRBeaconColor.Value
-        elseif HoverPart:IsA("Seat") then
+        elseif HoverPart:IsA("Seat") and not HoverPart.Disabled then
             BeaconColor = Color3.new(0,170/255,255/255)
         end
     end
