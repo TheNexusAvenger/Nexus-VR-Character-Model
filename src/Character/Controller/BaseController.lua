@@ -201,6 +201,8 @@ function BaseController:UpdateReferenceWorldCFrame(OverrideRaycastStartPosition)
         if AllowSit and HitPart and tick() >= (self.SeatCooldown or 0) and HitPart:IsA("Seat") and not HitPart.Occupant and not HitPart.Disabled then
             self.Character.Parts.HumanoidRootPart.Anchored = false
             HitPart:Sit(self.Character.Humanoid)
+        else
+            self.Character.Parts.HumanoidRootPart.Anchored = true
         end
     end
 end
