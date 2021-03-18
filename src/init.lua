@@ -70,11 +70,18 @@ function NexusVRCharacterModel:Load()
     NexusVRCharacterModelClientLoader:Clone().Parent = StarterPlayer:WaitForChild("StarterPlayerScripts")
 
     --Set up replication.
+    local ReadyPlayers = {}
     local RateLimter = NexusVRCharacterModel:GetResource("State.RateLimiter")
     local UpdateRateLimiter = RateLimter.new(REPLICATION_RATE_LIMIT)
+
     local UpdateInputsEvent = Instance.new("RemoteEvent")
     UpdateInputsEvent.Name = "UpdateInputs"
     UpdateInputsEvent.Parent = script
+
+    local ReplicationReadyEvent = Instance.new("RemoteEvent")
+    ReplicationReadyEvent.Name = "ReplicationReady"
+    ReplicationReadyEvent.Parent = script
+
     UpdateInputsEvent.OnServerEvent:Connect(function(Player,HeadCFrame,LeftHandCFrame,RightHandCFrame)
         --Ignore the input if 3 CFrames aren't given.
         if typeof(HeadCFrame) ~= "CFrame" then return end
@@ -86,10 +93,18 @@ function NexusVRCharacterModel:Load()
 
         --Replicate the CFrames to the other players.
         for _,OtherPlayer in pairs(Players:GetPlayers()) do
-            if Player ~= OtherPlayer then
+            if Player ~= OtherPlayer and ReadyPlayers[OtherPlayer] then
                 UpdateInputsEvent:FireClient(OtherPlayer,Player,HeadCFrame,LeftHandCFrame,RightHandCFrame)
             end
         end
+    end)
+
+    ReplicationReadyEvent.OnServerEvent:Connect(function(Player)
+        ReadyPlayers[Player] = true
+    end)
+
+    Players.PlayerRemoving:Connect(function(Player)
+        ReadyPlayers[Player] = nil
     end)
 end
 

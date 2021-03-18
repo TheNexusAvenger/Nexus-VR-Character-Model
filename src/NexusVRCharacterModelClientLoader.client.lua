@@ -17,6 +17,7 @@ local CharacterService = NexusVRCharacterModel:GetInstance("State.CharacterServi
 local ControlService = NexusVRCharacterModel:GetInstance("State.ControlService")
 local Settings = NexusVRCharacterModel:GetInstance("State.Settings")
 local UpdateInputs = NexusVRCharacterModel:GetResource("UpdateInputs")
+local ReplicationReady = NexusVRCharacterModel:GetResource("ReplicationReady")
 
 
 
@@ -30,6 +31,7 @@ UpdateInputs.OnClientEvent:Connect(function(Player,HeadCFrame,LeftHandCFrame,Rig
         Character:UpdateFromInputs(HeadCFrame,LeftHandCFrame,RightHandCFrame)
     end
 end)
+ReplicationReady:FireServer()
 
 --Connect the local player if VR is enabled.
 if VRService.VREnabled then
