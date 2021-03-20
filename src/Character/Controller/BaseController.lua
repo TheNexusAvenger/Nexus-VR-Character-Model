@@ -123,15 +123,23 @@ function BaseController:UpdateCharacter()
             SeatRotationXZ = (CFrame.new(SeatCFrame.Position) * CFrame.Angles(0,math.atan2(-SeatCFrame.LookVector.X,-SeatCFrame.LookVector.Z),0)):Inverse() * SeatCFrame
         end
 
+        --Get the eye CFrame of the current character, except the Y offset from the HumanoidRootPart.
+        --The Y position will be added absolutely since doing it relatively will result in floating or short characters.
+        local HumanoidRootPartCFrame = self.Character.Parts.HumanoidRootPart.CFrame
+        local LowerTorsoCFrame = HumanoidRootPartCFrame * self.Character.Attachments.HumanoidRootPart.RootRigAttachment.CFrame * CFrame.new(0,-self.Character.Motors.Root.Transform.Position.Y,0) * self.Character.Motors.Root.Transform * self.Character.Attachments.LowerTorso.RootRigAttachment.CFrame:Inverse()
+        local UpperTorsoCFrame = LowerTorsoCFrame * self.Character.Attachments.LowerTorso.WaistRigAttachment.CFrame * self.Character.Motors.Waist.Transform * self.Character.Attachments.UpperTorso.WaistRigAttachment.CFrame:Inverse()
+        local HeadCFrame = UpperTorsoCFrame * self.Character.Attachments.UpperTorso.NeckRigAttachment.CFrame * self.Character.Motors.Neck.Transform * self.Character.Attachments.Head.NeckRigAttachment.CFrame:Inverse()
+        local EyesOffset = self.Character.Head:GetEyesOffset()
+        local CharacterEyeCFrame = HeadCFrame * EyesOffset
+
         --Get the new CFrame of the eyes by offsetting the position and Y axis of the change in the VR head CFrame.
         --X and Z are handled absolutely for when the player teleports.
-        local CharacterEyeCFrame = self.Character.Head.Head.CFrame * self.Character.Head:GetEyesOffset()
         local InputDelta = self.LastHeadCFrame:Inverse() * VRHeadCFrame
         local HeadRotationXZ = (CFrame.new(VRHeadCFrame.Position) * CFrame.Angles(0,math.atan2(-VRHeadCFrame.LookVector.X,-VRHeadCFrame.LookVector.Z),0)):Inverse() * VRHeadCFrame
-        local BaseEyesCFrameWithRotationOffset = CharacterEyeCFrame * CFrame.new(InputDelta.Position) * CFrame.Angles(0,math.atan2(-InputDelta.LookVector.X,-InputDelta.LookVector.Z),0)
+        local BaseEyesCFrameWithRotationOffset = CharacterEyeCFrame * CFrame.new(InputDelta.Position.X,0,InputDelta.Position.Z) * CFrame.Angles(0,math.atan2(-InputDelta.LookVector.X,-InputDelta.LookVector.Z),0)
         local BaseEyesPosition = CFrame.new(BaseEyesCFrameWithRotationOffset.Position)
         BaseEyesCFrameWithRotationOffset = SeatRotationXZ:Inverse() * BaseEyesCFrameWithRotationOffset
-        local NewCharacterEyeCFrame = BaseEyesPosition * SeatRotationXZ * CFrame.Angles(0,math.atan2(-BaseEyesCFrameWithRotationOffset.LookVector.X,-BaseEyesCFrameWithRotationOffset.LookVector.Z),0) * HeadRotationXZ
+        local NewCharacterEyeCFrame = CFrame.new(0,(VRHeadCFrame * EyesOffset:Inverse()).Y + EyesOffset.Y,0) * BaseEyesPosition * SeatRotationXZ * CFrame.Angles(0,math.atan2(-BaseEyesCFrameWithRotationOffset.LookVector.X,-BaseEyesCFrameWithRotationOffset.LookVector.Z),0) * HeadRotationXZ
 
         --Update the character.
         local HeadToLeftHandCFrame = VRHeadCFrame:Inverse() * VRLeftHandCFrame
