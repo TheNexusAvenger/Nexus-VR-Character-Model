@@ -8,7 +8,6 @@ local THUMBSTICK_DEADZONE_RADIUS = 0.2
 
 
 
-local Workspace = game:GetService("Workspace")
 local Players = game:GetService("Players")
 local VRService = game:GetService("VRService")
 local UserInputService = game:GetService("UserInputService")

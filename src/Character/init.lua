@@ -5,12 +5,10 @@ Manipulates a character model.
 --]]
 
 local Players = game:GetService("Players")
-local RunService = game:GetService("RunService")
 local TweenService = game:GetService("TweenService")
 
 local NexusVRCharacterModel = require(script.Parent)
 local NexusObject = NexusVRCharacterModel:GetResource("NexusInstance.NexusObject")
-local NexusEventCreator = NexusVRCharacterModel:GetResource("NexusInstance.Event.NexusEventCreator")
 local Head = NexusVRCharacterModel:GetResource("Character.Head")
 local Torso = NexusVRCharacterModel:GetResource("Character.Torso")
 local Appendage = NexusVRCharacterModel:GetResource("Character.Appendage")
