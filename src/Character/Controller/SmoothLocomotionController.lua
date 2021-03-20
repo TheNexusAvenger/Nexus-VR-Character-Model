@@ -27,6 +27,21 @@ Enables the controller.
 function SmoothLocomotionController:Enable()
     self.super:Enable()
     VRService:SetTouchpadMode(Enum.VRTouchpad.Right,Enum.VRTouchpadMode.ABXY)
+
+    --Connect requesting jumping.
+    --ButtonA does not work with IsButtonDown.
+    self.ButtonADown = false
+    table.insert(self.Connections,UserInputService.InputBegan:Connect(function(Input,Processsed)
+        if Processsed then return end
+        if Input.KeyCode == Enum.KeyCode.ButtonA then
+            self.ButtonADown = true
+        end
+    end))
+    table.insert(self.Connections,UserInputService.InputEnded:Connect(function(Input)
+        if Input.KeyCode == Enum.KeyCode.ButtonA then
+            self.ButtonADown = false
+        end
+    end))
 end
 
 --[[
@@ -62,7 +77,7 @@ function SmoothLocomotionController:UpdateCharacter()
     self:UpdateVehicleSeat()
 
     --Jump the player.
-    if UserInputService:IsKeyDown(Enum.KeyCode.Space) or UserInputService:IsKeyDown(Enum.KeyCode.ButtonA) then
+    if UserInputService:IsKeyDown(Enum.KeyCode.Space) or self.ButtonADown then
         self.Character.Humanoid.Jump = true
     end
 end

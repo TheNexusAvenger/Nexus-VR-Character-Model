@@ -46,20 +46,17 @@ function TeleportController:Enable()
     }
 
     --Connect requesting jumping.
-    self.ButtonADown,self.SpaceDown = false,false
+    --ButtonA does not work with IsButtonDown.
+    self.ButtonADown = false
     table.insert(self.Connections,UserInputService.InputBegan:Connect(function(Input,Processsed)
         if Processsed then return end
         if Input.KeyCode == Enum.KeyCode.ButtonA then
             self.ButtonADown = true
-        elseif Input.KeyCode == Enum.KeyCode.Space then
-            self.SpaceDown = true
         end
     end))
     table.insert(self.Connections,UserInputService.InputEnded:Connect(function(Input)
         if Input.KeyCode == Enum.KeyCode.ButtonA then
             self.ButtonADown = false
-        elseif Input.KeyCode == Enum.KeyCode.Space then
-            self.SpaceDown = false
         end
     end))
 end
@@ -205,7 +202,7 @@ function TeleportController:UpdateCharacter()
     self:UpdateVehicleSeat()
 
     --Jump the player.
-    if self.SpaceDown or self.ButtonADown then
+    if UserInputService:IsKeyDown(Enum.KeyCode.Space) or self.ButtonADown then
         self.Character.Humanoid.Jump = true
     end
 end
