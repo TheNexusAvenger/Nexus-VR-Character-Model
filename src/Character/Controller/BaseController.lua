@@ -4,10 +4,6 @@ TheNexusAvenger
 Base class for controlling the local character.
 --]]
 
-local SEAT_COOLDOWN = 3
-
-
-
 local Workspace = game:GetService("Workspace")
 local Players = game:GetService("Players")
 
@@ -47,6 +43,16 @@ function BaseController:Enable()
     if not self.Character then
         return
     end
+
+    --Disable the controls.
+    --Done in a loop to ensure changed controllers are disabled.
+    coroutine.wrap(function()
+        local ControlModule = require(Players.LocalPlayer:WaitForChild("PlayerScripts"):WaitForChild("PlayerModule"):WaitForChild("ControlModule"))
+        while self.Character do
+            ControlModule:Disable()
+            wait()
+        end
+    end)()
 end
 
 --[[
