@@ -11,6 +11,7 @@ local THUMBSTICK_MANUAL_ROTATION_ANGLE = math.rad(22.5)
 
 
 local Workspace = game:GetService("Workspace")
+local UserInputService = game:GetService("UserInputService")
 
 local NexusVRCharacterModel = require(script.Parent.Parent.Parent)
 local BaseController = NexusVRCharacterModel:GetInstance("Character.Controller.BaseController")
@@ -43,6 +44,24 @@ function TeleportController:Enable()
             Arc = self.RightArc,
         },
     }
+
+    --Connect requesting jumping.
+    self.ButtonADown,self.SpaceDown = false,false
+    table.insert(self.Connections,UserInputService.InputBegan:Connect(function(Input,Processsed)
+        if Processsed then return end
+        if Input.KeyCode == Enum.KeyCode.ButtonA then
+            self.ButtonADown = true
+        elseif Input.KeyCode == Enum.KeyCode.Space then
+            self.SpaceDown = true
+        end
+    end))
+    table.insert(self.Connections,UserInputService.InputEnded:Connect(function(Input)
+        if Input.KeyCode == Enum.KeyCode.ButtonA then
+            self.ButtonADown = false
+        elseif Input.KeyCode == Enum.KeyCode.Space then
+            self.SpaceDown = false
+        end
+    end))
 end
 
 --[[
@@ -173,6 +192,11 @@ function TeleportController:UpdateCharacter()
         elseif ArcData.DirectionState == "Forward" and ArcData.RadiusState == "Extended" then
             ArcData.LastHitPart,ArcData.LastHitPosition = ArcData.Arc:Update(Workspace.CurrentCamera:GetRenderCFrame() * VRInputs[Enum.UserCFrame.Head]:Inverse() * VRInputs[ArcData.UserCFrame])
         end
+    end
+
+    --Jump the player.
+    if self.SpaceDown or self.ButtonADown then
+        self.Character.Humanoid.Jump = true
     end
 end
 

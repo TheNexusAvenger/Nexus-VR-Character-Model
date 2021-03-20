@@ -44,6 +44,9 @@ function BaseController:Enable()
         return
     end
 
+    --Disable auto rotate so that the default controls work.
+    self.Character.Humanoid.AutoRotate = false
+
     --Disable the controls.
     --Done in a loop to ensure changed controllers are disabled.
     coroutine.wrap(function()
