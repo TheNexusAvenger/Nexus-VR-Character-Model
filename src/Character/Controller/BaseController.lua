@@ -47,6 +47,13 @@ function BaseController:Enable()
         return
     end
 
+    --Connect the eye level being set.
+    table.insert(self.Connections,VRInputService.EyeLevelSet:Connect(function()
+        if self.LastHeadCFrame.Y > 0 then
+            self.LastHeadCFrame = CFrame.new(0,-self.LastHeadCFrame.Y,0) * self.LastHeadCFrame
+        end
+    end))
+
     --Disable auto rotate so that the default controls work.
     self.Character.Humanoid.AutoRotate = false
 
