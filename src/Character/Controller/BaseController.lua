@@ -11,9 +11,7 @@ local NexusVRCharacterModel = require(script.Parent.Parent.Parent)
 local NexusObject = NexusVRCharacterModel:GetResource("NexusInstance.NexusObject")
 local CameraService = NexusVRCharacterModel:GetInstance("State.CameraService")
 local CharacterService = NexusVRCharacterModel:GetInstance("State.CharacterService")
-local Settings = NexusVRCharacterModel:GetInstance("State.Settings")
 local VRInputService = NexusVRCharacterModel:GetInstance("State.VRInputService")
-local FindCollidablePartOnRay = NexusVRCharacterModel:GetResource("Util.FindCollidablePartOnRay")
 
 local BaseController = NexusObject:Extend()
 BaseController:SetClassName("BaseController")
@@ -146,11 +144,6 @@ function BaseController:UpdateCharacter()
         local HeadCFrame = self:ScaleInput(VRInputService:GetVRInputs()[Enum.UserCFrame.Head])
         Workspace.CurrentCamera.CFrame = CurrentCameraCFrame * LastHeadCFrame:Inverse() * HeadCFrame
         self.LastHeadCFrame = HeadCFrame
-    end
-
-    --Clamp the player to the ground.
-    if Settings:GetSetting("Movement.UseFallingSimulation") == false and (not self.Character.Humanoid.Sit or not self.Character:GetHumanoidSeatPart()) then
-        --TODO: Implement
     end
 end
 

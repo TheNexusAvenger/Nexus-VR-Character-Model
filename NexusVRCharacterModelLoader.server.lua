@@ -44,9 +44,6 @@ local Configuration = {
 
         --Default movement method.
         DefaultMovementMethod = "Teleport",
-
-        --If true, VR players will fall instead of instantly snapping to the next surface.
-        UseFallingSimulation = false,
     },
 }
 
