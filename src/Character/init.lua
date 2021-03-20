@@ -281,7 +281,7 @@ function Character:UpdateFromInputs(HeadControllerCFrame,LeftHandControllerCFram
     if self.Humanoid.Health <= 0 then
         return
     end
-    
+
     --Get the CFrames.
     local SeatPart = self:GetHumanoidSeatPart()
     local HeadCFrame = self.Head:GetHeadCFrame(HeadControllerCFrame)
@@ -290,20 +290,23 @@ function Character:UpdateFromInputs(HeadControllerCFrame,LeftHandControllerCFram
 	local JointCFrames = self.Torso:GetAppendageJointCFrames(LowerTorsoCFrame,UpperTorsoCFrame)
 	local LeftUpperArmCFrame,LeftLowerArmCFrame,LeftHandCFrame = self.LeftArm:GetAppendageCFrames(JointCFrames["LeftShoulder"],LeftHandControllerCFrame)
 	local RightUpperArmCFrame,RightLowerArmCFrame,RightHandCFrame = self.RightArm:GetAppendageCFrames(JointCFrames["RightShoulder"],RightHandControllerCFrame)
-    
+
     --Set the character CFrames.
     if not SeatPart then
         local LeftFoot,RightFoot = self.FootPlanter:GetFeetCFrames()
         local LeftUpperLegCFrame,LeftLowerLegCFrame,LeftFootCFrame = self.LeftLeg:GetAppendageCFrames(JointCFrames["LeftHip"],LeftFoot * CFrame.Angles(0,math.pi,0))
         local RightUpperLegCFrame,RightLowerLegCFrame,RightFootCFrame = self.RightLeg:GetAppendageCFrames(JointCFrames["RightHip"],RightFoot * CFrame.Angles(0,math.pi,0))
-        self:SetCFrameProperty(self.Parts.HumanoidRootPart,"CFrame",LowerTorsoCFrame * self.Attachments.LowerTorso.RootRigAttachment.CFrame * self.Attachments.HumanoidRootPart.RootRigAttachment.CFrame:Inverse())
+        local TargetHumanoidRootPartCFrame = LowerTorsoCFrame * self.Attachments.LowerTorso.RootRigAttachment.CFrame * self.Attachments.HumanoidRootPart.RootRigAttachment.CFrame:Inverse()
+        local ActualHumanoidRootPartCFrame = self.Parts.HumanoidRootPart.CFrame
+        local HumanoidRootPartHeightDifference = ActualHumanoidRootPartCFrame.Y - TargetHumanoidRootPartCFrame.Y
+        self:SetCFrameProperty(self.Parts.HumanoidRootPart,"CFrame",CFrame.new(0,HumanoidRootPartHeightDifference,0) * TargetHumanoidRootPartCFrame)
+        self:SetCFrameProperty(self.Motors.Root,"Transform",CFrame.new(0,-HumanoidRootPartHeightDifference,0))
         self:SetTransform("RightHip","RightHipRigAttachment","LowerTorso","RightUpperLeg",LowerTorsoCFrame,RightUpperLegCFrame)
         self:SetTransform("RightKnee","RightKneeRigAttachment","RightUpperLeg","RightLowerLeg",RightUpperLegCFrame,RightLowerLegCFrame)
         self:SetTransform("RightAnkle","RightAnkleRigAttachment","RightLowerLeg","RightFoot",RightLowerLegCFrame,RightFootCFrame)
         self:SetTransform("LeftHip","LeftHipRigAttachment","LowerTorso","LeftUpperLeg",LowerTorsoCFrame,LeftUpperLegCFrame)
         self:SetTransform("LeftKnee","LeftKneeRigAttachment","LeftUpperLeg","LeftLowerLeg",LeftUpperLegCFrame,LeftLowerLegCFrame)
         self:SetTransform("LeftAnkle","LeftAnkleRigAttachment","LeftLowerLeg","LeftFoot",LeftLowerLegCFrame,LeftFootCFrame)
-        self.Motors.Root.Transform = CFrame.new()
     else
         self:SetTransform("Root","RootRigAttachment","HumanoidRootPart","LowerTorso",self.Parts.HumanoidRootPart.CFrame,LowerTorsoCFrame)
         self.Motors.RightHip.Transform = CFrame.Angles(math.pi/2,0,math.rad(5))
