@@ -298,7 +298,7 @@ function Character:UpdateFromInputs(HeadControllerCFrame,LeftHandControllerCFram
         local RightUpperLegCFrame,RightLowerLegCFrame,RightFootCFrame = self.RightLeg:GetAppendageCFrames(JointCFrames["RightHip"],RightFoot * CFrame.Angles(0,math.pi,0))
         local TargetHumanoidRootPartCFrame = LowerTorsoCFrame * self.Attachments.LowerTorso.RootRigAttachment.CFrame * self.Attachments.HumanoidRootPart.RootRigAttachment.CFrame:Inverse()
         local ActualHumanoidRootPartCFrame = self.Parts.HumanoidRootPart.CFrame
-        local HumanoidRootPartHeightDifference = ActualHumanoidRootPartCFrame.Y - TargetHumanoidRootPartCFrame.Y
+        local HumanoidRootPartHeightDifference = math.max(ActualHumanoidRootPartCFrame.Y - TargetHumanoidRootPartCFrame.Y,0)
         self:SetCFrameProperty(self.Parts.HumanoidRootPart,"CFrame",CFrame.new(0,HumanoidRootPartHeightDifference,0) * TargetHumanoidRootPartCFrame)
         self:SetCFrameProperty(self.Motors.Root,"Transform",CFrame.new(0,-HumanoidRootPartHeightDifference,0))
         self:SetTransform("RightHip","RightHipRigAttachment","LowerTorso","RightUpperLeg",LowerTorsoCFrame,RightUpperLegCFrame)
