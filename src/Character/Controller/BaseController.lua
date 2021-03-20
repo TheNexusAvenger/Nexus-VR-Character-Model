@@ -13,6 +13,7 @@ local Players = game:GetService("Players")
 
 local NexusVRCharacterModel = require(script.Parent.Parent.Parent)
 local NexusObject = NexusVRCharacterModel:GetResource("NexusInstance.NexusObject")
+local CameraService = NexusVRCharacterModel:GetInstance("State.CameraService")
 local CharacterService = NexusVRCharacterModel:GetInstance("State.CharacterService")
 local Settings = NexusVRCharacterModel:GetInstance("State.Settings")
 local VRInputService = NexusVRCharacterModel:GetInstance("State.VRInputService")
@@ -39,38 +40,13 @@ end
 Enables the controller.
 --]]
 function BaseController:Enable()
-    self.VelocityY = 0
+    if not self.Connections then self.Connections = {} end
 
     --Update the character and return if the character is nil.
     self:UpdateCharacterReference()
     if not self.Character then
         return
     end
-
-    --Update the reference world CFrame.
-    local BaseReferenceCFrame = self.Character.Parts.Head.CFrame * VRInputService:GetVRInputs()[Enum.UserCFrame.Head]:Inverse()
-    self.ReferenceWorldCFrame = CFrame.new(BaseReferenceCFrame.Position) * CFrame.Angles(0,math.atan2(-BaseReferenceCFrame.LookVector.X,-BaseReferenceCFrame.LookVector.Z),0)
-
-    --Connect the character teleporting.
-    if not self.Connections then self.Connections = {} end
-    table.insert(self.Connections,self.Character.CharacterTeleported:Connect(function()
-        if self.IgnoreNextExternalTeleport then self.IgnoreNextExternalTeleport = nil return end
-        local HeadCFrame = self.Character.Parts.HumanoidRootPart.CFrame * self.Character.Attachments.HumanoidRootPart.RootRigAttachment.CFrame * self.Character.Attachments.LowerTorso.RootRigAttachment.CFrame:Inverse() * self.Character.Attachments.LowerTorso.WaistRigAttachment.CFrame * self.Character.Attachments.UpperTorso.WaistRigAttachment.CFrame * self.Character.Attachments.UpperTorso.NeckRigAttachment.CFrame * self.Character.Attachments.Head.NeckRigAttachment.CFrame
-        local HeadsetCFrame = self:ScaleInput(VRInputService:GetVRInputs()[Enum.UserCFrame.Head])
-        self.ReferenceWorldCFrame = HeadCFrame * CFrame.new(-HeadsetCFrame.X,0,-HeadsetCFrame.Z) * CFrame.Angles(0,-math.atan2(-HeadsetCFrame.LookVector.X,-HeadsetCFrame.LookVector.Z),0)
-    end))
-
-    --Connect the humanoid leaving the seat.
-    table.insert(self.Connections,self.Character.Humanoid:GetPropertyChangedSignal("SeatPart"):Connect(function()
-        if not self.Character:GetHumanoidSeatPart() then
-            self.SeatCooldown = tick() + SEAT_COOLDOWN
-        end
-    end))
-
-    --Connect the player recentering.
-    table.insert(self.Connections,VRInputService.Recentered:Connect(function()
-        self.SeatInitialHeadsetCFrame = nil
-    end))
 end
 
 --[[
@@ -78,8 +54,7 @@ Disables the controller.
 --]]
 function BaseController:Disable()
     self.Character = nil
-    self.ReferenceWorldCFrame = nil
-    self.VelocityY = nil
+    self.LastHeadCFrame = nil
     for _,Connection in pairs(self.Connections) do
         Connection:Disconnect()
     end
@@ -103,7 +78,7 @@ end
 --[[
 Updates the reference world CFrame.
 --]]
-function BaseController:UpdateReferenceWorldCFrame(OverrideRaycastStartPosition)
+function BaseController:UpdateCharacter()
     --Return if the character is nil.
     local CharacterChanged = self:UpdateCharacterReference()
     if not self.Character then
@@ -112,106 +87,52 @@ function BaseController:UpdateReferenceWorldCFrame(OverrideRaycastStartPosition)
     if CharacterChanged then
         self:Enable()
     end
+    self.Character.TweenComponents = false
 
-    --Raycast from the torso down.
-    local LowerTorsoCFrame = self.Character.Parts.LowerTorso.CFrame
-    local LeftHipPosition,RightHipPosition = (LowerTorsoCFrame * self.Character.Attachments.LowerTorso.LeftHipRigAttachment.CFrame).Position,(LowerTorsoCFrame * self.Character.Attachments.LowerTorso.RightHipRigAttachment.CFrame).Position
-    local RightHeight = (self.Character.Attachments.RightUpperLeg.RightHipRigAttachment.Position.Y - self.Character.Attachments.RightUpperLeg.RightKneeRigAttachment.Position.Y) + (self.Character.Attachments.RightLowerLeg.RightKneeRigAttachment.Position.Y - self.Character.Attachments.RightLowerLeg.RightAnkleRigAttachment.Position.Y) + (self.Character.Attachments.RightFoot.RightAnkleRigAttachment.Position.Y - self.Character.Attachments.RightFoot.RightFootAttachment.Position.Y)
-    local LeftHeight = (self.Character.Attachments.LeftUpperLeg.LeftHipRigAttachment.Position.Y - self.Character.Attachments.LeftUpperLeg.LeftKneeRigAttachment.Position.Y) + (self.Character.Attachments.LeftLowerLeg.LeftKneeRigAttachment.Position.Y - self.Character.Attachments.LeftLowerLeg.LeftAnkleRigAttachment.Position.Y) + (self.Character.Attachments.LeftFoot.LeftAnkleRigAttachment.Position.Y - self.Character.Attachments.LeftFoot.LeftFootAttachment.Position.Y)
-    local LeftHitPart,LeftHitPosition,RightHitPart,RightHitPosition
-    if OverrideRaycastStartPosition then
-        LeftHitPart,LeftHitPosition = FindCollidablePartOnRay(OverrideRaycastStartPosition,Vector3.new(0,-500,0),self.Character.CharacterModel,self.Character.Parts.LowerTorso)
-        RightHitPart,RightHitPosition = LeftHitPart,LeftHitPosition
-    else
-        LeftHitPart,LeftHitPosition = FindCollidablePartOnRay(LeftHipPosition,Vector3.new(0,-500,0),self.Character.CharacterModel,self.Character.Parts.LowerTorso)
-        RightHitPart,RightHitPosition = FindCollidablePartOnRay(RightHipPosition,Vector3.new(0,-500,0),self.Character.CharacterModel,self.Character.Parts.LowerTorso)
+    --Get the VR inputs.
+    local VRInputs = VRInputService:GetVRInputs()
+    local VRHeadCFrame = self:ScaleInput(VRInputs[Enum.UserCFrame.Head])
+    local VRLeftHandCFrame,VRRightHandCFrame = self:ScaleInput(VRInputs[Enum.UserCFrame.LeftHand]),self:ScaleInput(VRInputs[Enum.UserCFrame.RightHand])
+
+    --Offset the character by the change in the head input.
+    if self.LastHeadCFrame then
+        --Determine the XZ rotation of the seat, if any.
+        local SeatPart = self.Character:GetHumanoidSeatPart()
+        local SeatRotationXZ = CFrame.new()
+        if SeatPart then
+            local SeatCFrame = SeatPart.CFrame
+            SeatRotationXZ = (CFrame.new(SeatCFrame.Position) * CFrame.Angles(0,math.atan2(-SeatCFrame.LookVector.X,-SeatCFrame.LookVector.Z),0)):Inverse() * SeatCFrame
+        end
+
+        --Get the new CFrame of the eyes by offsetting the position and Y axis of the change in the VR head CFrame.
+        --X and Z are handled absolutely for when the player teleports.
+        local CharacterEyeCFrame = self.Character.Head.Head.CFrame * self.Character.Head:GetEyesOffset()
+        local InputDelta = self.LastHeadCFrame:Inverse() * VRHeadCFrame
+        local HeadRotationXZ = (CFrame.new(VRHeadCFrame.Position) * CFrame.Angles(0,math.atan2(-VRHeadCFrame.LookVector.X,-VRHeadCFrame.LookVector.Z),0)):Inverse() * VRHeadCFrame
+        local BaseEyesCFrameWithRotationOffset = CharacterEyeCFrame * CFrame.new(InputDelta.Position) * CFrame.Angles(0,math.atan2(-InputDelta.LookVector.X,-InputDelta.LookVector.Z),0)
+        local BaseEyesPosition = CFrame.new(BaseEyesCFrameWithRotationOffset.Position)
+        BaseEyesCFrameWithRotationOffset = SeatRotationXZ:Inverse() * BaseEyesCFrameWithRotationOffset
+        local NewCharacterEyeCFrame = BaseEyesPosition * SeatRotationXZ * CFrame.Angles(0,math.atan2(-BaseEyesCFrameWithRotationOffset.LookVector.X,-BaseEyesCFrameWithRotationOffset.LookVector.Z),0) * HeadRotationXZ
+
+        --Update the character.
+        local HeadToLeftHandCFrame = VRHeadCFrame:Inverse() * VRLeftHandCFrame
+        local HeadToRightHandCFrame = VRHeadCFrame:Inverse() * VRRightHandCFrame
+        self.Character:UpdateFromInputs(NewCharacterEyeCFrame,NewCharacterEyeCFrame * HeadToLeftHandCFrame,NewCharacterEyeCFrame * HeadToRightHandCFrame)
     end
-    local CharacterHeightWithoutLegs = (self.Character.Attachments.LowerTorso.WaistRigAttachment.Position.Y - self.Character.Attachments.LowerTorso.RightHipRigAttachment.Position.Y) + (self.Character.Attachments.UpperTorso.NeckRigAttachment.Position.Y - self.Character.Attachments.UpperTorso.WaistRigAttachment.Position.Y) - self.Character.Attachments.Head.NeckRigAttachment.Position.Y
-    local CharacterHeight = RightHeight + CharacterHeightWithoutLegs
+    self.LastHeadCFrame = VRHeadCFrame
 
-    local SeatPart = self.Character:GetHumanoidSeatPart()
-    if self.Character.Humanoid.Sit and SeatPart then
-        --Store the headset CFrame.
-        if not self.SeatInitialHeadsetCFrame then
-            self.SeatInitialHeadsetCFrame = VRInputService:GetVRInputs()[Enum.UserCFrame.Head]
-        end
+    --Update the camera.
+    --Done based on the HumanoidRootPart instead of the Head because of Motors not updating the same frame, leading to a delay.
+    local HumanoidRootPartCFrame = self.Character.Parts.HumanoidRootPart.CFrame
+    local LowerTorsoCFrame = HumanoidRootPartCFrame * self.Character.Attachments.HumanoidRootPart.RootRigAttachment.CFrame * self.Character.Motors.Root.Transform * self.Character.Attachments.LowerTorso.RootRigAttachment.CFrame:Inverse()
+    local UpperTorsoCFrame = LowerTorsoCFrame * self.Character.Attachments.LowerTorso.WaistRigAttachment.CFrame * self.Character.Motors.Waist.Transform * self.Character.Attachments.UpperTorso.WaistRigAttachment.CFrame:Inverse()
+    local HeadCFrame = UpperTorsoCFrame * self.Character.Attachments.UpperTorso.NeckRigAttachment.CFrame * self.Character.Motors.Neck.Transform * self.Character.Attachments.Head.NeckRigAttachment.CFrame:Inverse()
+    CameraService:UpdateCamera(HeadCFrame * self.Character.Head:GetEyesOffset())
 
-        --Set the offeset based on the seat.
-        local Seat = SeatPart
-        self.ReferenceWorldCFrame = Seat.CFrame * CFrame.new(0,(Seat.Size.Y/2) + (self.Character.Parts.LowerTorso.Size.Z/2) + CharacterHeightWithoutLegs,0) * CFrame.new(-self.SeatInitialHeadsetCFrame.Position) * CFrame.Angles(0,-math.atan2(-self.SeatInitialHeadsetCFrame.LookVector.X,-self.SeatInitialHeadsetCFrame.LookVector.Z),0)
-    else
-        --Unset the seat headset CFrame.
-        if self.SeatInitialHeadsetCFrame then
-            self.SeatInitialHeadsetCFrame = nil
-        end
-
-        --Determine the highest target position.
-        local HitPart,HitPosition,LegHeight,HipPosition
-        if LeftHitPosition.Y > RightHitPosition.Y then
-            HitPart,HitPosition,LegHeight,HipPosition = LeftHitPart,LeftHitPosition,LeftHeight,LeftHipPosition
-        else
-            HitPart,HitPosition,LegHeight,HipPosition = RightHitPart,RightHitPosition,RightHeight,RightHipPosition
-        end
-
-        --Update the reference world position.
-        local RayCastHeightDifference = HipPosition.Y - (HitPosition.Y + LegHeight)
-        local ClampOffset = (CharacterHeight + HitPosition.Y) - self.ReferenceWorldCFrame.Y
-        local AllowSit = false
-        if Settings:GetSetting("Movement.UseFallingSimulation") then
-            if RayCastHeightDifference > 0 then
-                --Simulate falling.
-                if self.LastPositionUpdate then
-                    --Calculate the delta time.
-                    local CurrentTime = tick()
-                    local DeltaTime = self.LastPositionUpdate - CurrentTime
-                    self.LastPositionUpdate = CurrentTime
-
-                    --Update height.
-                    local NewVelocity = self.VelocityY + (Workspace.Gravity * DeltaTime)
-                    if self.ReferenceWorldCFrame.Y + NewVelocity > HitPosition.Y + CharacterHeight then
-                        self.ReferenceWorldCFrame = CFrame.new(0,NewVelocity,0) * self.ReferenceWorldCFrame
-                        self.VelocityY = NewVelocity
-                    else
-                        self.ReferenceWorldCFrame = CFrame.new(0,ClampOffset,0) * self.ReferenceWorldCFrame
-                        self.VelocityY = 0
-                        AllowSit = true
-                    end
-                else
-                    --Set the last time for the next update.
-                    self.LastPositionUpdate = tick()
-                end
-            else
-                --Clamp the player to the hit part.
-                self.ReferenceWorldCFrame = CFrame.new(0,ClampOffset,0) * self.ReferenceWorldCFrame
-                self.VelocityY = 0
-                AllowSit = true
-            end
-        else
-            if HitPart then
-                --Clamp the player to the hit part.
-                self.ReferenceWorldCFrame = CFrame.new(0,ClampOffset,0) * self.ReferenceWorldCFrame
-                AllowSit = true
-            end
-        end
-
-        --Correct the rotation.
-        self.ReferenceWorldCFrame = CFrame.new(self.ReferenceWorldCFrame.Position) * CFrame.Angles(0,math.atan2(-self.ReferenceWorldCFrame.LookVector.X,-self.ReferenceWorldCFrame.LookVector.Z),0)
-
-        --Allow the player to sit if the hit part was a seat.
-        if AllowSit and HitPart and tick() >= (self.SeatCooldown or 0) and HitPart:IsA("Seat") and not HitPart.Occupant and not HitPart.Disabled then
-            self.Character.Parts.HumanoidRootPart.Anchored = false
-            HitPart:Sit(self.Character.Humanoid)
-        else
-            self.Character.Parts.HumanoidRootPart.Anchored = true
-        end
+    --Clamp the player to the ground.
+    if Settings:GetSetting("Movement.UseFallingSimulation") == false and (not self.Character.Humanoid.Sit or not self.Character:GetHumanoidSeatPart()) then
+        --TODO: Implement
     end
-end
-
---[[
-Updates the local character. Must also update the camara.
---]]
-function BaseController:UpdateCharacter()
-    error("Not implemented in base class")
 end
 
 

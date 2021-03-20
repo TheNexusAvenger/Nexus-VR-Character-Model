@@ -193,31 +193,6 @@ function Character:__new(CharacterModel)
     self.RightLeg.InvertBendDirection = true
     self.FootPlanter = FootPlanter:CreateSolver(CharacterModel:WaitForChild("LowerTorso"),self.ScaleValues.BodyHeightScale)
 
-    if Players.LocalPlayer and Players.LocalPlayer.Character == CharacterModel then
-        --Connect the HumanoidRootPart teleporting.
-        --Done as a while true loop because the Changed event does not fire for CFrames.
-        self.CharacterTeleported = NexusEventCreator:CreateEvent()
-        coroutine.wrap(function()
-            RunService:BindToRenderStep("NexusVRCharacterModelLocalTeleportCheck",Enum.RenderPriority.First.Value,function()
-                if self.LastHumanoidRootPartCFrame and self.LastHumanoidRootPartCFrame.Position ~= self.Parts.HumanoidRootPart.Position then
-                    self.CharacterTeleported:Fire()
-                end
-            end)
-        end)()
-
-        --Connect the character dieing.
-        self.Humanoid.Died:Connect(function()
-            RunService:UnbindFromRenderStep("NexusVRCharacterModelLocalTeleportCheck")
-            self.CharacterTeleported:Disconnect()
-        end)
-    end
-
-    --Connect anchoring and unanchoring the HumanoidRootPart.
-    self.Humanoid:GetPropertyChangedSignal("SeatPart"):Connect(function()
-        self.Parts.HumanoidRootPart.Anchored = (self:GetHumanoidSeatPart() == nil)
-    end)
-    self.Parts.HumanoidRootPart.Anchored = (self:GetHumanoidSeatPart() == nil)
-
     --Stop the character animations.
     local Animator = self.Humanoid:WaitForChild("Animator")
     if Players.LocalPlayer and Players.LocalPlayer.Character == CharacterModel then
@@ -301,15 +276,6 @@ function Character:SetTransform(MotorName,AttachmentName,StartLimbName,EndLimbNa
 end
 
 --[[
-Sets the CFrame of the HumanoidRootPart. Prevents invoking
-the CharacterTeleported event.
---]]
-function Character:SetHumanoidRootPartCFrame(NewCFrame)
-    self.LastHumanoidRootPartCFrame = NewCFrame
-    self:SetCFrameProperty(self.Parts.HumanoidRootPart,"CFrame",NewCFrame)
-end
-
---[[
 Updates the character from the inputs.
 --]]
 function Character:UpdateFromInputs(HeadControllerCFrame,LeftHandControllerCFrame,RightHandControllerCFrame)
@@ -332,7 +298,7 @@ function Character:UpdateFromInputs(HeadControllerCFrame,LeftHandControllerCFram
         local LeftFoot,RightFoot = self.FootPlanter:GetFeetCFrames()
         local LeftUpperLegCFrame,LeftLowerLegCFrame,LeftFootCFrame = self.LeftLeg:GetAppendageCFrames(JointCFrames["LeftHip"],LeftFoot * CFrame.Angles(0,math.pi,0))
         local RightUpperLegCFrame,RightLowerLegCFrame,RightFootCFrame = self.RightLeg:GetAppendageCFrames(JointCFrames["RightHip"],RightFoot * CFrame.Angles(0,math.pi,0))
-        self:SetHumanoidRootPartCFrame(LowerTorsoCFrame * self.Attachments.LowerTorso.RootRigAttachment.CFrame * self.Attachments.HumanoidRootPart.RootRigAttachment.CFrame:Inverse())
+        self:SetCFrameProperty(self.Parts.HumanoidRootPart,"CFrame",LowerTorsoCFrame * self.Attachments.LowerTorso.RootRigAttachment.CFrame * self.Attachments.HumanoidRootPart.RootRigAttachment.CFrame:Inverse())
         self:SetTransform("RightHip","RightHipRigAttachment","LowerTorso","RightUpperLeg",LowerTorsoCFrame,RightUpperLegCFrame)
         self:SetTransform("RightKnee","RightKneeRigAttachment","RightUpperLeg","RightLowerLeg",RightUpperLegCFrame,RightLowerLegCFrame)
         self:SetTransform("RightAnkle","RightAnkleRigAttachment","RightLowerLeg","RightFoot",RightLowerLegCFrame,RightFootCFrame)

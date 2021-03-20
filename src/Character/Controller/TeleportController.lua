@@ -10,10 +10,11 @@ local THUMBSTICK_MANUAL_ROTATION_ANGLE = math.rad(22.5)
 
 
 
+local Workspace = game:GetService("Workspace")
+
 local NexusVRCharacterModel = require(script.Parent.Parent.Parent)
 local BaseController = NexusVRCharacterModel:GetInstance("Character.Controller.BaseController")
 local ArcWithBeacon = NexusVRCharacterModel:GetInstance("Character.Controller.Visual.ArcWithBeacon")
-local CameraService = NexusVRCharacterModel:GetInstance("State.CameraService")
 local VRInputService = NexusVRCharacterModel:GetInstance("State.VRInputService")
 
 local TeleportController = BaseController:Extend()
@@ -59,15 +60,17 @@ end
 Updates the local character. Must also update the camara.
 --]]
 function TeleportController:UpdateCharacter()
-    --Update the world CFrame reference.
-    self:UpdateReferenceWorldCFrame()
+    --Update the base character.
+    self.super:UpdateCharacter()
     if not self.Character then
         return
     end
-    self.Character.TweenComponents = false
 
-    --Get the VR inputs and convert them to world space.
+    --Get the VR inputs.
     local VRInputs = VRInputService:GetVRInputs()
+    for _,InputEnum in pairs({Enum.UserCFrame.Head,Enum.UserCFrame.LeftHand,Enum.UserCFrame.RightHand}) do
+        VRInputs[InputEnum] = self:ScaleInput(VRInputs[InputEnum])
+    end
 
     --Update the arcs.
     for _,ArcData in pairs(self.ArcControls) do
@@ -113,16 +116,17 @@ function TeleportController:UpdateCharacter()
                 StateChange = "Released"
             end
         end
-        
+
         --Update from the state.
+        local HumanoidRootPart = self.Character.Parts.HumanoidRootPart
         if StateChange == "Extended" then
             if not self.Character.Humanoid.Sit then
                 if ArcData.DirectionState == "Left" then
                     --Turn the player to the left.
-                    self.ReferenceWorldCFrame = self.ReferenceWorldCFrame * CFrame.Angles(0,THUMBSTICK_MANUAL_ROTATION_ANGLE,0)
+                    HumanoidRootPart.CFrame = CFrame.new(HumanoidRootPart.Position) * CFrame.Angles(0,THUMBSTICK_MANUAL_ROTATION_ANGLE,0) * (CFrame.new(-HumanoidRootPart.Position) * HumanoidRootPart.CFrame)
                 elseif ArcData.DirectionState == "Right" then
                     --Turn the player to the right.
-                    self.ReferenceWorldCFrame = self.ReferenceWorldCFrame * CFrame.Angles(0,-THUMBSTICK_MANUAL_ROTATION_ANGLE,0)
+                    HumanoidRootPart.CFrame = CFrame.new(HumanoidRootPart.Position) * CFrame.Angles(0,-THUMBSTICK_MANUAL_ROTATION_ANGLE,0) * (CFrame.new(-HumanoidRootPart.Position) * HumanoidRootPart.CFrame)
                 end
             end
         elseif StateChange == "Released" then
@@ -139,18 +143,15 @@ function TeleportController:UpdateCharacter()
                         self.Character.Humanoid.Sit = false
                     end
 
-                    self.Character.Parts.HumanoidRootPart.Anchored = true
                     if ArcData.LastHitPart:IsA("Seat") and not ArcData.LastHitPart.Occupant and not ArcData.LastHitPart.Disabled then
                         --Sit in the seat.
                         --Waiting is done if the player was in an existing seat because the player no longer sitting will prevent sitting.
                         if WasSitting then
                             coroutine.wrap(function()
                                 while self.Character.Humanoid.SeatPart do wait() end
-                                self.Character.Parts.HumanoidRootPart.Anchored = false
                                 ArcData.LastHitPart:Sit(self.Character.Humanoid)
                             end)()
                         else
-                            self.Character.Parts.HumanoidRootPart.Anchored = true
                             ArcData.LastHitPart:Sit(self.Character.Humanoid)
                         end
                     else
@@ -159,12 +160,10 @@ function TeleportController:UpdateCharacter()
                         if WasSitting then
                             coroutine.wrap(function()
                                 while self.Character.Humanoid.SeatPart do wait() end
-                                self.ReferenceWorldCFrame = CFrame.new(ArcData.LastHitPosition) * CFrame.new(0,4.5 * self.Character.ScaleValues.BodyHeightScale.Value,0) * (CFrame.new(-self.ReferenceWorldCFrame.Position) * self.ReferenceWorldCFrame)
-                                self:UpdateReferenceWorldCFrame((CFrame.new(ArcData.LastHitPosition) * CFrame.new(0,2 * self.Character.ScaleValues.BodyHeightScale.Value,0)).Position)
+                                HumanoidRootPart.CFrame = CFrame.new(ArcData.LastHitPosition) * CFrame.new(0,4.5 * self.Character.ScaleValues.BodyHeightScale.Value,0) * (CFrame.new(-HumanoidRootPart.Position) * HumanoidRootPart.CFrame)
                             end)()
                         else
-                            self.ReferenceWorldCFrame = CFrame.new(ArcData.LastHitPosition) * CFrame.new(0,4.5 * self.Character.ScaleValues.BodyHeightScale.Value,0) * (CFrame.new(-self.ReferenceWorldCFrame.Position) * self.ReferenceWorldCFrame)
-                            self:UpdateReferenceWorldCFrame((CFrame.new(ArcData.LastHitPosition) * CFrame.new(0,2 * self.Character.ScaleValues.BodyHeightScale.Value,0)).Position)
+                            HumanoidRootPart.CFrame = CFrame.new(ArcData.LastHitPosition) * CFrame.new(0,4.5 * self.Character.ScaleValues.BodyHeightScale.Value,0) * (CFrame.new(-HumanoidRootPart.Position) * HumanoidRootPart.CFrame)
                         end
                     end
                 end
@@ -172,20 +171,9 @@ function TeleportController:UpdateCharacter()
         elseif StateChange == "Cancel" then
             ArcData.Arc:Hide()
         elseif ArcData.DirectionState == "Forward" and ArcData.RadiusState == "Extended" then
-            ArcData.LastHitPart,ArcData.LastHitPosition = ArcData.Arc:Update(self.ReferenceWorldCFrame * VRInputs[ArcData.UserCFrame])
+            ArcData.LastHitPart,ArcData.LastHitPosition = ArcData.Arc:Update(Workspace.CurrentCamera:GetRenderCFrame() * VRInputs[Enum.UserCFrame.Head]:Inverse() * VRInputs[ArcData.UserCFrame])
         end
     end
-
-    --Convert the VR inputs from local to world space.
-    for _,InputEnum in pairs({Enum.UserCFrame.Head,Enum.UserCFrame.LeftHand,Enum.UserCFrame.RightHand}) do
-        VRInputs[InputEnum] = self.ReferenceWorldCFrame * self:ScaleInput(VRInputs[InputEnum])
-    end
-
-    --Update the character.
-    self.Character:UpdateFromInputs(VRInputs[Enum.UserCFrame.Head],VRInputs[Enum.UserCFrame.LeftHand],VRInputs[Enum.UserCFrame.RightHand])
-
-    --Update the camera.
-    CameraService:UpdateCamera(VRInputs[Enum.UserCFrame.Head])
 end
 
 

@@ -24,11 +24,19 @@ function Head:__new(Head)
 end
 
 --[[
+Returns the offset from the head to
+the location of the eyes.
+--]]
+function Head:GetEyesOffset()
+    return self:GetAttachmentCFrame(self.Head,"FaceFrontAttachment") * CFrame.new(0,self.Head.Size.Y/4,0)
+end
+
+--[[
 Returns the head CFrame for the
 given VR input in global world space.
 --]]
 function Head:GetHeadCFrame(VRHeadCFrame)
-    return VRHeadCFrame * (self:GetAttachmentCFrame(self.Head,"FaceFrontAttachment") * CFrame.new(0,self.Head.Size.Y/4,0)):inverse()
+    return VRHeadCFrame * self:GetEyesOffset():Inverse()
 end
 
 --[[
