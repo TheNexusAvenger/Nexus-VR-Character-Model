@@ -131,12 +131,22 @@ function BaseController:UpdateCharacter()
     self.LastHeadCFrame = VRHeadCFrame
 
     --Update the camera.
-    --Done based on the HumanoidRootPart instead of the Head because of Motors not updating the same frame, leading to a delay.
-    local HumanoidRootPartCFrame = self.Character.Parts.HumanoidRootPart.CFrame
-    local LowerTorsoCFrame = HumanoidRootPartCFrame * self.Character.Attachments.HumanoidRootPart.RootRigAttachment.CFrame * self.Character.Motors.Root.Transform * self.Character.Attachments.LowerTorso.RootRigAttachment.CFrame:Inverse()
-    local UpperTorsoCFrame = LowerTorsoCFrame * self.Character.Attachments.LowerTorso.WaistRigAttachment.CFrame * self.Character.Motors.Waist.Transform * self.Character.Attachments.UpperTorso.WaistRigAttachment.CFrame:Inverse()
-    local HeadCFrame = UpperTorsoCFrame * self.Character.Attachments.UpperTorso.NeckRigAttachment.CFrame * self.Character.Motors.Neck.Transform * self.Character.Attachments.Head.NeckRigAttachment.CFrame:Inverse()
-    CameraService:UpdateCamera(HeadCFrame * self.Character.Head:GetEyesOffset())
+    if self.Character.Parts.HumanoidRootPart:IsDescendantOf(Workspace) then
+        --Update the camera based on the character.
+        --Done based on the HumanoidRootPart instead of the Head because of Motors not updating the same frame, leading to a delay.
+        local HumanoidRootPartCFrame = self.Character.Parts.HumanoidRootPart.CFrame
+        local LowerTorsoCFrame = HumanoidRootPartCFrame * self.Character.Attachments.HumanoidRootPart.RootRigAttachment.CFrame * self.Character.Motors.Root.Transform * self.Character.Attachments.LowerTorso.RootRigAttachment.CFrame:Inverse()
+        local UpperTorsoCFrame = LowerTorsoCFrame * self.Character.Attachments.LowerTorso.WaistRigAttachment.CFrame * self.Character.Motors.Waist.Transform * self.Character.Attachments.UpperTorso.WaistRigAttachment.CFrame:Inverse()
+        local HeadCFrame = UpperTorsoCFrame * self.Character.Attachments.UpperTorso.NeckRigAttachment.CFrame * self.Character.Motors.Neck.Transform * self.Character.Attachments.Head.NeckRigAttachment.CFrame:Inverse()
+        CameraService:UpdateCamera(HeadCFrame * self.Character.Head:GetEyesOffset())
+    else
+        --Update the camera based on the last CFrame if the motors can't update (not in Workspace).
+        local CurrentCameraCFrame = Workspace.CurrentCamera.CFrame
+        local LastHeadCFrame = self.LastHeadCFrame or CFrame.new()
+        local HeadCFrame = self:ScaleInput(VRInputService:GetVRInputs()[Enum.UserCFrame.Head])
+        Workspace.CurrentCamera.CFrame = CurrentCameraCFrame * LastHeadCFrame:Inverse() * HeadCFrame
+        self.LastHeadCFrame = HeadCFrame
+    end
 
     --Clamp the player to the ground.
     if Settings:GetSetting("Movement.UseFallingSimulation") == false and (not self.Character.Humanoid.Sit or not self.Character:GetHumanoidSeatPart()) then
