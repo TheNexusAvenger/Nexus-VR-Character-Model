@@ -92,7 +92,14 @@ function TeleportController:UpdateCharacter()
     end
 
     --Update the arcs.
+    local SeatPart = self.Character:GetHumanoidSeatPart()
     for _,ArcData in pairs(self.ArcControls) do
+        --Reset the left arc if the player is in a vehicle seat.
+        if ArcData.Thumbstick == Enum.KeyCode.Thumbstick1 and SeatPart and SeatPart:IsA("VehicleSeat") then
+            ArcData.Arc:Hide()
+            continue
+        end
+
         --Fetch the input and calculate the radius and angle.
         local InputPosition = VRInputService:GetThumbstickPosition(ArcData.Thumbstick)
         local InputRadius = ((InputPosition.X ^ 2) + (InputPosition.Y ^ 2)) ^ 0.5
@@ -156,13 +163,13 @@ function TeleportController:UpdateCharacter()
                     --Unsit the player.
                     --The teleport event is set to ignored since the CFrame will be different when the player gets out of the seat.
                     local WasSitting = false
-                    if self.Character:GetHumanoidSeatPart() then
+                    if SeatPart then
                         WasSitting = true
                         self.IgnoreNextExternalTeleport = true
                         self.Character.Humanoid.Sit = false
                     end
 
-                    if ArcData.LastHitPart:IsA("Seat") and not ArcData.LastHitPart.Occupant and not ArcData.LastHitPart.Disabled then
+                    if (ArcData.LastHitPart:IsA("Seat") or ArcData.LastHitPart:IsA("VehicleSeat")) and not ArcData.LastHitPart.Occupant and not ArcData.LastHitPart.Disabled then
                         --Sit in the seat.
                         --Waiting is done if the player was in an existing seat because the player no longer sitting will prevent sitting.
                         if WasSitting then
@@ -193,6 +200,9 @@ function TeleportController:UpdateCharacter()
             ArcData.LastHitPart,ArcData.LastHitPosition = ArcData.Arc:Update(Workspace.CurrentCamera:GetRenderCFrame() * VRInputs[Enum.UserCFrame.Head]:Inverse() * VRInputs[ArcData.UserCFrame])
         end
     end
+
+    --Update the vehicle seat.
+    self:UpdateVehicleSeat()
 
     --Jump the player.
     if self.SpaceDown or self.ButtonADown then

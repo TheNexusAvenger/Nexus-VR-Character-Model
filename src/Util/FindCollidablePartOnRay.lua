@@ -47,7 +47,7 @@ local function FindCollidablePartOnRay(StartPosition,Direction,IgnoreList,Collis
         return nil,StartPosition + Direction
     end
     local HitPart,EndPosition = RaycastResult.Instance,RaycastResult.Position
-    if HitPart and not HitPart.CanCollide and (not HitPart:IsA("Seat") or HitPart.Disabled) then
+    if HitPart and not HitPart.CanCollide and (not HitPart:IsA("Seat") or not HitPart:IsA("VehicleSeat") or HitPart.Disabled) then
         table.insert(NewIgnoreList,HitPart)
         return FindCollidablePartOnRay(EndPosition,Direction + (EndPosition - StartPosition),NewIgnoreList,CollisionGroup)
     end

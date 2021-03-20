@@ -4,8 +4,13 @@ TheNexusAvenger
 Base class for controlling the local character.
 --]]
 
+local THUMBSTICK_DEADZONE_RADIUS = 0.2
+
+
+
 local Workspace = game:GetService("Workspace")
 local Players = game:GetService("Players")
+local UserInputService = game:GetService("UserInputService")
 
 local NexusVRCharacterModel = require(script.Parent.Parent.Parent)
 local NexusObject = NexusVRCharacterModel:GetResource("NexusInstance.NexusObject")
@@ -145,6 +150,29 @@ function BaseController:UpdateCharacter()
         Workspace.CurrentCamera.CFrame = CurrentCameraCFrame * LastHeadCFrame:Inverse() * HeadCFrame
         self.LastHeadCFrame = HeadCFrame
     end
+end
+
+--[[
+Updates the values of the vehicle seat.
+--]]
+function BaseController:UpdateVehicleSeat()
+    --Get the vehicle seat.
+    local SeatPart = self.Character:GetHumanoidSeatPart()
+    if not SeatPart or not SeatPart:IsA("VehicleSeat") then
+        return
+    end
+
+    --Get the direction.
+    local ThumbstickPosition = VRInputService:GetThumbstickPosition(Enum.KeyCode.Thumbstick1)
+    if ThumbstickPosition.Magnitude < THUMBSTICK_DEADZONE_RADIUS then
+        ThumbstickPosition = Vector3.new(0,0,0)
+    end
+    local ForwardDirection = (UserInputService:IsKeyDown(Enum.KeyCode.W) and 1 or 0) + (UserInputService:IsKeyDown(Enum.KeyCode.S) and -1 or 0) + ThumbstickPosition.Y
+    local SideDirection = (UserInputService:IsKeyDown(Enum.KeyCode.D) and 1 or 0) + (UserInputService:IsKeyDown(Enum.KeyCode.A) and -1 or 0) + ThumbstickPosition.X
+
+    --Update the throttle and steering.
+    SeatPart.ThrottleFloat = ForwardDirection
+    SeatPart.SteerFloat = SideDirection
 end
 
 

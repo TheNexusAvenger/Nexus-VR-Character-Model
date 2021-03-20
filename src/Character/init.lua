@@ -242,7 +242,7 @@ function Character:GetHumanoidSeatPart()
     --Iterated through the connected parts and return if a seat exists.
     --While SeatPart may not be set, a SeatWeld does exist.
     for _,ConnectedPart in pairs(self.Parts.HumanoidRootPart:GetConnectedParts()) do
-        if ConnectedPart:IsA("Seat") then
+        if ConnectedPart:IsA("Seat") or ConnectedPart:IsA("VehicleSeat") then
             return ConnectedPart
         end
     end
