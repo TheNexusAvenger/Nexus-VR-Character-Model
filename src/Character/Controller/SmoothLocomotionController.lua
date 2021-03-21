@@ -4,6 +4,9 @@ TheNexusAvenger
 Local character controller using teleporting.
 --]]
 
+local THUMBSTICK_INPUT_START_RADIUS = 0.6
+local THUMBSTICK_INPUT_RELEASE_RADIUS = 0.4
+local THUMBSTICK_MANUAL_ROTATION_ANGLE = math.rad(22.5)
 local THUMBSTICK_DEADZONE_RADIUS = 0.2
 
 
@@ -72,6 +75,64 @@ function SmoothLocomotionController:UpdateCharacter()
 
     --Move the player in that direction.
     Players.LocalPlayer:Move(Vector3.new(SideDirection,0,-ForwardDirection),true)
+
+    --Snap rotate the character.
+    if not self.Character.Humanoid.Sit then
+        --Fetch the input and calculate the radius and angle of the right thumbstick.
+        local InputPosition = VRInputService:GetThumbstickPosition(Enum.KeyCode.Thumbstick2)
+        local InputRadius = ((InputPosition.X ^ 2) + (InputPosition.Y ^ 2)) ^ 0.5
+        local InputAngle = math.atan2(InputPosition.X,InputPosition.Y)
+
+        --Determine the state.
+        local DirectionState,RadiusState
+        if InputAngle >= math.rad(-135) and InputAngle <= math.rad(-45) then
+            DirectionState = "Left"
+        elseif InputAngle >= math.rad(-45) and InputAngle <= math.rad(45) then
+            DirectionState = "Forward"
+        elseif InputAngle >= math.rad(45) and InputAngle <= math.rad(135) then
+            DirectionState = "Right"
+        end
+        if InputRadius >= THUMBSTICK_INPUT_START_RADIUS then
+            RadiusState = "Extended"
+        elseif InputRadius <= THUMBSTICK_INPUT_RELEASE_RADIUS then
+            RadiusState = "Released"
+        else
+            RadiusState = "InBetween"
+        end
+
+        --Update the stored state.
+        local StateChange
+        if self.RightDirectionState == nil then
+            if RadiusState == "Released" then
+                self.RightDirectionState = DirectionState
+                self.RightRadiusState = RadiusState
+            end
+        else
+            if self.RightDirectionState ~= DirectionState then
+                self.RightDirectionState = nil
+                self.RightRadiusState = nil
+                StateChange = "Cancel"
+            elseif (self.RightRadiusState == nil or self.RightRadiusState == "Released") and RadiusState == "Extended" then
+                self.RightRadiusState = RadiusState
+                StateChange = "Extended"
+            elseif (RadiusState == nil or RadiusState == "Released") and self.RightRadiusState == "Extended" then
+                self.RightRadiusState = RadiusState
+                StateChange = "Released"
+            end
+        end
+
+        --Snap rotate the character.
+        local HumanoidRootPart = self.Character.Parts.HumanoidRootPart
+        if StateChange == "Extended" then
+            if self.RightDirectionState == "Left" then
+                --Turn the player to the left.
+                HumanoidRootPart.CFrame = CFrame.new(HumanoidRootPart.Position) * CFrame.Angles(0,THUMBSTICK_MANUAL_ROTATION_ANGLE,0) * (CFrame.new(-HumanoidRootPart.Position) * HumanoidRootPart.CFrame)
+            elseif self.RightDirectionState == "Right" then
+                --Turn the player to the right.
+                HumanoidRootPart.CFrame = CFrame.new(HumanoidRootPart.Position) * CFrame.Angles(0,-THUMBSTICK_MANUAL_ROTATION_ANGLE,0) * (CFrame.new(-HumanoidRootPart.Position) * HumanoidRootPart.CFrame)
+            end
+        end
+    end
 
     --Update the vehicle seat.
     self:UpdateVehicleSeat()
