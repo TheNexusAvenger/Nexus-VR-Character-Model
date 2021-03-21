@@ -150,7 +150,7 @@ function BaseController:UpdateCharacter()
     self.LastHeadCFrame = VRHeadCFrame
 
     --Update the camera.
-    if self.Character.Parts.HumanoidRootPart:IsDescendantOf(Workspace) then
+    if self.Character.Parts.HumanoidRootPart:IsDescendantOf(Workspace) and self.Character.Humanoid.Health > 0 then
         --Update the camera based on the character.
         --Done based on the HumanoidRootPart instead of the Head because of Motors not updating the same frame, leading to a delay.
         local HumanoidRootPartCFrame = self.Character.Parts.HumanoidRootPart.CFrame
