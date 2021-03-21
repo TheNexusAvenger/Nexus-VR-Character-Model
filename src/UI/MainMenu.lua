@@ -314,7 +314,9 @@ function MainMenu:SetUpOpening()
                 --Toggle the menu if the time threshold was reached.
                 if DeltaTimePercent >= 1 then
                     MenuToggleReached = true
-                    self:Toggle()
+                    coroutine.wrap(function()
+                        self:Toggle()
+                    end)()
                 end
             else
                 LeftAdorn.Visible = false
