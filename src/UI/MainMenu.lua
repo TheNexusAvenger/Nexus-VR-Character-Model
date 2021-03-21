@@ -16,6 +16,7 @@ local RunService = game:GetService("RunService")
 local TweenService = game:GetService("TweenService")
 
 local NexusVRCharacterModel = require(script.Parent.Parent)
+local Settings = NexusVRCharacterModel:GetInstance("State.Settings")
 local VRInputService = NexusVRCharacterModel:GetInstance("State.VRInputService")
 local ChatView = NexusVRCharacterModel:GetResource("UI.View.ChatView")
 local SettingsView = NexusVRCharacterModel:GetResource("UI.View.SettingsView")
@@ -276,19 +277,41 @@ function MainMenu:SetUpOpening()
     RightMenuToggleHintBackText.ImageRectOffset = Vector2.new(0,512)
     RightMenuToggleHintBackText.Parent = RightMenuToggleHintGuiBack
 
+    --Connect hiding the hints when the setting changes.
+    Settings:GetSettingsChangedSignal("Menu.MenuToggleGestureActive"):Connect(function()
+        --Determine if the gesture is active.
+        local MenuToggleGestureActive = Settings:GetSetting("Menu.MenuToggleGestureActive")
+        if MenuToggleGestureActive == nil then
+            MenuToggleGestureActive = true
+        end
+
+        --Update the visibility of the hints.
+        LeftMenuToggleHintGuiFront.Enabled = MenuToggleGestureActive
+        LeftMenuToggleHintGuiBack.Enabled = MenuToggleGestureActive
+        RightMenuToggleHintGuiFront.Enabled = MenuToggleGestureActive
+        RightMenuToggleHintGuiBack.Enabled = MenuToggleGestureActive
+    end)
+
+
     --Start checking for the controllers to be upside down.
     --Done in a coroutine since this function is non-yielding.
     local BothControllersUpStartTime
     local MenuToggleReached = false
     coroutine.wrap(function()
         while true do
+            --Determine if the gesture is active.
+            local MenuToggleGestureActive = Settings:GetSetting("Menu.MenuToggleGestureActive")
+            if MenuToggleGestureActive == nil then
+                MenuToggleGestureActive = true
+            end
+
             --Get the inputs and determine if the hands are both upside down and pointing forward.
             local VRInputs = VRInputService:GetVRInputs()
             local LeftHandCFrameRelative,RightHandCFrameRelative = VRInputs[Enum.UserCFrame.Head]:Inverse() * VRInputs[Enum.UserCFrame.LeftHand],VRInputs[Enum.UserCFrame.Head]:Inverse() * VRInputs[Enum.UserCFrame.RightHand]
             local LeftHandFacingUp,RightHandFacingUp = LeftHandCFrameRelative.UpVector.Y < 0,RightHandCFrameRelative.UpVector.Y < 0
             local LeftHandFacingForward,RightHandFacingForward = LeftHandCFrameRelative.LookVector.Z < 0,RightHandCFrameRelative.LookVector.Z < 0
             local LeftHandUp,RightHandUp = LeftHandFacingUp and LeftHandFacingForward,RightHandFacingUp and RightHandFacingForward
-            local BothHandsUp = LeftHandUp and RightHandUp
+            local BothHandsUp = MenuToggleGestureActive and LeftHandUp and RightHandUp
             if BothHandsUp then
                 BothControllersUpStartTime = BothControllersUpStartTime or tick()
             else

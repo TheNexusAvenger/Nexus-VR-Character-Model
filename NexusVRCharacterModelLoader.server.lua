@@ -40,10 +40,19 @@ local Configuration = {
         EnabledMovementMethods = {
             "Teleport",
             "SmoothLocomotion",
+            --"None", --Disables controls but still allows character updates. Intended for stationay games or momentarily freezing players.
         },
 
         --Default movement method.
         DefaultMovementMethod = "Teleport",
+    },
+    Menu = {
+        --If true, a gesture will be active for opening
+        --the Nexus VR Character Model menu. If you manually
+        --set this to false, you will lock players from being
+        --able to change camera options, movement options,
+        --recallibration, and chat.
+        MenuToggleGestureActive = true,
     },
 }
 

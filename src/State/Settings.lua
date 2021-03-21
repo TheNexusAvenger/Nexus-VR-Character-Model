@@ -31,7 +31,7 @@ Returns the value of a setting.
 --]]
 function Settings:GetSetting(Setting)
     --Return a cached entry if one exists.
-    if self.SettingsCache[Setting] then
+    if self.SettingsCache[Setting] ~= nil then
         return self.SettingsCache[Setting]
     end
 
