@@ -139,7 +139,8 @@ function BaseController:UpdateCharacter()
         local BaseEyesCFrameWithRotationOffset = CharacterEyeCFrame * CFrame.new(InputDelta.Position.X,0,InputDelta.Position.Z) * CFrame.Angles(0,math.atan2(-InputDelta.LookVector.X,-InputDelta.LookVector.Z),0)
         local BaseEyesPosition = CFrame.new(BaseEyesCFrameWithRotationOffset.Position)
         BaseEyesCFrameWithRotationOffset = SeatRotationXZ:Inverse() * BaseEyesCFrameWithRotationOffset
-        local NewCharacterEyeCFrame = CFrame.new(0,(VRHeadCFrame * EyesOffset:Inverse()).Y + EyesOffset.Y,0) * BaseEyesPosition * SeatRotationXZ * CFrame.Angles(0,math.atan2(-BaseEyesCFrameWithRotationOffset.LookVector.X,-BaseEyesCFrameWithRotationOffset.LookVector.Z),0) * HeadRotationXZ
+        local HeightOffset = CFrame.new((SeatRotationXZ * CFrame.new(0,(VRHeadCFrame * EyesOffset:Inverse()).Y + EyesOffset.Y,0)).Position)
+        local NewCharacterEyeCFrame = HeightOffset * BaseEyesPosition * SeatRotationXZ * CFrame.Angles(0,math.atan2(-BaseEyesCFrameWithRotationOffset.LookVector.X,-BaseEyesCFrameWithRotationOffset.LookVector.Z),0) * HeadRotationXZ
 
         --Update the character.
         local HeadToLeftHandCFrame = VRHeadCFrame:Inverse() * VRLeftHandCFrame
