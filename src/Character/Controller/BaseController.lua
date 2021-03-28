@@ -87,8 +87,11 @@ function BaseController:Enable()
     --Done in a loop to ensure changed controllers are disabled.
     coroutine.wrap(function()
         local ControlModule = require(Players.LocalPlayer:WaitForChild("PlayerScripts"):WaitForChild("PlayerModule"):WaitForChild("ControlModule"))
-        while self.Character do
-            ControlModule:Disable()
+        local Character = self.Character
+        while self.Character == Character and Character.Humanoid.Health > 0 do
+            if ControlModule.activeController and ControlModule.activeController.enabled then
+                ControlModule:Disable()
+            end
             wait()
         end
     end)()
@@ -130,7 +133,7 @@ function BaseController:UpdateCharacter()
         return
     end
     if CharacterChanged then
-        self:Enable()
+        self.object:Enable()
     end
     self.Character.TweenComponents = false
 
