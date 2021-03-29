@@ -70,8 +70,10 @@ function SmoothLocomotionController:UpdateCharacter()
     if ThumbstickPosition.Magnitude < THUMBSTICK_DEADZONE_RADIUS then
         ThumbstickPosition = Vector3.new(0,0,0)
     end
-    local ForwardDirection = (UserInputService:IsKeyDown(Enum.KeyCode.W) and 1 or 0) + (UserInputService:IsKeyDown(Enum.KeyCode.S) and -1 or 0) + ThumbstickPosition.Y
-    local SideDirection = (UserInputService:IsKeyDown(Enum.KeyCode.D) and 1 or 0) + (UserInputService:IsKeyDown(Enum.KeyCode.A) and -1 or 0) + ThumbstickPosition.X
+    local WDown,SDown = not UserInputService:GetFocusedTextBox() and UserInputService:IsKeyDown(Enum.KeyCode.W),not UserInputService:GetFocusedTextBox() and UserInputService:IsKeyDown(Enum.KeyCode.S)
+    local DDown,ADown = not UserInputService:GetFocusedTextBox() and UserInputService:IsKeyDown(Enum.KeyCode.D),not UserInputService:GetFocusedTextBox() and UserInputService:IsKeyDown(Enum.KeyCode.A)
+    local ForwardDirection = (WDown and 1 or 0) + (SDown and -1 or 0) + ThumbstickPosition.Y
+    local SideDirection = (DDown and 1 or 0) + (ADown and -1 or 0) + ThumbstickPosition.X
 
     --Move the player in that direction.
     Players.LocalPlayer:Move(Vector3.new(SideDirection,0,-ForwardDirection),true)
@@ -138,7 +140,7 @@ function SmoothLocomotionController:UpdateCharacter()
     self:UpdateVehicleSeat()
 
     --Jump the player.
-    if UserInputService:IsKeyDown(Enum.KeyCode.Space) or self.ButtonADown then
+    if (not UserInputService:GetFocusedTextBox() and UserInputService:IsKeyDown(Enum.KeyCode.Space)) or self.ButtonADown then
         self.Character.Humanoid.Jump = true
     end
 end
