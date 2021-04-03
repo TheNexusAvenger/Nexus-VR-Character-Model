@@ -74,9 +74,8 @@ function BaseController:Enable()
     --Connect the character entering a seat.
     table.insert(self.Connections,self.Character.Humanoid:GetPropertyChangedSignal("SeatPart"):Connect(function()
         local SeatPart = self.Character:GetHumanoidSeatPart()
-        if SeatPart and self.LastHeadCFrame then
-            --Set the next angle Y to use for the character during the next update.
-            self.OverrideBaseAngleY = GetAngleToGlobalY(SeatPart.CFrame)
+        if SeatPart then
+            VRInputService:Recenter()
         end
     end))
 
@@ -141,10 +140,13 @@ function BaseController:UpdateCharacter()
     local VRInputs = VRInputService:GetVRInputs()
     local VRHeadCFrame = self:ScaleInput(VRInputs[Enum.UserCFrame.Head])
     local VRLeftHandCFrame,VRRightHandCFrame = self:ScaleInput(VRInputs[Enum.UserCFrame.LeftHand]),self:ScaleInput(VRInputs[Enum.UserCFrame.RightHand])
+    local HeadToLeftHandCFrame = VRHeadCFrame:Inverse() * VRLeftHandCFrame
+    local HeadToRightHandCFrame = VRHeadCFrame:Inverse() * VRRightHandCFrame
 
-    --Offset the character by the change in the head input.
+    --Update the character.
     local SeatPart = self.Character:GetHumanoidSeatPart()
     if not SeatPart then
+        --Offset the character by the change in the head input.
         if self.LastHeadCFrame then
             --Get the eye CFrame of the current character, except the Y offset from the HumanoidRootPart.
             --The Y position will be added absolutely since doing it relatively will result in floating or short characters.
@@ -167,21 +169,16 @@ function BaseController:UpdateCharacter()
 
             --Offset the character eyes for the current input.
             local CurrentCharacterAngleY = GetAngleToGlobalY(CharacterEyeCFrame)
-            if self.OverrideBaseAngleY then
-                CurrentCharacterAngleY = self.OverrideBaseAngleY
-                self.OverrideBaseAngleY = nil
-            end
             local RotationY = CFrame.Angles(0,CurrentCharacterAngleY + (HeadAngleY - LastHeadAngleY),0)
             local NewCharacterEyePosition = (HeightOffset *  CFrame.new((RotationY * CFrame.new(InputDelta.X,0,InputDelta.Z)).Position) * CharacterEyeCFrame).Position
             local NewCharacterEyeCFrame = CFrame.new(NewCharacterEyePosition) * RotationY * HeadRotationXZ
 
             --Update the character.
-            local HeadToLeftHandCFrame = VRHeadCFrame:Inverse() * VRLeftHandCFrame
-            local HeadToRightHandCFrame = VRHeadCFrame:Inverse() * VRRightHandCFrame
             self.Character:UpdateFromInputs(NewCharacterEyeCFrame,NewCharacterEyeCFrame * HeadToLeftHandCFrame,NewCharacterEyeCFrame * HeadToRightHandCFrame)
         end
     else
-        --TODO: Special case seats; can rely on absolute position/rotation instead of relative
+        --Set the absolute positions of the character.
+        self.Character:UpdateFromInputsSeated(VRHeadCFrame,VRHeadCFrame * HeadToLeftHandCFrame,VRHeadCFrame * HeadToRightHandCFrame)
     end
     self.LastHeadCFrame = VRHeadCFrame
 
