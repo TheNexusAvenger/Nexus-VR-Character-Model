@@ -276,9 +276,7 @@ end
 --[[
 Updates the character from the inputs.
 --]]
-function Character:UpdateFromInputs(HeadControllerCFrame,LeftHandControllerCFrame,RightHandControllerCFrame,HumanoidRootPartHeightOffset) --TODO: Remove extra parameter when seat rotation is properly used.
-    HumanoidRootPartHeightOffset = HumanoidRootPartHeightOffset or CFrame.new()
-
+function Character:UpdateFromInputs(HeadControllerCFrame,LeftHandControllerCFrame,RightHandControllerCFrame)
     --Return if the humanoid is dead.
     if self.Humanoid.Health <= 0 then
         return
@@ -306,7 +304,7 @@ function Character:UpdateFromInputs(HeadControllerCFrame,LeftHandControllerCFram
         local HumanoidRootPartHeightDifference = ActualHumanoidRootPartCFrame.Y - TargetHumanoidRootPartCFrame.Y
         local NewTargetHumanoidRootPartCFrame = CFrame.new(TargetHumanoidRootPartCFrame.Position)
         self:SetCFrameProperty(self.Parts.HumanoidRootPart,"CFrame",CFrame.new(0,HumanoidRootPartHeightDifference,0) * NewTargetHumanoidRootPartCFrame)
-        self:SetCFrameProperty(self.Motors.Root,"Transform",HumanoidRootPartHeightOffset * CFrame.new(0,-HumanoidRootPartHeightDifference,0) * (NewTargetHumanoidRootPartCFrame * self.Attachments.HumanoidRootPart.RootRigAttachment.CFrame):Inverse() * LowerTorsoCFrame * self.Attachments.LowerTorso.RootRigAttachment.CFrame)
+        self:SetCFrameProperty(self.Motors.Root,"Transform",CFrame.new(0,-HumanoidRootPartHeightDifference,0) * (NewTargetHumanoidRootPartCFrame * self.Attachments.HumanoidRootPart.RootRigAttachment.CFrame):Inverse() * LowerTorsoCFrame * self.Attachments.LowerTorso.RootRigAttachment.CFrame)
         self:SetTransform("RightHip","RightHipRigAttachment","LowerTorso","RightUpperLeg",LowerTorsoCFrame,RightUpperLegCFrame)
         self:SetTransform("RightKnee","RightKneeRigAttachment","RightUpperLeg","RightLowerLeg",RightUpperLegCFrame,RightLowerLegCFrame)
         self:SetTransform("RightAnkle","RightAnkleRigAttachment","RightLowerLeg","RightFoot",RightLowerLegCFrame,RightFootCFrame)
@@ -314,7 +312,7 @@ function Character:UpdateFromInputs(HeadControllerCFrame,LeftHandControllerCFram
         self:SetTransform("LeftKnee","LeftKneeRigAttachment","LeftUpperLeg","LeftLowerLeg",LeftUpperLegCFrame,LeftLowerLegCFrame)
         self:SetTransform("LeftAnkle","LeftAnkleRigAttachment","LeftLowerLeg","LeftFoot",LeftLowerLegCFrame,LeftFootCFrame)
     else
-        self:SetTransform("Root","RootRigAttachment","HumanoidRootPart","LowerTorso",HumanoidRootPartHeightOffset * self.Parts.HumanoidRootPart.CFrame,LowerTorsoCFrame)
+        self:SetTransform("Root","RootRigAttachment","HumanoidRootPart","LowerTorso",self.Parts.HumanoidRootPart.CFrame,LowerTorsoCFrame)
         self.Motors.RightHip.Transform = CFrame.Angles(math.pi/2,0,math.rad(5))
         self.Motors.LeftHip.Transform = CFrame.Angles(math.pi/2,0,math.rad(-5))
         self.Motors.RightKnee.Transform = CFrame.Angles(math.rad(-10),0,0)
@@ -333,7 +331,7 @@ function Character:UpdateFromInputs(HeadControllerCFrame,LeftHandControllerCFram
 
     --Replicate the changes to the server.
     if Players.LocalPlayer and Players.LocalPlayer.Character == self.CharacterModel then
-        self.ReplicationCFrames = {HumanoidRootPartHeightOffset * HeadControllerCFrame,LeftHandControllerCFrame,RightHandControllerCFrame}
+        self.ReplicationCFrames = {HeadControllerCFrame,LeftHandControllerCFrame,RightHandControllerCFrame}
     end
 end
 
