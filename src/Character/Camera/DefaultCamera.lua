@@ -37,6 +37,9 @@ function DefaultCamera:Enable()
                     Part.LocalTransparencyModifier = 1
                 elseif not Part.Parent:IsA("Tool") then
                     Part.LocalTransparencyModifier = Transparency
+                    table.insert(self.TransparencyEvents,Part:GetPropertyChangedSignal("LocalTransparencyModifier"):Connect(function()
+                        Part.LocalTransparencyModifier = Transparency
+                    end))
                 end
             end
         end))
@@ -46,6 +49,9 @@ function DefaultCamera:Enable()
                     Part.LocalTransparencyModifier = 1
                 elseif not Part.Parent:IsA("Tool") then
                     Part.LocalTransparencyModifier = Transparency
+                    table.insert(self.TransparencyEvents,Part:GetPropertyChangedSignal("LocalTransparencyModifier"):Connect(function()
+                        Part.LocalTransparencyModifier = Transparency
+                    end))
                 end
             end
         end
