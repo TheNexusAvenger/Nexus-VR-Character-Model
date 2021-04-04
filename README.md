@@ -20,7 +20,6 @@ games.
 * R6 characters are not supported. R15 is recommended
   for new projects since R15 gets better support and
   has more functionality.
-* Collisions may not act as expected.
 * Roblox's Core GUIs are unable to be modified.
 * The foot-planting code is old and could use a rewrite.
 * The menu gesture is not obvious. Most players may
