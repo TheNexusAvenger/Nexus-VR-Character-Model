@@ -43,7 +43,7 @@ end
 Returns the neck CFrame for the
 given VR input in global world space.
 --]]
-function Head:GetNeckCFrame(VRHeadCFrame,OverrideSeatCFrame)
+function Head:GetNeckCFrame(VRHeadCFrame)
     --Get the base neck CFrame and angles.
     local BaseNeckCFrame = self:GetHeadCFrame(VRHeadCFrame) * self:GetAttachmentCFrame(self.Head,"NeckRigAttachment")
     local BaseNeckLookVector = BaseNeckCFrame.LookVector
@@ -82,9 +82,6 @@ function Head:GetNeckCFrame(VRHeadCFrame,OverrideSeatCFrame)
     self.LastNeckRotationGlobal = BaseNeckLook
     
     --Return the new neck CFrame.
-    if OverrideSeatCFrame then
-        return CFrame.new(BaseNeckCFrame.Position) * CFrame.new(-OverrideSeatCFrame.Position) * OverrideSeatCFrame * CFrame.Angles(NewNeckTilt,0,0)
-    end
     return CFrame.new(BaseNeckCFrame.Position) * CFrame.Angles(0,BaseNeckLook,0) * CFrame.Angles(NewNeckTilt,0,0)
 end
 

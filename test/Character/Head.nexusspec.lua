@@ -77,12 +77,6 @@ NexusUnitTesting:RegisterUnitTest(HeadTest.new("GetNeckCFrame"):SetRun(function(
     self:AssertClose(self.CuT:GetNeckCFrame(CFrame.Angles(0,math.rad(-50),0) * CFrame.new(0,2,1)),CFrame.Angles(0,math.rad(-50),0) * CFrame.new(0,1.25,1.5) * CFrame.Angles(0,math.rad(35),0),0.01)
     self:AssertClose(self.CuT:GetNeckCFrame(CFrame.Angles(0,math.rad(-60),0) * CFrame.new(0,2,1)),CFrame.Angles(0,math.rad(-60),0) * CFrame.new(0,1.25,1.5) * CFrame.Angles(0,math.rad(35),0),0.01)
     self:AssertClose(self.CuT:GetNeckCFrame(CFrame.Angles(0,math.rad(-50),0) * CFrame.new(0,2,1)),CFrame.Angles(0,math.rad(-50),0) * CFrame.new(0,1.25,1.5) * CFrame.Angles(0,math.rad(25),0),0.01)
-
-    --Test overriding the rotation angle.
-    self:AssertClose(self.CuT:GetNeckCFrame(CFrame.Angles(0,math.rad(-50),0) * CFrame.new(0,2,1),CFrame.Angles(0,math.rad(20),0)),CFrame.Angles(0,math.rad(-50),0) * CFrame.new(0,1.25,1.5) * CFrame.Angles(0,math.rad(70),0),0.01)
-    self:AssertClose(self.CuT:GetNeckCFrame(CFrame.new(0,2,1),CFrame.Angles(0,math.rad(20),0)),CFrame.new(0,1.25,1.5) * CFrame.Angles(0,math.rad(20),0),0.01)
-    self:AssertClose(self.CuT:GetNeckCFrame(CFrame.new(0,2,1),CFrame.Angles(math.rad(160),0,0)),CFrame.new(0,1.25,1.5) * CFrame.Angles(math.rad(160),0,0),0.01)
-    self:AssertClose(self.CuT:GetNeckCFrame(CFrame.new(0,2,1),CFrame.Angles(math.rad(-160),0,0)),CFrame.new(0,1.25,1.5) * CFrame.Angles(math.rad(-160),0,0),0.01)
 end))
 
 
