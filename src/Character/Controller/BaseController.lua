@@ -30,14 +30,6 @@ local function GetAngleToGlobalY(CF)
     return math.atan2(-CF.LookVector.X,-CF.LookVector.Z)
 end
 
---[[
-Returns the Y-axis angle of the given CFrame relative
-to another CFrame.
---]]
-local function GetAngleToRelativeY(CF,Relative)
-    return GetAngleToGlobalY(Relative:Inverse() * CF)
-end
-
 
 
 --[[
