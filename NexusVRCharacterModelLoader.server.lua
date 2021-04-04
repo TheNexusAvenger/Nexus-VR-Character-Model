@@ -18,6 +18,7 @@ local Configuration = {
 
         --Maximum angle the neck can turn before the torso turns.
         MaxNeckRotation = math.rad(35),
+        MaxNeckSeatedRotation = math.rad(60),
 
         --Maximum angle the neck can tilt before the torso tilts.
         MaxNeckTilt = math.rad(60),

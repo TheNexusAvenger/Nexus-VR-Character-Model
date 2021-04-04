@@ -77,6 +77,17 @@ NexusUnitTesting:RegisterUnitTest(HeadTest.new("GetNeckCFrame"):SetRun(function(
     self:AssertClose(self.CuT:GetNeckCFrame(CFrame.Angles(0,math.rad(-50),0) * CFrame.new(0,2,1)),CFrame.Angles(0,math.rad(-50),0) * CFrame.new(0,1.25,1.5) * CFrame.Angles(0,math.rad(35),0),0.01)
     self:AssertClose(self.CuT:GetNeckCFrame(CFrame.Angles(0,math.rad(-60),0) * CFrame.new(0,2,1)),CFrame.Angles(0,math.rad(-60),0) * CFrame.new(0,1.25,1.5) * CFrame.Angles(0,math.rad(35),0),0.01)
     self:AssertClose(self.CuT:GetNeckCFrame(CFrame.Angles(0,math.rad(-50),0) * CFrame.new(0,2,1)),CFrame.Angles(0,math.rad(-50),0) * CFrame.new(0,1.25,1.5) * CFrame.Angles(0,math.rad(25),0),0.01)
+
+    --Test the neck CFrame with a target angle.
+    self:AssertClose(self.CuT:GetNeckCFrame(CFrame.new(0,2,1),0),CFrame.new(0,1.25,1.5),0.01)
+    self:AssertClose(self.CuT:GetNeckCFrame(CFrame.Angles(0,math.rad(10),0) * CFrame.new(0,2,1),0),CFrame.Angles(0,math.rad(10),0) * CFrame.new(0,1.25,1.5) * CFrame.Angles(0,math.rad(-10),0),0.01)
+    self:AssertClose(self.CuT:GetNeckCFrame(CFrame.Angles(0,math.rad(40),0) * CFrame.new(0,2,1),0),CFrame.Angles(0,math.rad(40),0) * CFrame.new(0,1.25,1.5) * CFrame.Angles(0,math.rad(-35),0),0.01)
+    self:AssertClose(self.CuT:GetNeckCFrame(CFrame.Angles(0,math.rad(-10),0) * CFrame.new(0,2,1),0),CFrame.Angles(0,math.rad(-10),0) * CFrame.new(0,1.25,1.5) * CFrame.Angles(0,math.rad(10),0),0.01)
+    self:AssertClose(self.CuT:GetNeckCFrame(CFrame.Angles(0,math.rad(-40),0) * CFrame.new(0,2,1),0),CFrame.Angles(0,math.rad(-40),0) * CFrame.new(0,1.25,1.5) * CFrame.Angles(0,math.rad(35),0),0.01)
+    self:AssertClose(self.CuT:GetNeckCFrame(CFrame.new(0,2,1),0),CFrame.new(0,1.25,1.5),0.01)
+    self:AssertClose(self.CuT:GetNeckCFrame(CFrame.Angles(0,math.pi,0) * CFrame.new(0,2,1),math.pi),CFrame.Angles(0,math.rad(180),0) * CFrame.new(0,1.25,1.5) * CFrame.Angles(0,math.rad(-180),0),0.01)
+    self:AssertClose(self.CuT:GetNeckCFrame(CFrame.Angles(0,math.pi + math.rad(10),0) * CFrame.new(0,2,1),math.pi),CFrame.Angles(0,math.rad(190),0) * CFrame.new(0,1.25,1.5) * CFrame.Angles(0,math.rad(-190),0),0.01)
+    self:AssertClose(self.CuT:GetNeckCFrame(CFrame.Angles(0,math.pi + math.rad(40),0) * CFrame.new(0,2,1),math.pi),CFrame.Angles(0,math.rad(220),0) * CFrame.new(0,1.25,1.5) * CFrame.Angles(0,math.rad(-215),0),0.01)
 end))
 
 
