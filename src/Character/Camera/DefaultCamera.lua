@@ -96,8 +96,9 @@ Updates the camera.
 function DefaultCamera:UpdateCamera(HeadsetCFrameWorld)
     Workspace.CurrentCamera.CameraType = "Scriptable"
     if USE_HEAD_LOCKED_WORKAROUND then
+        local HeadCFrame = VRService:GetUserCFrame(Enum.UserCFrame.Head)
         Workspace.CurrentCamera.HeadLocked = true
-        Workspace.CurrentCamera.CFrame = HeadsetCFrameWorld * VRService:GetUserCFrame(Enum.UserCFrame.Head):Inverse()
+        Workspace.CurrentCamera.CFrame = HeadsetCFrameWorld * (CFrame.new(HeadCFrame.Position * (Workspace.CurrentCamera.HeadScale - 1)) * HeadCFrame):Inverse()
     else
         Workspace.CurrentCamera.HeadLocked = false
         Workspace.CurrentCamera.CFrame = HeadsetCFrameWorld

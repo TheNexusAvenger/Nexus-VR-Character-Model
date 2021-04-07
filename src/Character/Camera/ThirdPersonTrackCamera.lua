@@ -70,8 +70,9 @@ function ThirdPersonTrackCamera:UpdateCamera(HeadsetCFrameWorld)
     Workspace.CurrentCamera.CameraType = "Scriptable"
     Workspace.CurrentCamera.HeadLocked = false
     if USE_HEAD_LOCKED_WORKAROUND then
+        local HeadCFrame = VRService:GetUserCFrame(Enum.UserCFrame.Head)
         Workspace.CurrentCamera.HeadLocked = true
-        Workspace.CurrentCamera.CFrame = TargetCFrame * VRService:GetUserCFrame(Enum.UserCFrame.Head):Inverse()
+        Workspace.CurrentCamera.CFrame = TargetCFrame * (CFrame.new(HeadCFrame.Position * (Workspace.CurrentCamera.HeadScale - 1)) * HeadCFrame):Inverse()
     else
         Workspace.CurrentCamera.HeadLocked = false
         Workspace.CurrentCamera.CFrame = TargetCFrame
