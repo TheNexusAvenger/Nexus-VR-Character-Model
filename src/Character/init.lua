@@ -192,18 +192,35 @@ function Character:__new(CharacterModel)
     self.FootPlanter = FootPlanter:CreateSolver(CharacterModel:WaitForChild("LowerTorso"),self.ScaleValues.BodyHeightScale)
 
     --Stop the character animations.
-    local Animator = self.Humanoid:WaitForChild("Animator")
-    if Players.LocalPlayer and Players.LocalPlayer.Character == CharacterModel then
-        CharacterModel:WaitForChild("Animate"):Destroy()
-        for _,Track in pairs(Animator:GetPlayingAnimationTracks()) do
-            Track:Stop()
+    local Animator = self.Humanoid:FindFirstChild("Animator")
+    if Animator then
+        if Players.LocalPlayer and Players.LocalPlayer.Character == CharacterModel then
+            CharacterModel:WaitForChild("Animate"):Destroy()
+            for _,Track in pairs(Animator:GetPlayingAnimationTracks()) do
+                Track:Stop()
+            end
+            Animator.AnimationPlayed:Connect(function(Track)
+                Track:Stop()
+            end)
+        else
+            Animator:Destroy()
         end
-        Animator.AnimationPlayed:Connect(function(Track)
-            Track:Stop()
-        end)
-    else
-        Animator:Destroy()
     end
+    self.Humanoid.ChildAdded:Connect(function(NewAnimator)
+        if NewAnimator:IsA("Animator") then
+            if Players.LocalPlayer and Players.LocalPlayer.Character == CharacterModel then
+                CharacterModel:WaitForChild("Animate"):Destroy()
+                for _,Track in pairs(NewAnimator:GetPlayingAnimationTracks()) do
+                    Track:Stop()
+                end
+                NewAnimator.AnimationPlayed:Connect(function(Track)
+                    Track:Stop()
+                end)
+            else
+                NewAnimator:Destroy()
+            end
+        end
+    end)
 
     --Set up replication at 30hz.
     if Players.LocalPlayer and Players.LocalPlayer.Character == CharacterModel then
