@@ -10,6 +10,7 @@ local THUMBSTICK_DEADZONE_RADIUS = 0.2
 
 local Workspace = game:GetService("Workspace")
 local Players = game:GetService("Players")
+local ContextActionService = game:GetService("ContextActionService")
 local UserInputService = game:GetService("UserInputService")
 
 local NexusVRCharacterModel = require(script.Parent.Parent.Parent)
@@ -82,6 +83,7 @@ function BaseController:Enable()
         while self.Character == Character and Character.Humanoid.Health > 0 do
             if ControlModule.activeController and ControlModule.activeController.enabled then
                 ControlModule:Disable()
+                ContextActionService:BindActivate(Enum.UserInputType.Gamepad1,Enum.KeyCode.ButtonR2)
             end
             wait()
         end
