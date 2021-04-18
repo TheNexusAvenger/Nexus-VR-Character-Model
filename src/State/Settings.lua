@@ -44,7 +44,10 @@ function Settings:GetSetting(Setting)
     end
 
     --Return the value.
-    local Value = Overrides[SplitSettingNames[#SplitSettingNames]] or Defaults[SplitSettingNames[#SplitSettingNames]]
+    local Value = Overrides[SplitSettingNames[#SplitSettingNames]]
+    if Value == nil then
+        Value = Defaults[SplitSettingNames[#SplitSettingNames]]
+    end
     self.SettingsCache[Setting] = Value
     return Value
 end
