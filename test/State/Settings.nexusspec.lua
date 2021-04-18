@@ -83,6 +83,64 @@ NexusUnitTesting:RegisterUnitTest(SettingsTest.new("SetSetting"):SetRun(function
 end))
 
 --[[
+Tests the SetDefaults method.
+--]]
+NexusUnitTesting:RegisterUnitTest(SettingsTest.new("SetDefaults"):SetRun(function(self)
+    --Connect the events.
+    local ConnectionsFired = 0
+    self.CuT:GetSettingsChangedSignal("TestValue1.TestValue2"):Connect(function()
+        ConnectionsFired = ConnectionsFired + 1
+    end)
+    self.CuT:GetSettingsChangedSignal("TestValue3.TestValue4.TestValue5"):Connect(function()
+        ConnectionsFired = ConnectionsFired + 1
+    end)
+    self.CuT:GetSettingsChangedSignal("TestValue3.TestValue4.TestValue7"):Connect(function()
+        ConnectionsFired = ConnectionsFired + 1
+    end)
+
+    --Set the defaults and assert the changed values are correct.
+    self.CuT.Overrides = {}
+    self.CuT:SetDefaults({
+        TestValue1 = {
+            TestValue2 = "Test7",
+        },
+        TestValue3 = {
+            TestValue4 = {
+                TestValue5 = "Test8",
+                TestValue7 = "Test9",
+                TestValue8 = false,
+            },
+        },
+    })
+    self:AssertEquals(ConnectionsFired,3)
+    self:AssertEquals(self.CuT:GetSetting("TestValue1.TestValue2"),"Test7")
+    self:AssertEquals(self.CuT:GetSetting("TestValue3.TestValue4.TestValue5"),"Test8")
+    self:AssertEquals(self.CuT:GetSetting("TestValue3.TestValue4.TestValue7"),"Test9")
+    self:AssertEquals(self.CuT:GetSetting("TestValue3.TestValue4.TestValue8"),false)
+
+    --Override some defaults and assert they are correct.
+    self.CuT:SetSetting("TestValue1.TestValue2","Test10")
+    self.CuT:SetSetting("TestValue3.TestValue4.TestValue5","Test11")
+    self.CuT:SetSetting("TestValue3.TestValue4.TestValue7","Test12")
+    self.CuT:SetSetting("TestValue3.TestValue4.TestValue8",true)
+    self:AssertEquals(ConnectionsFired,6)
+    self:AssertEquals(self.CuT:GetSetting("TestValue1.TestValue2"),"Test10")
+    self:AssertEquals(self.CuT:GetSetting("TestValue3.TestValue4.TestValue5"),"Test11")
+    self:AssertEquals(self.CuT:GetSetting("TestValue3.TestValue4.TestValue7"),"Test12")
+    self:AssertEquals(self.CuT:GetSetting("TestValue3.TestValue4.TestValue8"),true)
+
+    --Revert the settings and assert the defaults are used.
+    self.CuT:SetSetting("TestValue1.TestValue2",nil)
+    self.CuT:SetSetting("TestValue3.TestValue4.TestValue5",nil)
+    self.CuT:SetSetting("TestValue3.TestValue4.TestValue7",nil)
+    self.CuT:SetSetting("TestValue3.TestValue4.TestValue8",nil)
+    self:AssertEquals(self.CuT:GetSetting("TestValue1.TestValue2"),"Test7")
+    self:AssertEquals(self.CuT:GetSetting("TestValue3.TestValue4.TestValue5"),"Test8")
+    self:AssertEquals(self.CuT:GetSetting("TestValue3.TestValue4.TestValue7"),"Test9")
+    self:AssertEquals(self.CuT:GetSetting("TestValue3.TestValue4.TestValue8"),false)
+end))
+
+--[[
 Tests the SetOverrides method.
 --]]
 NexusUnitTesting:RegisterUnitTest(SettingsTest.new("SetOverrides"):SetRun(function(self)

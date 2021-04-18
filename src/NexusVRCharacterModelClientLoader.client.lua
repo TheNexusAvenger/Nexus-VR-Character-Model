@@ -22,7 +22,7 @@ local ReplicationReady = NexusVRCharacterModel:GetResource("ReplicationReady")
 
 
 --Load the settings.
-Settings:SetOverrides(HttpService:JSONDecode(NexusVRCharacterModel:GetResource("Configuration").Value))
+Settings:SetDefaults(HttpService:JSONDecode(NexusVRCharacterModel:GetResource("Configuration").Value))
 
 --Connect replication for other players.
 UpdateInputs.OnClientEvent:Connect(function(Player,HeadCFrame,LeftHandCFrame,RightHandCFrame)

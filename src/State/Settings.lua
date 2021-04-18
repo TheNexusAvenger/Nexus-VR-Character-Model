@@ -76,6 +76,20 @@ function Settings:SetSetting(Setting,Value)
 end
 
 --[[
+Sets all the defaults.
+--]]
+function Settings:SetDefaults(Defaults)
+    --Set the defaults.
+    self.Defaults = Defaults
+    self.SettingsCache = {}
+
+    --Fire all the event changes.
+    for _,Event in pairs(self.SettingsChangeEvents) do
+        Event:Fire()
+    end
+end
+
+--[[
 Sets all the overrides.
 --]]
 function Settings:SetOverrides(Overrides)
