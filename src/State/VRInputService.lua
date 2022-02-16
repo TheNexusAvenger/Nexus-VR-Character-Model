@@ -12,7 +12,7 @@ local THUMBSTICK_SAMPLES_TO_RESET = 5
 
 local NexusVRCharacterModel = require(script.Parent.Parent)
 local NexusObject = NexusVRCharacterModel:GetResource("NexusInstance.NexusObject")
-local NexusEventCreator = NexusVRCharacterModel:GetResource("NexusInstance.Event.NexusEventCreator")
+local NexusEvent = NexusVRCharacterModel:GetResource("NexusInstance.Event.NexusEvent")
 
 local VRInputService = NexusObject:Extend()
 VRInputService:SetClassName("VRInputService")
@@ -31,8 +31,8 @@ function VRInputService:__new(VRService,UserInputService)
     self.UserInputService = UserInputService or game:GetService("UserInputService")
 
     --Create the events.
-    self.Recentered = NexusEventCreator:CreateEvent()
-    self.EyeLevelSet = NexusEventCreator:CreateEvent()
+    self.Recentered = NexusEvent.new()
+    self.EyeLevelSet = NexusEvent.new()
 
     --Connect updating the thumbsticks.
     self.ThumbstickValues = {

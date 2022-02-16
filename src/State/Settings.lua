@@ -6,7 +6,7 @@ Stores settings.
 
 local NexusVRCharacterModel = require(script.Parent.Parent)
 local NexusObject = NexusVRCharacterModel:GetResource("NexusInstance.NexusObject")
-local NexusEventCreator = NexusVRCharacterModel:GetResource("NexusInstance.Event.NexusEventCreator")
+local NexusEvent = NexusVRCharacterModel:GetResource("NexusInstance.Event.NexusEvent")
 
 local Settings = NexusObject:Extend()
 Settings:SetClassName("Settings")
@@ -111,7 +111,7 @@ function Settings:GetSettingsChangedSignal(SettingName)
 
     --Create the event if none exists.
     if not self.SettingsChangeEvents[SettingName] then
-        self.SettingsChangeEvents[SettingName] = NexusEventCreator:CreateEvent()
+        self.SettingsChangeEvents[SettingName] = NexusEvent.new()
     end
 
     --Return the event.
