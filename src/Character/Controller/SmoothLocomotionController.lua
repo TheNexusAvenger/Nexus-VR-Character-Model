@@ -16,7 +16,7 @@ local VRService = game:GetService("VRService")
 local UserInputService = game:GetService("UserInputService")
 
 local NexusVRCharacterModel = require(script.Parent.Parent.Parent)
-local BaseController = NexusVRCharacterModel:GetInstance("Character.Controller.BaseController")
+local BaseController = NexusVRCharacterModel:GetResource("Character.Controller.BaseController")
 local VRInputService = NexusVRCharacterModel:GetInstance("State.VRInputService")
 
 local SmoothLocomotionController = BaseController:Extend()

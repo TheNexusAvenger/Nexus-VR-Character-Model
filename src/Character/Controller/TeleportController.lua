@@ -14,8 +14,8 @@ local Workspace = game:GetService("Workspace")
 local UserInputService = game:GetService("UserInputService")
 
 local NexusVRCharacterModel = require(script.Parent.Parent.Parent)
-local BaseController = NexusVRCharacterModel:GetInstance("Character.Controller.BaseController")
-local ArcWithBeacon = NexusVRCharacterModel:GetInstance("Character.Controller.Visual.ArcWithBeacon")
+local BaseController = NexusVRCharacterModel:GetResource("Character.Controller.BaseController")
+local ArcWithBeacon = NexusVRCharacterModel:GetResource("Character.Controller.Visual.ArcWithBeacon")
 local VRInputService = NexusVRCharacterModel:GetInstance("State.VRInputService")
 
 local TeleportController = BaseController:Extend()
