@@ -15,12 +15,11 @@ games.
 ## Limitations
 * Optimizations for specific headsets and controllers
   can't be made because the hardware is not communicated
-  to the developer. Some headsets, like the Valve Index,
+  to the developer. Some headsets, like the HP Reverb G2,
   may perform poorly.
 * R6 characters are not supported. R15 is recommended
   for new projects since R15 gets better support and
   has more functionality.
-* Roblox's Core GUIs are unable to be modified.
 * The foot-planting code is old and could use a rewrite.
 * The menu gesture is not obvious. Most players may
   not know about it.
