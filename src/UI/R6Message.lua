@@ -14,6 +14,7 @@ local RunService = game:GetService("RunService")
 
 local NexusVRCharacterModel = require(script.Parent.Parent)
 local TextButtonFactory = NexusVRCharacterModel:GetResource("NexusButton.Factory.TextButtonFactory").CreateDefault(Color3.new(0,170/255,255/255))
+TextButtonFactory:SetDefault("Theme", "RoundedCorners")
 local NexusVRCore = require(ReplicatedStorage:WaitForChild("NexusVRCore"))
 local ScreenGui = NexusVRCore:GetResource("Container.ScreenGui")
 local NexusWrappedInstance = NexusVRCore:GetResource("NexusWrappedInstance")
@@ -48,7 +49,7 @@ function R6Message:__new()
     UpperText.BackgroundTransparency = 1
     UpperText.Size = UDim2.new(0.8,0,0.1,0)
     UpperText.Position = UDim2.new(0.1,0,0.25,0)
-    UpperText.Font = Enum.Font.SciFi
+    UpperText.Font = Enum.Font.SourceSansBold
     UpperText.Text = "R6 Not Supported"
     UpperText.TextScaled = true
     UpperText.TextColor3 = Color3.new(1,1,1)
@@ -60,7 +61,7 @@ function R6Message:__new()
     LowerText.BackgroundTransparency = 1
     LowerText.Size = UDim2.new(0.8,0,0.25,0)
     LowerText.Position = UDim2.new(0.1,0,0.4,0)
-    LowerText.Font = Enum.Font.SciFi
+    LowerText.Font = Enum.Font.SourceSansBold
     LowerText.Text = "Nexus VR Character Model does not support using R6. Use R15 instead."
     LowerText.TextScaled = true
     LowerText.TextColor3 = Color3.new(1,1,1)

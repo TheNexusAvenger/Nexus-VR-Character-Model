@@ -13,6 +13,7 @@ local Settings = NexusVRCharacterModel:GetInstance("State.Settings")
 local VRInputService = NexusVRCharacterModel:GetInstance("State.VRInputService")
 local BaseView = NexusVRCharacterModel:GetResource("UI.View.BaseView")
 local TextButtonFactory = NexusVRCharacterModel:GetResource("NexusButton.Factory.TextButtonFactory").CreateDefault(Color3.new(0,170/255,255/255))
+TextButtonFactory:SetDefault("Theme", "RoundedCorners")
 local NexusVRCore = require(ReplicatedStorage:WaitForChild("NexusVRCore"))
 local NexusWrappedInstance = NexusVRCore:GetResource("NexusWrappedInstance")
 
@@ -39,7 +40,7 @@ function SettingsView:__new()
     NameText.BackgroundTransparency = 1
     NameText.Size = UDim2.new(0.8,0,0.1,0)
     NameText.Position = UDim2.new(0.1,0,0.2,0)
-    NameText.Font = Enum.Font.SciFi
+    NameText.Font = Enum.Font.SourceSansBold
     NameText.Text = "Nexus VR Character Model"
     NameText.TextScaled = true
     NameText.TextColor3 = Color3.new(1,1,1)
@@ -118,7 +119,7 @@ function SettingsView:PopulateSettingsFrame(ContainerFrame,HeaderName,OptionsSet
     OptionHeaderText.BackgroundTransparency = 1
     OptionHeaderText.Size = UDim2.new(0.8,0,0.4,0)
     OptionHeaderText.Position = UDim2.new(0.1,0,0,0)
-    OptionHeaderText.Font = Enum.Font.SciFi
+    OptionHeaderText.Font = Enum.Font.SourceSansBold
     OptionHeaderText.Text = HeaderName
     OptionHeaderText.TextScaled = true
     OptionHeaderText.TextColor3 = Color3.new(1,1,1)
@@ -130,7 +131,7 @@ function SettingsView:PopulateSettingsFrame(ContainerFrame,HeaderName,OptionsSet
     OptionText.BackgroundTransparency = 1
     OptionText.Size = UDim2.new(0.6,0,0.7,0)
     OptionText.Position = UDim2.new(0.2,0,0.3,0)
-    OptionText.Font = Enum.Font.SciFi
+    OptionText.Font = Enum.Font.SourceSansBold
     OptionText.TextScaled = true
     OptionText.TextColor3 = Color3.new(1,1,1)
     OptionText.TextStrokeColor3 = Color3.new(0,0,0)

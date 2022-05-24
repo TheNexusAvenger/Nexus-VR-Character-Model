@@ -21,6 +21,7 @@ local VRInputService = NexusVRCharacterModel:GetInstance("State.VRInputService")
 local ChatView = NexusVRCharacterModel:GetResource("UI.View.ChatView")
 local SettingsView = NexusVRCharacterModel:GetResource("UI.View.SettingsView")
 local TextButtonFactory = NexusVRCharacterModel:GetResource("NexusButton.Factory.TextButtonFactory").CreateDefault(Color3.new(0,170/255,255/255))
+TextButtonFactory:SetDefault("Theme", "RoundedCorners")
 local NexusVRCore = require(ReplicatedStorage:WaitForChild("NexusVRCore"))
 local ScreenGui = NexusVRCore:GetResource("Container.ScreenGui")
 local NexusWrappedInstance = NexusVRCore:GetResource("NexusWrappedInstance")
@@ -78,7 +79,7 @@ function MainMenu:__new()
     ViewTextLabel.BackgroundTransparency = 1
     ViewTextLabel.Size = UDim2.new(0,300,0,60)
     ViewTextLabel.Position = UDim2.new(0,100,0,520)
-    ViewTextLabel.Font = Enum.Font.SciFi
+    ViewTextLabel.Font = Enum.Font.SourceSansBold
     ViewTextLabel.TextScaled = true
     ViewTextLabel.TextColor3 = Color3.new(1,1,1)
     ViewTextLabel.TextStrokeColor3 = Color3.new(0,0,0)

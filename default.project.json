@@ -1,50 +1,20 @@
 {
-    "name": "Nexus-VR-Character-Model",
+    "name": "NexusVRCharacterModel",
     "tree": {
-        "$className": "DataModel",
-        "ServerScriptService": {
-            "$className": "ServerScriptService",
-            "NexusVRCharacterModelLoader": {
-                "$path": "./NexusVRCharacterModelLoader.server.lua",
-                "MainModule": {
-                    "$path": "./MainModule.lua",
-                    "NexusVRCharacterModel": {
-                        "$path": "./src",
-                        "NexusInstance": {
-                            "$path": "./module/Nexus-Instance/src"
-                        },
-                        "NexusProject": {
-                            "$path": "./module/Nexus-Project/src",
-                            "NexusInstance": {
-                                "$path": "./module/Nexus-Project/module/Nexus-Instance/src"
-                            }
-                        },
-                        "NexusVRCore": {
-                            "$path": "./module/Nexus-VR-Core/src",
-                            "NexusWrappedInstance": {
-                                "$path": "./module/Nexus-VR-Core/module/Nexus-Wrapped-Instance/src",
-                                "NexusInstance": {
-                                    "$path": "./module/Nexus-VR-Core/module/Nexus-Wrapped-Instance/module/Nexus-Instance/src"
-                                }
-                            },
-                            "NexusProject": {
-                                "$path": "./module/Nexus-VR-Core/module/Nexus-Project/src",
-                                "NexusInstance": {
-                                    "$path": "./module/Nexus-VR-Core/module/Nexus-Project/module/Nexus-Instance/src"
-                                }
-                            }
-                        },
-                        "NexusButton": {
-                            "$path": "./module/Nexus-Button/src",
-                            "NexusInstance": {
-                                "$path": "./module/Nexus-Button/module/NexusInstance/src"
-                            }
-                        }
-                    }
-                }
+        "$path": "./MainModule.lua",
+        "NexusVRCharacterModel": {
+            "$path": "./src",
+            "NexusInstance": {
+                "$path": "./module/Nexus-Instance/"
             },
-            "NexusVRCharacterModelTest": {
-                "$path": "./test"
+            "NexusProject": {
+                "$path": "./module/Nexus-Project/"
+            },
+            "NexusVRCore": {
+                "$path": "./module/Nexus-VR-Core/"
+            },
+            "NexusButton": {
+                "$path": "./module/Nexus-Button/"
             }
         }
     }

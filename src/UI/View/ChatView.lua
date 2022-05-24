@@ -33,7 +33,7 @@ function ChatView:__new()
     LoadingText.BackgroundTransparency = 1
     LoadingText.Size = UDim2.new(0.6,0,0.2,0)
     LoadingText.Position = UDim2.new(0.2,0,0.4,0)
-    LoadingText.Font = Enum.Font.SciFi
+    LoadingText.Font = Enum.Font.SourceSansBold
     LoadingText.Text = "Loading..."
     LoadingText.TextScaled = true
     LoadingText.TextColor3 = Color3.new(1,1,1)
