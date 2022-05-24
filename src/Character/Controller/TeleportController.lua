@@ -150,7 +150,7 @@ function TeleportController:UpdateCharacter()
             local VRCorePanelParts = Workspace.CurrentCamera:FindFirstChild("VRCorePanelParts")
             if VRCorePanelParts then
                 local UserGui = VRCorePanelParts:FindFirstChild("UserGui")
-                if UserGui then
+                if UserGui and UserGui.Position.Magnitude > 0.001 then
                     ArcData.WaitForRelease = true
                 end
             end
