@@ -4,6 +4,7 @@ TheNexusAvenger
 Local character controller using teleporting.
 --]]
 
+local IGNORE_RIGHT_INPUT_FORWARD_ON_MENU_OPEN = true
 local THUMBSTICK_INPUT_START_RADIUS = 0.6
 local THUMBSTICK_INPUT_RELEASE_RADIUS = 0.4
 local THUMBSTICK_MANUAL_ROTATION_ANGLE = math.rad(22.5)
@@ -137,6 +138,26 @@ function TeleportController:UpdateCharacter()
             elseif (RadiusState == nil or RadiusState == "Released") and ArcData.RadiusState == "Extended" then
                 ArcData.RadiusState = RadiusState
                 StateChange = "Released"
+            end
+        end
+
+        --Cancel the input if it is forward facing, on the right hand, and the menu is visible.
+        --This is an optimization for the Valve Index that has pressing the right thumbstick forward for opening the menu.
+        if IGNORE_RIGHT_INPUT_FORWARD_ON_MENU_OPEN and not ArcData.WaitForRelease and DirectionState == "Forward" and ArcData.Thumbstick == Enum.KeyCode.Thumbstick2 then
+            local VRCorePanelParts = Workspace.CurrentCamera:FindFirstChild("VRCorePanelParts")
+            if VRCorePanelParts then
+                local UserGui = VRCorePanelParts:FindFirstChild("UserGui")
+                if UserGui then
+                    ArcData.WaitForRelease = true
+                end
+            end
+        end
+        if ArcData.WaitForRelease then
+            if RadiusState == "Released" then
+                ArcData.WaitForRelease = false
+            else
+                StateChange = "Cancel"
+                ArcData.RadiusState = nil
             end
         end
 
