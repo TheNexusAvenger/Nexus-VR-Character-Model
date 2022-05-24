@@ -121,23 +121,26 @@ function TeleportController:UpdateCharacter()
         end
 
         --Update the stored state.
-        local StateChange
-        if ArcData.DirectionState == nil then
-            if RadiusState == "Released" then
-                ArcData.DirectionState = DirectionState
-                ArcData.RadiusState = RadiusState
-            end
-        else
-            if ArcData.DirectionState ~= DirectionState then
-                ArcData.DirectionState = nil
-                ArcData.RadiusState = nil
-                StateChange = "Cancel"
-            elseif (ArcData.RadiusState == nil or ArcData.RadiusState == "Released") and RadiusState == "Extended" then
-                ArcData.RadiusState = RadiusState
-                StateChange = "Extended"
-            elseif (RadiusState == nil or RadiusState == "Released") and ArcData.RadiusState == "Extended" then
-                ArcData.RadiusState = RadiusState
+        local StateChange = nil
+        if RadiusState == "Released" then
+            if ArcData.RadiusState == "Extended" then
                 StateChange = "Released"
+            end
+            ArcData.RadiusState = "Released"
+            ArcData.DirectionState = nil
+        elseif RadiusState == "Extended" then
+            if ArcData.RadiusState == nil or ArcData.RadiusState == "Released" then
+                if ArcData.RadiusState ~= "Extended" then
+                    StateChange = "Extended"
+                end
+                ArcData.RadiusState = "Extended"
+                ArcData.DirectionState = DirectionState
+            elseif ArcData.DirectionState ~= DirectionState then
+                if ArcData.RadiusState ~= "Cancelled" then
+                    StateChange = "Cancel"
+                end
+                ArcData.RadiusState = "Cancelled"
+                ArcData.DirectionState = nil
             end
         end
 
@@ -165,17 +168,17 @@ function TeleportController:UpdateCharacter()
         local HumanoidRootPart = self.Character.Parts.HumanoidRootPart
         if StateChange == "Extended" then
             if not self.Character.Humanoid.Sit then
-                if ArcData.DirectionState == "Left" then
+                if DirectionState == "Left" then
                     --Turn the player to the left.
                     HumanoidRootPart.CFrame = CFrame.new(HumanoidRootPart.Position) * CFrame.Angles(0,THUMBSTICK_MANUAL_ROTATION_ANGLE,0) * (CFrame.new(-HumanoidRootPart.Position) * HumanoidRootPart.CFrame)
-                elseif ArcData.DirectionState == "Right" then
+                elseif DirectionState == "Right" then
                     --Turn the player to the right.
                     HumanoidRootPart.CFrame = CFrame.new(HumanoidRootPart.Position) * CFrame.Angles(0,-THUMBSTICK_MANUAL_ROTATION_ANGLE,0) * (CFrame.new(-HumanoidRootPart.Position) * HumanoidRootPart.CFrame)
                 end
             end
         elseif StateChange == "Released" then
             ArcData.Arc:Hide()
-            if ArcData.DirectionState == "Forward" then
+            if DirectionState == "Forward" then
                 --Teleport the player.
                 if ArcData.LastHitPart and ArcData.LastHitPosition then
                     --Unsit the player.
@@ -192,7 +195,7 @@ function TeleportController:UpdateCharacter()
                         --Waiting is done if the player was in an existing seat because the player no longer sitting will prevent sitting.
                         if WasSitting then
                             coroutine.wrap(function()
-                                while self.Character.Humanoid.SeatPart do wait() end
+                                while self.Character.Humanoid.SeatPart do task.wait() end
                                 ArcData.LastHitPart:Sit(self.Character.Humanoid)
                             end)()
                         else
@@ -203,7 +206,7 @@ function TeleportController:UpdateCharacter()
                         --Waiting is done if the player was in an existing seat because the player will teleport the seat.
                         if WasSitting then
                             coroutine.wrap(function()
-                                while self.Character.Humanoid.SeatPart do wait() end
+                                while self.Character.Humanoid.SeatPart do task.wait() end
                                 HumanoidRootPart.CFrame = CFrame.new(ArcData.LastHitPosition) * CFrame.new(0,4.5 * self.Character.ScaleValues.BodyHeightScale.Value,0) * (CFrame.new(-HumanoidRootPart.Position) * HumanoidRootPart.CFrame)
                             end)()
                         else
@@ -214,7 +217,7 @@ function TeleportController:UpdateCharacter()
             end
         elseif StateChange == "Cancel" then
             ArcData.Arc:Hide()
-        elseif ArcData.DirectionState == "Forward" and ArcData.RadiusState == "Extended" then
+        elseif DirectionState == "Forward" and RadiusState == "Extended" then
             ArcData.LastHitPart,ArcData.LastHitPosition = ArcData.Arc:Update(Workspace.CurrentCamera:GetRenderCFrame() * VRInputs[Enum.UserCFrame.Head]:Inverse() * VRInputs[ArcData.UserCFrame])
         end
     end
