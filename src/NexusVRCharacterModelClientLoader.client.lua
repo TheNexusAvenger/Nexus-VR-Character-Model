@@ -15,6 +15,7 @@ local NexusVRCharacterModel = require(ReplicatedStorage:WaitForChild("NexusVRCha
 local CameraService = NexusVRCharacterModel:GetInstance("State.CameraService")
 local CharacterService = NexusVRCharacterModel:GetInstance("State.CharacterService")
 local ControlService = NexusVRCharacterModel:GetInstance("State.ControlService")
+local DefaultCursorService = NexusVRCharacterModel:GetInstance("State.DefaultCursorService")
 local Settings = NexusVRCharacterModel:GetInstance("State.Settings")
 local UpdateInputs = NexusVRCharacterModel:GetResource("UpdateInputs")
 local ReplicationReady = NexusVRCharacterModel:GetResource("ReplicationReady")
@@ -35,16 +36,16 @@ ReplicationReady:FireServer()
 
 --Connect the local player if VR is enabled.
 if VRService.VREnabled then
-    --Disable the native VR pointer.
+    --Disable the native VR controller models.
     --Done in a pcall in case the SetCore is not registered or is removed.
     coroutine.wrap(function()
         for i = 1,600 do
             local Worked = pcall(function()
-                StarterGui:SetCore("VRLaserPointerMode",0)
                 StarterGui:SetCore("VREnableControllerModels",false)
+                DefaultCursorService:SetCursorState("Detect")
             end)
             if Worked then break end
-            wait(0.1)
+            task.wait(0.1)
         end
     end)()
 

@@ -9,6 +9,7 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local NexusVRCharacterModel = require(script.Parent.Parent.Parent)
 local CameraService = NexusVRCharacterModel:GetInstance("State.CameraService")
 local ControlService = NexusVRCharacterModel:GetInstance("State.ControlService")
+local DefaultCursorService = NexusVRCharacterModel:GetInstance("State.DefaultCursorService")
 local Settings = NexusVRCharacterModel:GetInstance("State.Settings")
 local VRInputService = NexusVRCharacterModel:GetInstance("State.VRInputService")
 local BaseView = NexusVRCharacterModel:GetResource("UI.View.BaseView")
@@ -51,7 +52,7 @@ function SettingsView:__new()
     --Create the settings.
     local CameraSettingFrame = NexusWrappedInstance.new("Frame")
     CameraSettingFrame.BackgroundTransparency = 1
-    CameraSettingFrame.Size = UDim2.new(0.8,0,0.125,0)
+    CameraSettingFrame.Size = UDim2.new(0.8,0,0.11,0)
     CameraSettingFrame.Position = UDim2.new(0.1,0,0.325,0)
     CameraSettingFrame.Parent = self
     self:PopulateSettingsFrame(CameraSettingFrame,"View","Camera.EnabledCameraOptions",function()
@@ -62,8 +63,8 @@ function SettingsView:__new()
 
     local MovementSettingFrame = NexusWrappedInstance.new("Frame")
     MovementSettingFrame.BackgroundTransparency = 1
-    MovementSettingFrame.Size = UDim2.new(0.8,0,0.125,0)
-    MovementSettingFrame.Position = UDim2.new(0.1,0,0.5,0)
+    MovementSettingFrame.Size = UDim2.new(0.8,0,0.11,0)
+    MovementSettingFrame.Position = UDim2.new(0.1,0,0.325 + (0.15 * 1),0)
     MovementSettingFrame.Parent = self
     self:PopulateSettingsFrame(MovementSettingFrame,"Control","Movement.EnabledMovementMethods",function()
         return ControlService.ActiveController
@@ -71,10 +72,23 @@ function SettingsView:__new()
         ControlService:SetActiveController(NewValue)
     end)
 
+    local CursorSettingFrame = NexusWrappedInstance.new("Frame")
+    CursorSettingFrame.BackgroundTransparency = 1
+    CursorSettingFrame.Size = UDim2.new(0.8,0,0.11,0)
+    CursorSettingFrame.Position = UDim2.new(0.1,0,0.325 + (0.15 * 2),0)
+    CursorSettingFrame.Parent = self
+    self:PopulateSettingsFrame(CursorSettingFrame,"Roblox VR Cursor",function()
+        return DefaultCursorService.CursorOptionsList
+    end,function()
+        return DefaultCursorService.CurrentCursorState
+    end,function(NewValue)
+        DefaultCursorService:SetCursorState(NewValue)
+    end)
+
     --Create the callibration settings.
     local RecenterButton,RecenterText = TextButtonFactory:Create()
     RecenterButton.Size = UDim2.new(0.4,0,0.075,0)
-    RecenterButton.Position = UDim2.new(0.075,0,0.8,0)
+    RecenterButton.Position = UDim2.new(0.075,0,0.85,0)
     RecenterButton.SizeConstraint = Enum.SizeConstraint.RelativeYY
     RecenterButton.Parent = self
     RecenterText.Text = "Recenter"
@@ -85,7 +99,7 @@ function SettingsView:__new()
 
     local SetEyeLevelButton,SetEyeLevelText = TextButtonFactory:Create()
     SetEyeLevelButton.Size = UDim2.new(0.4,0,0.075,0)
-    SetEyeLevelButton.Position = UDim2.new(0.525,0,0.8,0)
+    SetEyeLevelButton.Position = UDim2.new(0.525,0,0.85,0)
     SetEyeLevelButton.SizeConstraint = Enum.SizeConstraint.RelativeYY
     SetEyeLevelButton.Parent = self
     SetEyeLevelText.Text = " Set Eye Level "
@@ -98,7 +112,16 @@ end
 --[[
 Popuulates a setting frame.
 --]]
-function SettingsView:PopulateSettingsFrame(ContainerFrame,HeaderName,OptionsSetting,GetValueFunction,SetValueFunction)
+function SettingsView:PopulateSettingsFrame(ContainerFrame,HeaderName,GetOptionsSettings,GetValueFunction,SetValueFunction)
+    --Converrt the GetOptionsSettings callback if it is a string.
+    local OptionsSetting = nil
+    if typeof(GetOptionsSettings) == "string" then
+        OptionsSetting = GetOptionsSettings
+        GetOptionsSettings = function()
+            return Settings:GetSetting(OptionsSetting) or {}
+        end
+    end
+
     --Create the frames.
     local LeftButton,LeftText = TextButtonFactory:Create()
     LeftButton.Size = UDim2.new(1,0,1,0)
@@ -117,8 +140,8 @@ function SettingsView:PopulateSettingsFrame(ContainerFrame,HeaderName,OptionsSet
 
     local OptionHeaderText = NexusWrappedInstance.new("TextLabel")
     OptionHeaderText.BackgroundTransparency = 1
-    OptionHeaderText.Size = UDim2.new(0.8,0,0.4,0)
-    OptionHeaderText.Position = UDim2.new(0.1,0,0,0)
+    OptionHeaderText.Size = UDim2.new(0.8,0,0.5,0)
+    OptionHeaderText.Position = UDim2.new(0.1,0,-0.0125,0)
     OptionHeaderText.Font = Enum.Font.SourceSansBold
     OptionHeaderText.Text = HeaderName
     OptionHeaderText.TextScaled = true
@@ -145,7 +168,7 @@ function SettingsView:PopulateSettingsFrame(ContainerFrame,HeaderName,OptionsSet
         --Get the current value id.
         local InitialValueName = GetValueFunction()
         local CurrentValue = 1
-        local Options = Settings:GetSetting(OptionsSetting) or {}
+        local Options = GetOptionsSettings()
         for i,Option in pairs(Options) do
             if Option == InitialValueName then
                 CurrentValue = i
@@ -178,7 +201,9 @@ function SettingsView:PopulateSettingsFrame(ContainerFrame,HeaderName,OptionsSet
     end
 
     --Connect the events.
-    Settings:GetSettingsChangedSignal(OptionsSetting):Connect(UpdateSettings)
+    if OptionsSetting then
+        Settings:GetSettingsChangedSignal(OptionsSetting):Connect(UpdateSettings)
+    end
     LeftButton.MouseButton1Click:Connect(function()
         UpdateSettings(-1)
     end)
