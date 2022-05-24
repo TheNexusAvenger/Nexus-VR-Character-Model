@@ -59,7 +59,8 @@ function VRInputService:__new(VRService,UserInputService)
     self.UserInputService.InputEnded:Connect(function(Input)
         if self.InputsDown[Input.KeyCode] then
             self.InputsDown[Input.KeyCode] = false
-        elseif self.ThumbstickValues[Input.KeyCode] then
+        end
+        if self.ThumbstickValues[Input.KeyCode] then
             self.ThumbstickValues[Input.KeyCode] = Vector3.new()
         end
     end)
