@@ -169,6 +169,7 @@ function MainMenu:SetUpOpening()
     RightMenuToggleHintAdornPart.Parent = Workspace.CurrentCamera
 
     local LeftMenuToggleHintGuiFront = Instance.new("SurfaceGui")
+    LeftMenuToggleHintGuiFront.Active = false
     LeftMenuToggleHintGuiFront.Face = Enum.NormalId.Front
     LeftMenuToggleHintGuiFront.CanvasSize = Vector2.new(500,500)
     LeftMenuToggleHintGuiFront.LightInfluence = 0
@@ -197,6 +198,7 @@ function MainMenu:SetUpOpening()
     LeftMenuToggleHintFrontText.Parent = LeftMenuToggleHintGuiFront
 
     local LeftMenuToggleHintGuiBack = Instance.new("SurfaceGui")
+    LeftMenuToggleHintGuiBack.Active = false
     LeftMenuToggleHintGuiBack.Face = Enum.NormalId.Back
     LeftMenuToggleHintGuiBack.CanvasSize = Vector2.new(500,500)
     LeftMenuToggleHintGuiBack.LightInfluence = 0
@@ -224,6 +226,7 @@ function MainMenu:SetUpOpening()
     LeftMenuToggleHintBackText.Parent = LeftMenuToggleHintGuiBack
 
     local RightMenuToggleHintGuiFront = Instance.new("SurfaceGui")
+    RightMenuToggleHintGuiFront.Active = false
     RightMenuToggleHintGuiFront.Face = Enum.NormalId.Front
     RightMenuToggleHintGuiFront.CanvasSize = Vector2.new(500,500)
     RightMenuToggleHintGuiFront.LightInfluence = 0
@@ -251,6 +254,7 @@ function MainMenu:SetUpOpening()
     RightMenuToggleHintFrontText.Parent = RightMenuToggleHintGuiFront
 
     local RightMenuToggleHintGuiBack = Instance.new("SurfaceGui")
+    RightMenuToggleHintGuiBack.Active = false
     RightMenuToggleHintGuiBack.Face = Enum.NormalId.Back
     RightMenuToggleHintGuiBack.CanvasSize = Vector2.new(500,500)
     RightMenuToggleHintGuiBack.LightInfluence = 0
