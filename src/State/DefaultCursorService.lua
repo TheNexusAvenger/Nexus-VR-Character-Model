@@ -73,6 +73,9 @@ function DefaultCursorService:__new()
             StarterGui:SetCore("VRLaserPointerMode", "Pointer")
             VRPointing.PointersEnabled = false
 
+            --Wait until the next frame to register the BindToRenderStep. Otherwise, the order is
+            RunService.Stepped:Wait()
+
             --Enable the workaround for moving the pointer when the cursor isn't active.
             --It must be Last + 1 because the Core Script uses Last.
             RunService:BindToRenderStep("NexusVRCharacterModel_MoveCursorWorkaround", Enum.RenderPriority.Last.Value + 1, function()
