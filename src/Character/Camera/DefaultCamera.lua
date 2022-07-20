@@ -46,12 +46,7 @@ function DefaultCamera.ShouldHidePart(Part: BasePart): boolean
     if Parent then
         if Parent:IsA("Accessory") then
             local AccessoryType = Parent.AccessoryType
-
-            local Show = if ShownAccessories[AccessoryType] 
-                then true 
-                else false
-            
-            return Show
+            return ShownAccessories[AccessoryType] or false
         elseif Parent:IsA("Model") then
             return false
         else
