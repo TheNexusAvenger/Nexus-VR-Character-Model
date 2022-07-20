@@ -29,6 +29,7 @@ local ShownAccessories = {
     [Enum.AccessoryType.Sweater] = true;
     [Enum.AccessoryType.TShirt] = true;
     [Enum.AccessoryType.Shorts] = true;
+    [Enum.AccessoryType.Jacket] = true;
     [Enum.AccessoryType.Front] = true;
     [Enum.AccessoryType.Waist] = true;
     [Enum.AccessoryType.Shirt] = true;
