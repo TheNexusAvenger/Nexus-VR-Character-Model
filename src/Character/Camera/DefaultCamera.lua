@@ -8,7 +8,13 @@ Default camera that follows the character.
 --https://devforum.roblox.com/t/coregui-vr-components-rely-on-headlocked-being-true/100460
 local USE_HEAD_LOCKED_WORKAROUND = true
 
-
+local HIDDEN_ACCESSORIES = {
+    [Enum.AccessoryType.Hat] = true;
+    [Enum.AccessoryType.Hair] = true;
+    [Enum.AccessoryType.Face] = true;
+    [Enum.AccessoryType.Eyebrow] = true;
+    [Enum.AccessoryType.Eyelash] = true;
+}
 
 local Workspace = game:GetService("Workspace")
 local Players = game:GetService("Players")
@@ -21,38 +27,17 @@ local Settings = NexusVRCharacterModel:GetInstance("State.Settings")
 local DefaultCamera = NexusObject:Extend()
 DefaultCamera:SetClassName("DefaultCamera")
 
-local ShownAccessories = {
-    [Enum.AccessoryType.DressSkirt] = true;
-    [Enum.AccessoryType.RightShoe] = true;
-    [Enum.AccessoryType.LeftShoe] = true;
-    [Enum.AccessoryType.Shoulder] = true;
-    [Enum.AccessoryType.Sweater] = true;
-    [Enum.AccessoryType.TShirt] = true;
-    [Enum.AccessoryType.Shorts] = true;
-    [Enum.AccessoryType.Jacket] = true;
-    [Enum.AccessoryType.Front] = true;
-    [Enum.AccessoryType.Waist] = true;
-    [Enum.AccessoryType.Shirt] = true;
-    [Enum.AccessoryType.Pants] = true;
-    [Enum.AccessoryType.Back] = true;
-    [Enum.AccessoryType.Neck] = true;
-}
 
 --[[
 Returns true if the provided part should be hidden in first person.
-]]
+--]]
 function DefaultCamera.ShouldHidePart(Part: BasePart): boolean
     local Parent: Instance? = Part.Parent
     
     if Parent then
         if Parent:IsA("Accessory") then
             local AccessoryType = Parent.AccessoryType
-
-            if ShownAccessories[AccessoryType] then
-                return false
-            end
-
-            return true
+            return HIDDEN_ACCESSORIES[AccessoryType] or false
         elseif Parent:IsA("Model") then
             return false
         else
