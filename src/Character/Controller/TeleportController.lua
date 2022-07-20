@@ -5,10 +5,7 @@ Local character controller using teleporting.
 --]]
 
 local IGNORE_RIGHT_INPUT_FORWARD_ON_MENU_OPEN = true
-local THUMBSTICK_INPUT_START_RADIUS = 0.6
-local THUMBSTICK_INPUT_RELEASE_RADIUS = 0.4
-local THUMBSTICK_MANUAL_ROTATION_ANGLE = math.rad(22.5)
-
+local THUMBSTICK_MANUAL_ROTATION_ANGLE = math.rad(45)
 
 
 local Workspace = game:GetService("Workspace")
@@ -98,52 +95,9 @@ function TeleportController:UpdateCharacter()
             continue
         end
 
-        --Fetch the input and calculate the radius and angle.
-        local InputPosition = VRInputService:GetThumbstickPosition(ArcData.Thumbstick)
-        local InputRadius = ((InputPosition.X ^ 2) + (InputPosition.Y ^ 2)) ^ 0.5
-        local InputAngle = math.atan2(InputPosition.X,InputPosition.Y)
-
-        --Determine the state.
-        local DirectionState,RadiusState
-        if InputAngle >= math.rad(-135) and InputAngle <= math.rad(-45) then
-            DirectionState = "Left"
-        elseif InputAngle >= math.rad(-45) and InputAngle <= math.rad(45) then
-            DirectionState = "Forward"
-        elseif InputAngle >= math.rad(45) and InputAngle <= math.rad(135) then
-            DirectionState = "Right"
-        end
-        if InputRadius >= THUMBSTICK_INPUT_START_RADIUS then
-            RadiusState = "Extended"
-        elseif InputRadius <= THUMBSTICK_INPUT_RELEASE_RADIUS then
-            RadiusState = "Released"
-        else
-            RadiusState = "InBetween"
-        end
-
-        --Update the stored state.
-        local StateChange = nil
-        if RadiusState == "Released" then
-            if ArcData.RadiusState == "Extended" then
-                StateChange = "Released"
-            end
-            ArcData.RadiusState = "Released"
-            ArcData.DirectionState = nil
-        elseif RadiusState == "Extended" then
-            if ArcData.RadiusState == nil or ArcData.RadiusState == "Released" then
-                if ArcData.RadiusState ~= "Extended" then
-                    StateChange = "Extended"
-                end
-                ArcData.RadiusState = "Extended"
-                ArcData.DirectionState = DirectionState
-            elseif ArcData.DirectionState ~= DirectionState then
-                if ArcData.RadiusState ~= "Cancelled" then
-                    StateChange = "Cancel"
-                end
-                ArcData.RadiusState = "Cancelled"
-                ArcData.DirectionState = nil
-            end
-        end
-
+        --Update and fetch the current state.
+        local DirectionState, RadiusState, StateChange = self:GetJoystickState(ArcData)
+        
         --Cancel the input if it is forward facing, on the right hand, and the menu is visible.
         --This is an optimization for the Valve Index that has pressing the right thumbstick forward for opening the menu.
         if IGNORE_RIGHT_INPUT_FORWARD_ON_MENU_OPEN and not ArcData.WaitForRelease and DirectionState == "Forward" and ArcData.Thumbstick == Enum.KeyCode.Thumbstick2 then
@@ -170,9 +124,11 @@ function TeleportController:UpdateCharacter()
             if not self.Character.Humanoid.Sit then
                 if DirectionState == "Left" then
                     --Turn the player to the left.
+                    self:PlayBlur()
                     HumanoidRootPart.CFrame = CFrame.new(HumanoidRootPart.Position) * CFrame.Angles(0,THUMBSTICK_MANUAL_ROTATION_ANGLE,0) * (CFrame.new(-HumanoidRootPart.Position) * HumanoidRootPart.CFrame)
                 elseif DirectionState == "Right" then
                     --Turn the player to the right.
+                    self:PlayBlur()
                     HumanoidRootPart.CFrame = CFrame.new(HumanoidRootPart.Position) * CFrame.Angles(0,-THUMBSTICK_MANUAL_ROTATION_ANGLE,0) * (CFrame.new(-HumanoidRootPart.Position) * HumanoidRootPart.CFrame)
                 end
             end
@@ -184,6 +140,8 @@ function TeleportController:UpdateCharacter()
                     --Unsit the player.
                     --The teleport event is set to ignored since the CFrame will be different when the player gets out of the seat.
                     local WasSitting = false
+                    self:PlayBlur()
+
                     if SeatPart then
                         WasSitting = true
                         self.IgnoreNextExternalTeleport = true

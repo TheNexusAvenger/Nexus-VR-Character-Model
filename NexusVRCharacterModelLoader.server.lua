@@ -46,6 +46,9 @@ local Configuration = {
 
         --Default movement method.
         DefaultMovementMethod = "Teleport",
+
+        --Blur effect for snap turning and teleports.
+        SnapTeleportBlur = true,
     },
     Menu = {
         --If true, a gesture will be active for opening

@@ -4,20 +4,24 @@ TheNexusAvenger
 Base class for controlling the local character.
 --]]
 
+local THUMBSTICK_INPUT_START_RADIUS = 0.6
+local THUMBSTICK_INPUT_RELEASE_RADIUS = 0.4
 local THUMBSTICK_DEADZONE_RADIUS = 0.2
 
-
+local BLUR_TWEEN_INFO = TweenInfo.new(0.25, Enum.EasingStyle.Quad)
 
 local Workspace = game:GetService("Workspace")
 local Players = game:GetService("Players")
 local ContextActionService = game:GetService("ContextActionService")
 local UserInputService = game:GetService("UserInputService")
+local TweenService = game:GetService("TweenService")
 
 local NexusVRCharacterModel = require(script.Parent.Parent.Parent)
 local NexusObject = NexusVRCharacterModel:GetResource("NexusInstance.NexusObject")
 local CameraService = NexusVRCharacterModel:GetInstance("State.CameraService")
 local CharacterService = NexusVRCharacterModel:GetInstance("State.CharacterService")
 local VRInputService = NexusVRCharacterModel:GetInstance("State.VRInputService")
+local Settings = NexusVRCharacterModel:GetInstance("State.Settings")
 
 local BaseController = NexusObject:Extend()
 BaseController:SetClassName("BaseController")
@@ -68,6 +72,7 @@ function BaseController:Enable()
     table.insert(self.Connections,self.Character.Humanoid:GetPropertyChangedSignal("SeatPart"):Connect(function()
         local SeatPart = self.Character:GetHumanoidSeatPart()
         if SeatPart then
+            self:PlayBlur()
             VRInputService:Recenter()
         end
     end))
@@ -114,6 +119,84 @@ function BaseController:ScaleInput(InputCFrame)
 
     --Return the modified CFrame.
     return CFrame.new(InputCFrame.Position * (self.Character.ScaleValues.BodyHeightScale.Value - 1)) * InputCFrame
+end
+
+--[[
+Updates the provided 'Store' table with the state of its 
+Thumbstick (Enum.KeyCode.ThumbstickX) field. Returns the
+direction state, radius state, and overall state change.
+--]]
+function BaseController:GetJoystickState(Store)
+    local InputPosition = VRInputService:GetThumbstickPosition(Store.Thumbstick)
+    local InputRadius = ((InputPosition.X ^ 2) + (InputPosition.Y ^ 2)) ^ 0.5
+    local InputAngle = math.atan2(InputPosition.X,InputPosition.Y)
+
+    local DirectionState, RadiusState
+
+    if InputAngle >= math.rad(-135) and InputAngle <= math.rad(-45) then
+        DirectionState = "Left"
+    elseif InputAngle >= math.rad(-45) and InputAngle <= math.rad(45) then
+        DirectionState = "Forward"
+    elseif InputAngle >= math.rad(45) and InputAngle <= math.rad(135) then
+        DirectionState = "Right"
+    end
+    if InputRadius >= THUMBSTICK_INPUT_START_RADIUS then
+        RadiusState = "Extended"
+    elseif InputRadius <= THUMBSTICK_INPUT_RELEASE_RADIUS then
+        RadiusState = "Released"
+    else
+        RadiusState = "InBetween"
+    end
+
+    --Update the stored state.
+    local StateChange = nil
+    if RadiusState == "Released" then
+        if Store.RadiusState == "Extended" then
+            StateChange = "Released"
+        end
+        Store.RadiusState = "Released"
+        Store.DirectionState = nil
+    elseif RadiusState == "Extended" then
+        if Store.RadiusState == nil or Store.RadiusState == "Released" then
+            if Store.RadiusState ~= "Extended" then
+                StateChange = "Extended"
+            end
+            Store.RadiusState = "Extended"
+            Store.DirectionState = DirectionState
+        elseif Store.DirectionState ~= DirectionState then
+            if Store.RadiusState ~= "Cancelled" then
+                StateChange = "Cancel"
+            end
+            Store.RadiusState = "Cancelled"
+            Store.DirectionState = nil
+        end
+    end
+
+    return DirectionState, RadiusState, StateChange
+end
+
+--[[
+Plays a temporary blur effect to make
+teleports and snap turns less jarring.
+]]--
+function BaseController:PlayBlur()
+    local SnapTeleportBlur = Settings:GetSetting("Camera.SnapTeleportBlur")
+    SnapTeleportBlur = (if SnapTeleportBlur == nil then true else SnapTeleportBlur)
+
+    if not SnapTeleportBlur then
+        return
+    end
+
+    local Blur = Instance.new("BlurEffect")
+    Blur.Parent = workspace.CurrentCamera
+    Blur.Size = 56
+
+    local BlurTween = TweenService:Create(Blur, BLUR_TWEEN_INFO, { Size = 0 })
+    BlurTween:Play()
+
+    BlurTween.Completed:Connect(function()
+        Blur:Destroy()
+    end)
 end
 
 --[[
