@@ -8,7 +8,13 @@ Default camera that follows the character.
 --https://devforum.roblox.com/t/coregui-vr-components-rely-on-headlocked-being-true/100460
 local USE_HEAD_LOCKED_WORKAROUND = true
 
-
+local HIDDEN_ACCESSORIES = {
+    [Enum.AccessoryType.Hat] = true;
+    [Enum.AccessoryType.Hair] = true;
+    [Enum.AccessoryType.Face] = true;
+    [Enum.AccessoryType.Eyebrow] = true;
+    [Enum.AccessoryType.Eyelash] = true;
+}
 
 local Workspace = game:GetService("Workspace")
 local Players = game:GetService("Players")
@@ -22,6 +28,29 @@ local DefaultCamera = NexusObject:Extend()
 DefaultCamera:SetClassName("DefaultCamera")
 
 
+--[[
+Returns true if the provided part should be hidden in first person.
+--]]
+function DefaultCamera.ShouldHidePart(Part: BasePart): boolean
+    local Parent: Instance? = Part.Parent
+    
+    if Parent then
+        if Parent:IsA("Accessory") then
+            local AccessoryType = Parent.AccessoryType
+            return HIDDEN_ACCESSORIES[AccessoryType] or false
+        elseif Parent:IsA("Model") then
+            return false
+        else
+            return not Parent:IsA("Tool")
+        end
+    end
+    
+    if Part:FindFirstChildWhichIsA("WrapLayer") then
+        return false
+    end
+    
+    return true
+end
 
 --[[
 Enables the camera.
@@ -33,9 +62,9 @@ function DefaultCamera:Enable()
         local Transparency = Settings:GetSetting("Appearance.LocalCharacterTransparency")
         table.insert(self.TransparencyEvents,Players.LocalPlayer.Character.DescendantAdded:Connect(function(Part)
             if Part:IsA("BasePart") then
-                if Part.Parent:IsA("Accoutrement") then
+                if DefaultCamera.ShouldHidePart(Part) then
                     Part.LocalTransparencyModifier = 1
-                elseif not Part.Parent:IsA("Tool") then
+                else
                     Part.LocalTransparencyModifier = Transparency
                     table.insert(self.TransparencyEvents,Part:GetPropertyChangedSignal("LocalTransparencyModifier"):Connect(function()
                         Part.LocalTransparencyModifier = Transparency
@@ -45,9 +74,9 @@ function DefaultCamera:Enable()
         end))
         for _,Part in pairs(Players.LocalPlayer.Character:GetDescendants()) do
             if Part:IsA("BasePart") then
-                if Part.Parent:IsA("Accoutrement") then
+                if DefaultCamera.ShouldHidePart(Part) then
                     Part.LocalTransparencyModifier = 1
-                elseif not Part.Parent:IsA("Tool") then
+                else
                     Part.LocalTransparencyModifier = Transparency
                     table.insert(self.TransparencyEvents,Part:GetPropertyChangedSignal("LocalTransparencyModifier"):Connect(function()
                         Part.LocalTransparencyModifier = Transparency
