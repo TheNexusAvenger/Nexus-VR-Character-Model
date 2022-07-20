@@ -22,11 +22,11 @@ local DefaultCamera = NexusObject:Extend()
 DefaultCamera:SetClassName("DefaultCamera")
 
 local ShownAccessories = {
-	[Enum.AccessoryType.DressSkirt] = true;
-	[Enum.AccessoryType.RightShoe] = true;
-	[Enum.AccessoryType.LeftShoe] = true;
+    [Enum.AccessoryType.DressSkirt] = true;
+    [Enum.AccessoryType.RightShoe] = true;
+    [Enum.AccessoryType.LeftShoe] = true;
     [Enum.AccessoryType.Shoulder] = true;
-	[Enum.AccessoryType.Sweater] = true;
+    [Enum.AccessoryType.Sweater] = true;
     [Enum.AccessoryType.TShirt] = true;
     [Enum.AccessoryType.Shorts] = true;
     [Enum.AccessoryType.Front] = true;
