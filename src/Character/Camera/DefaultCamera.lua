@@ -33,7 +33,7 @@ Returns true if the provided part should be hidden in first person.
 --]]
 function DefaultCamera.ShouldHidePart(Part: BasePart): boolean
     local Parent: Instance? = Part.Parent
-    
+
     if Parent then
         if Parent:IsA("Accessory") then
             local AccessoryType = Parent.AccessoryType
@@ -44,12 +44,25 @@ function DefaultCamera.ShouldHidePart(Part: BasePart): boolean
             return not Parent:IsA("Tool")
         end
     end
-    
+
     if Part:FindFirstChildWhichIsA("WrapLayer") then
         return false
     end
-    
+
     return true
+end
+
+--[[
+Returns true if the provided part is in a tool.
+--]]
+function DefaultCamera.IsInTool(Part: BasePart): boolean
+    while Part do
+        if Part:IsA("Tool") then
+            return true
+        end
+        Part = Part.Parent
+    end
+    return false
 end
 
 --[[
@@ -64,6 +77,8 @@ function DefaultCamera:Enable()
             if Part:IsA("BasePart") then
                 if DefaultCamera.ShouldHidePart(Part) then
                     Part.LocalTransparencyModifier = 1
+                elseif DefaultCamera.IsInTool(Part) then
+                    Part.LocalTransparencyModifier = 0
                 else
                     Part.LocalTransparencyModifier = Transparency
                     table.insert(self.TransparencyEvents,Part:GetPropertyChangedSignal("LocalTransparencyModifier"):Connect(function()
@@ -76,6 +91,8 @@ function DefaultCamera:Enable()
             if Part:IsA("BasePart") then
                 if DefaultCamera.ShouldHidePart(Part) then
                     Part.LocalTransparencyModifier = 1
+                elseif DefaultCamera.IsInTool(Part) then
+                    Part.LocalTransparencyModifier = 0
                 else
                     Part.LocalTransparencyModifier = Transparency
                     table.insert(self.TransparencyEvents,Part:GetPropertyChangedSignal("LocalTransparencyModifier"):Connect(function()
