@@ -58,6 +58,12 @@ local Configuration = {
         --recallibration, and chat.
         MenuToggleGestureActive = true,
     },
+    Extra = {
+        --If true, Nexus VR Backpack (https://github.com/TheNexusAvenger/Nexus-VR-Backpack)
+        --will be inserted into the game and loaded. This replaces
+        --the default Roblox backpack.
+        NexusVRBackpackEnabled = true,
+    },
 }
 
 

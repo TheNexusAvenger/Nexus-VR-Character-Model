@@ -38,6 +38,7 @@ function NexusVRCharacterModel:SetConfiguration(Configuration)
 
     --Store the configuration.
     ConfigurationValue.Value = HttpService:JSONEncode(Configuration)
+    NexusVRCharacterModel:GetInstance("State.Settings"):SetDefaults(Configuration)
 end
 
 --[[
@@ -106,6 +107,12 @@ function NexusVRCharacterModel:Load()
     Players.PlayerRemoving:Connect(function(Player)
         ReadyPlayers[Player] = nil
     end)
+
+    --Load Nexus VR Backpack.
+    local Settings = NexusVRCharacterModel:GetInstance("State.Settings")
+    if Settings:GetSetting("Extra.NexusVRBackpackEnabled") then
+        require(10728805649)()
+    end
 end
 
 --[[

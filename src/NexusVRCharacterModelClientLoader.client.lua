@@ -76,6 +76,14 @@ if VRService.VREnabled then
     local MainMenu = NexusVRCharacterModel:GetInstance("UI.MainMenu")
     MainMenu:SetUpOpening()
 
+    --Load the backpack.
+    if Settings:GetSetting("Extra.NexusVRBackpackEnabled") then
+        task.spawn(function()
+            local NexusVRBackpack = require(ReplicatedStorage:WaitForChild("NexusVRBackpack"))
+            NexusVRBackpack:Load()
+        end)
+    end
+
     --Start updating the VR character.
     RunService:BindToRenderStep("NexusVRCharacterModelUpdate",Enum.RenderPriority.Camera.Value - 1,function()
         ControlService:UpdateCharacter()
