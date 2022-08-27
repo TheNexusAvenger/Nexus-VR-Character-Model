@@ -30,7 +30,7 @@ The repository can be synced into Roblox using
 will include the [loader](NexusVRCharacterModelLoader.server.lua)
 with the `MainModule`. If the loader contains
 `MainModule`, it will load the `MainModule`.
-Otherwise, the asset id `6052374981` will be
+Otherwise, the asset id `10728814921` will be
 fetched. The behavior allows for automatic
 updates while still allowing an easy way to use
 static versions. The loader uploaded to the
