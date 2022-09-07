@@ -197,10 +197,12 @@ function Character:__new(CharacterModel)
         if Players.LocalPlayer and Players.LocalPlayer.Character == CharacterModel then
             CharacterModel:WaitForChild("Animate"):Destroy()
             for _,Track in pairs(Animator:GetPlayingAnimationTracks()) do
-                Track:Stop()
+                Track:AdjustWeight(0, 0)
+                Track:Stop(0)
             end
             Animator.AnimationPlayed:Connect(function(Track)
-                Track:Stop()
+                Track:AdjustWeight(0, 0)
+                Track:Stop(0)
             end)
         else
             Animator:Destroy()
@@ -211,10 +213,12 @@ function Character:__new(CharacterModel)
             if Players.LocalPlayer and Players.LocalPlayer.Character == CharacterModel then
                 CharacterModel:WaitForChild("Animate"):Destroy()
                 for _,Track in pairs(NewAnimator:GetPlayingAnimationTracks()) do
-                    Track:Stop()
+                    Track:AdjustWeight(0, 0)
+                    Track:Stop(0)
                 end
                 NewAnimator.AnimationPlayed:Connect(function(Track)
-                    Track:Stop()
+                    Track:AdjustWeight(0, 0)
+                    Track:Stop(0)
                 end)
             else
                 NewAnimator:Destroy()
