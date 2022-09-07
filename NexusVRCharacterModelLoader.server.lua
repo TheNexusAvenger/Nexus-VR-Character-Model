@@ -41,7 +41,7 @@ local Configuration = {
         EnabledMovementMethods = {
             "Teleport",
             "SmoothLocomotion",
-            --"None", --Disables controls but still allows character updates. Intended for stationay games or momentarily freezing players.
+            --"None", --Disables controls but still allows character updates. Intended for stationary games or momentarily freezing players.
         },
 
         --Default movement method.
