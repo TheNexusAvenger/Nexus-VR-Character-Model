@@ -84,13 +84,13 @@ function SmoothLocomotionController:UpdateCharacter(): nil
         --Snap rotate the character.
         local HumanoidRootPart = self.Character.Parts.HumanoidRootPart
         if StateChange == "Extended" then
-            self:PlayBlur()
-
             if DirectionState == "Left" then
                 --Turn the player to the left.
+                self:PlayBlur()
                 HumanoidRootPart.CFrame = CFrame.new(HumanoidRootPart.Position) * CFrame.Angles(0, THUMBSTICK_MANUAL_ROTATION_ANGLE, 0) * (CFrame.new(-HumanoidRootPart.Position) * HumanoidRootPart.CFrame)
             elseif DirectionState == "Right" then
                 --Turn the player to the right.
+                self:PlayBlur()
                 HumanoidRootPart.CFrame = CFrame.new(HumanoidRootPart.Position) * CFrame.Angles(0, -THUMBSTICK_MANUAL_ROTATION_ANGLE, 0) * (CFrame.new(-HumanoidRootPart.Position) * HumanoidRootPart.CFrame)
             end
         end
