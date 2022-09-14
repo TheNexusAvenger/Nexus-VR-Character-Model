@@ -4,21 +4,17 @@ TheNexusAvenger
 View for the user settings.
 --]]
 
-local ReplicatedStorage = game:GetService("ReplicatedStorage")
-
 local NexusVRCharacterModel = require(script.Parent.Parent.Parent)
+local NexusInstance = NexusVRCharacterModel:GetResource("NexusInstance.NexusInstance")
 local CameraService = NexusVRCharacterModel:GetInstance("State.CameraService")
 local ControlService = NexusVRCharacterModel:GetInstance("State.ControlService")
 local DefaultCursorService = NexusVRCharacterModel:GetInstance("State.DefaultCursorService")
 local Settings = NexusVRCharacterModel:GetInstance("State.Settings")
 local VRInputService = NexusVRCharacterModel:GetInstance("State.VRInputService")
-local BaseView = NexusVRCharacterModel:GetResource("UI.View.BaseView")
 local TextButtonFactory = NexusVRCharacterModel:GetResource("NexusButton.Factory.TextButtonFactory").CreateDefault(Color3.fromRGB(0, 170, 255))
 TextButtonFactory:SetDefault("Theme", "RoundedCorners")
-local NexusVRCore = require(ReplicatedStorage:WaitForChild("NexusVRCore"))
-local NexusWrappedInstance = NexusVRCore:GetResource("NexusWrappedInstance")
 
-local SettingsView = BaseView:Extend()
+local SettingsView = NexusInstance:Extend()
 SettingsView:SetClassName("SettingsView")
 
 
@@ -26,18 +22,19 @@ SettingsView:SetClassName("SettingsView")
 --[[
 Creates the settings view.
 --]]
-function SettingsView:__new()
+function SettingsView:__new(View: table): nil
     self:InitializeSuper()
 
     --Create the header.
-    local HeaderLogo = NexusWrappedInstance.new("ImageLabel")
+    local Container = View:GetContainer()
+    local HeaderLogo = Instance.new("ImageLabel")
     HeaderLogo.BackgroundTransparency = 1
     HeaderLogo.Size = UDim2.new(0.4, 0, 0.4, 0)
     HeaderLogo.Position = UDim2.new(0.3, 0, -0.1, 0)
     HeaderLogo.Image = "http://www.roblox.com/asset/?id=1499731139"
-    HeaderLogo.Parent = self
+    HeaderLogo.Parent = Container
 
-    local NameText = NexusWrappedInstance.new("TextLabel")
+    local NameText = Instance.new("TextLabel")
     NameText.BackgroundTransparency = 1
     NameText.Size = UDim2.new(0.8, 0, 0.1, 0)
     NameText.Position = UDim2.new(0.1, 0, 0.2, 0)
@@ -47,36 +44,36 @@ function SettingsView:__new()
     NameText.TextColor3 = Color3.fromRGB(255, 255, 255)
     NameText.TextStrokeColor3 = Color3.fromRGB(0, 0, 0)
     NameText.TextStrokeTransparency = 0
-    NameText.Parent = self
+    NameText.Parent = Container
 
     --Create the settings.
-    local CameraSettingFrame = NexusWrappedInstance.new("Frame")
+    local CameraSettingFrame = Instance.new("Frame")
     CameraSettingFrame.BackgroundTransparency = 1
     CameraSettingFrame.Size = UDim2.new(0.8, 0,0.11, 0)
     CameraSettingFrame.Position = UDim2.new(0.1, 0, 0.325, 0)
-    CameraSettingFrame.Parent = self
+    CameraSettingFrame.Parent = Container
     self:PopulateSettingsFrame(CameraSettingFrame, "View", "Camera.EnabledCameraOptions", function()
         return CameraService.ActiveCamera
     end, function(NewValue)
         CameraService:SetActiveCamera(NewValue)
     end)
 
-    local MovementSettingFrame = NexusWrappedInstance.new("Frame")
+    local MovementSettingFrame = Instance.new("Frame")
     MovementSettingFrame.BackgroundTransparency = 1
     MovementSettingFrame.Size = UDim2.new(0.8, 0, 0.11, 0)
     MovementSettingFrame.Position = UDim2.new(0.1, 0, 0.325 + (0.15 * 1), 0)
-    MovementSettingFrame.Parent = self
+    MovementSettingFrame.Parent = Container
     self:PopulateSettingsFrame(MovementSettingFrame, "Control", "Movement.EnabledMovementMethods", function()
         return ControlService.ActiveController
     end, function(NewValue)
         ControlService:SetActiveController(NewValue)
     end)
 
-    local CursorSettingFrame = NexusWrappedInstance.new("Frame")
+    local CursorSettingFrame = Instance.new("Frame")
     CursorSettingFrame.BackgroundTransparency = 1
     CursorSettingFrame.Size = UDim2.new(0.8, 0, 0.11, 0)
     CursorSettingFrame.Position = UDim2.new(0.1, 0, 0.325 + (0.15 * 2), 0)
-    CursorSettingFrame.Parent = self
+    CursorSettingFrame.Parent = Container
     self:PopulateSettingsFrame(CursorSettingFrame, "Roblox VR Cursor", function()
         return DefaultCursorService.CursorOptionsList
     end, function()
@@ -90,7 +87,7 @@ function SettingsView:__new()
     RecenterButton.Size = UDim2.new(0.4, 0, 0.075, 0)
     RecenterButton.Position = UDim2.new(0.075, 0, 0.85, 0)
     RecenterButton.SizeConstraint = Enum.SizeConstraint.RelativeYY
-    RecenterButton.Parent = self
+    RecenterButton.Parent = Container
     RecenterText.Text = "Recenter"
 
     RecenterButton.MouseButton1Click:Connect(function()
@@ -101,7 +98,7 @@ function SettingsView:__new()
     SetEyeLevelButton.Size = UDim2.new(0.4, 0, 0.075, 0)
     SetEyeLevelButton.Position = UDim2.new(0.525, 0, 0.85, 0)
     SetEyeLevelButton.SizeConstraint = Enum.SizeConstraint.RelativeYY
-    SetEyeLevelButton.Parent = self
+    SetEyeLevelButton.Parent = Container
     SetEyeLevelText.Text = " Set Eye Level "
 
     SetEyeLevelButton.MouseButton1Click:Connect(function()
@@ -138,7 +135,7 @@ function SettingsView:PopulateSettingsFrame(ContainerFrame: string, HeaderName: 
     RightButton.Parent = ContainerFrame
     RightText.Text = ">"
 
-    local OptionHeaderText = NexusWrappedInstance.new("TextLabel")
+    local OptionHeaderText = Instance.new("TextLabel")
     OptionHeaderText.BackgroundTransparency = 1
     OptionHeaderText.Size = UDim2.new(0.8, 0, 0.5, 0)
     OptionHeaderText.Position = UDim2.new(0.1, 0, -0.0125, 0)
@@ -150,7 +147,7 @@ function SettingsView:PopulateSettingsFrame(ContainerFrame: string, HeaderName: 
     OptionHeaderText.TextStrokeTransparency = 0
     OptionHeaderText.Parent = ContainerFrame
 
-    local OptionText = NexusWrappedInstance.new("TextLabel")
+    local OptionText = Instance.new("TextLabel")
     OptionText.BackgroundTransparency = 1
     OptionText.Size = UDim2.new(0.6, 0, 0.7, 0)
     OptionText.Position = UDim2.new(0.2, 0, 0.3, 0)

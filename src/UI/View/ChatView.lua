@@ -7,16 +7,13 @@ add any additional functionality.
 --]]
 
 local Players = game:GetService("Players")
-local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
 local UserInputService = game:GetService("UserInputService")
 
 local NexusVRCharacterModel = require(script.Parent.Parent.Parent)
-local BaseView = NexusVRCharacterModel:GetResource("UI.View.BaseView")
-local NexusVRCore = require(ReplicatedStorage:WaitForChild("NexusVRCore"))
-local NexusWrappedInstance = NexusVRCore:GetResource("NexusWrappedInstance")
+local NexusInstance = NexusVRCharacterModel:GetResource("NexusInstance.NexusInstance")
 
-local ChatView = BaseView:Extend()
+local ChatView = NexusInstance:Extend()
 ChatView:SetClassName("ChatView")
 
 
@@ -24,12 +21,13 @@ ChatView:SetClassName("ChatView")
 --[[
 Creates the chat view.
 --]]
-function ChatView:__new(): nil
+function ChatView:__new(View: table): nil
     self:InitializeSuper()
 
     --Create the loading text.
     --May be needed if the chat structure changes.
-    local LoadingText = NexusWrappedInstance.new("TextLabel")
+    local Container = View:GetContainer()
+    local LoadingText = Instance.new("TextLabel")
     LoadingText.BackgroundTransparency = 1
     LoadingText.Size = UDim2.new(0.6, 0, 0.2, 0)
     LoadingText.Position = UDim2.new(0.2, 0, 0.4, 0)
@@ -39,7 +37,7 @@ function ChatView:__new(): nil
     LoadingText.TextColor3 = Color3.fromRGB(255, 255, 255)
     LoadingText.TextStrokeColor3 = Color3.fromRGB(0, 0, 0)
     LoadingText.TextStrokeTransparency = 0
-    LoadingText.Parent = self
+    LoadingText.Parent = Container
 
     --Set up the chat.
     --Done in a task in case it fails or yields.
@@ -138,7 +136,7 @@ function ChatView:__new(): nil
         while #ChatWindow:GetChildren() == 0 do task.wait() end
         local ChatFrame = ChatWindow:FindFirstChildOfClass("Frame")
         ChatFrame.Size = UDim2.new(1, 0, 1, 0)
-        ChatFrame.Parent = self:GetWrappedInstance()
+        ChatFrame.Parent = Container
 
         --Destroy the loading text.
         LoadingText:Destroy()
@@ -147,7 +145,7 @@ function ChatView:__new(): nil
         --For some reason, it is not done when VR is enabled.
         UserInputService.InputBegan:Connect(function(Input,Processed)
             if Processed then return end
-            if not UserInputService:GetFocusedTextBox() and Input.KeyCode == Enum.KeyCode.Slash and self.Visible then
+            if not UserInputService:GetFocusedTextBox() and Input.KeyCode == Enum.KeyCode.Slash and Container.Visible then
                 --Focus the chat bar.
                 --Done the next frame so that the slash is not inputted.
                 RunService.Stepped:Wait()

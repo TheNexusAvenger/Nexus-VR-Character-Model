@@ -22,6 +22,7 @@ function BaseView:__new(): nil
     self.BackgroundTransparency = 1
     self.Size = UDim2.new(1, 0, 1, 0)
     self.SizeConstraint = Enum.SizeConstraint.RelativeXX
+    warn("MainMenu::RegisterView is deprecated and may be removed in the future.")
 end
 
 

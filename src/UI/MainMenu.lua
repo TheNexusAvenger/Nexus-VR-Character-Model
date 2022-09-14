@@ -18,6 +18,7 @@ local TweenService = game:GetService("TweenService")
 local NexusVRCharacterModel = require(script.Parent.Parent)
 local Settings = NexusVRCharacterModel:GetInstance("State.Settings")
 local VRInputService = NexusVRCharacterModel:GetInstance("State.VRInputService")
+local ApiBaseView = NexusVRCharacterModel:GetResource("UI.View.ApiBaseView")
 local ChatView = NexusVRCharacterModel:GetResource("UI.View.ChatView")
 local SettingsView = NexusVRCharacterModel:GetResource("UI.View.SettingsView")
 local TextButtonFactory = NexusVRCharacterModel:GetResource("NexusButton.Factory.TextButtonFactory").CreateDefault(Color3.fromRGB(0, 170, 255))
@@ -40,7 +41,7 @@ function MainMenu:__new()
     --Set up the ScreenGui.
     self.ResetOnSpawn = false
     self.Enabled = false
-    self.CanvasSize = Vector2.new(500,600)
+    self.CanvasSize = Vector2.new(500, 600)
     self.FieldOfView = 0
     self.Easing = 0.25
 
@@ -57,28 +58,28 @@ function MainMenu:__new()
     --Create the parent frame, display text, and toggle buttons.
     local ViewAdornFrame = NexusWrappedInstance.new("Frame")
     ViewAdornFrame.BackgroundTransparency = 1
-    ViewAdornFrame.Size = UDim2.new(0,500,0,500)
+    ViewAdornFrame.Size = UDim2.new(0, 500, 0, 500)
     ViewAdornFrame.Parent = self
     self.ViewAdornFrame = ViewAdornFrame
 
     local LeftButton,LeftText = TextButtonFactory:Create()
-    LeftButton.Size = UDim2.new(0,80,0,80)
-    LeftButton.Position = UDim2.new(0,10,0,510)
+    LeftButton.Size = UDim2.new(0, 80, 0, 80)
+    LeftButton.Position = UDim2.new(0, 10, 0, 510)
     LeftButton.Parent = self
     LeftText.Text = "<"
     self.LeftButton = LeftButton
 
     local RightButton,RightText = TextButtonFactory:Create()
-    RightButton.Size = UDim2.new(0,80,0,80)
-    RightButton.Position = UDim2.new(0,410,0,510)
+    RightButton.Size = UDim2.new(0, 80, 0, 80)
+    RightButton.Position = UDim2.new(0, 410, 0, 510)
     RightButton.Parent = self
     RightText.Text = ">"
     self.RightButton = RightButton
 
     local ViewTextLabel = NexusWrappedInstance.new("TextLabel")
     ViewTextLabel.BackgroundTransparency = 1
-    ViewTextLabel.Size = UDim2.new(0,300,0,60)
-    ViewTextLabel.Position = UDim2.new(0,100,0,520)
+    ViewTextLabel.Size = UDim2.new(0, 300, 0, 60)
+    ViewTextLabel.Position = UDim2.new(0, 100, 0, 520)
     ViewTextLabel.Font = Enum.Font.SourceSansBold
     ViewTextLabel.TextScaled = true
     ViewTextLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
@@ -90,8 +91,8 @@ function MainMenu:__new()
     --Set up the default views.
     self.CurrentView = 1
     self.Views = {}
-    self:RegisterView("Settings",SettingsView.new())
-    self:RegisterView("Chat",ChatView.new())
+    SettingsView.new(self:CreateView("Settings"))
+    ChatView.new(self:CreateView("Chat"))
     self:UpdateVisibleView()
 
     --Connect changing views.
@@ -124,7 +125,7 @@ end
 Sets up opening based on the controllers
 being rotated upwards.
 --]]
-function MainMenu:SetUpOpening()
+function MainMenu:SetUpOpening(): nil
     --Create the animation parts.
     local LeftAdornPart = Instance.new("Part")
     LeftAdornPart.Transparency = 1
@@ -312,10 +313,10 @@ function MainMenu:SetUpOpening()
 
             --Get the inputs and determine if the hands are both upside down and pointing forward.
             local VRInputs = VRInputService:GetVRInputs()
-            local LeftHandCFrameRelative,RightHandCFrameRelative = VRInputs[Enum.UserCFrame.Head]:Inverse() * VRInputs[Enum.UserCFrame.LeftHand],VRInputs[Enum.UserCFrame.Head]:Inverse() * VRInputs[Enum.UserCFrame.RightHand]
-            local LeftHandFacingUp,RightHandFacingUp = LeftHandCFrameRelative.UpVector.Y < 0,RightHandCFrameRelative.UpVector.Y < 0
-            local LeftHandFacingForward,RightHandFacingForward = LeftHandCFrameRelative.LookVector.Z < 0,RightHandCFrameRelative.LookVector.Z < 0
-            local LeftHandUp,RightHandUp = LeftHandFacingUp and LeftHandFacingForward,RightHandFacingUp and RightHandFacingForward
+            local LeftHandCFrameRelative, RightHandCFrameRelative = VRInputs[Enum.UserCFrame.Head]:Inverse() * VRInputs[Enum.UserCFrame.LeftHand], VRInputs[Enum.UserCFrame.Head]:Inverse() * VRInputs[Enum.UserCFrame.RightHand]
+            local LeftHandFacingUp, RightHandFacingUp = LeftHandCFrameRelative.UpVector.Y < 0, RightHandCFrameRelative.UpVector.Y < 0
+            local LeftHandFacingForward, RightHandFacingForward = LeftHandCFrameRelative.LookVector.Z < 0, RightHandCFrameRelative.LookVector.Z < 0
+            local LeftHandUp, RightHandUp = LeftHandFacingUp and LeftHandFacingForward, RightHandFacingUp and RightHandFacingForward
             local BothHandsUp = MenuToggleGestureActive and LeftHandUp and RightHandUp
             if BothHandsUp then
                 BothControllersUpStartTime = BothControllersUpStartTime or tick()
@@ -326,16 +327,16 @@ function MainMenu:SetUpOpening()
 
             --Update the adorn part CFrames.
             local CameraCenterCFrame = Workspace.CurrentCamera:GetRenderCFrame() * VRInputs[Enum.UserCFrame.Head]:Inverse()
-            LeftAdornPart.CFrame = CameraCenterCFrame * VRInputs[Enum.UserCFrame.LeftHand] * CFrame.new(0,-0.25,0.25)
-            RightAdornPart.CFrame = CameraCenterCFrame * VRInputs[Enum.UserCFrame.RightHand] * CFrame.new(0,-0.25,0.25)
+            LeftAdornPart.CFrame = CameraCenterCFrame * VRInputs[Enum.UserCFrame.LeftHand] * CFrame.new(0, -0.25, 0.25)
+            RightAdornPart.CFrame = CameraCenterCFrame * VRInputs[Enum.UserCFrame.RightHand] * CFrame.new(0, -0.25, 0.25)
             LeftMenuToggleHintAdornPart.CFrame = CameraCenterCFrame * VRInputs[Enum.UserCFrame.LeftHand]
             RightMenuToggleHintAdornPart.CFrame = CameraCenterCFrame * VRInputs[Enum.UserCFrame.RightHand]
 
             --Update the progress bars.
             if BothControllersUpStartTime and not MenuToggleReached then
-                local DeltaTimePercent = (tick() - BothControllersUpStartTime)/MENU_OPEN_TIME_REQUIREMENT
-                LeftAdorn.Size = Vector3.new(0.1,0,0.25 * DeltaTimePercent)
-                RightAdorn.Size = Vector3.new(0.1,0,0.25 * DeltaTimePercent)
+                local DeltaTimePercent = (tick() - BothControllersUpStartTime) / MENU_OPEN_TIME_REQUIREMENT
+                LeftAdorn.Size = Vector3.new(0.1, 0, 0.25 * DeltaTimePercent)
+                RightAdorn.Size = Vector3.new(0.1, 0, 0.25 * DeltaTimePercent)
                 LeftAdorn.Visible = true
                 RightAdorn.Visible = true
 
@@ -357,7 +358,7 @@ function MainMenu:SetUpOpening()
             local function UpdateHintParts(Visible,Part,FrontArrow,BackArrow,FrontText,BackText)
                 local TweenData = TweenInfo.new(0.25)
                 TweenService:Create(Part,TweenData,{
-                    Size = Visible and Vector3.new(1,1,0) or Vector3.new(1.5,1.5,0)
+                    Size = Visible and Vector3.new(1, 1, 0) or Vector3.new(1.5, 1.5, 0)
                 }):Play()
                 TweenService:Create(FrontArrow,TweenData,{
                     ImageTransparency = Visible and 0 or 1
@@ -374,14 +375,14 @@ function MainMenu:SetUpOpening()
             end
 
             --Update the hints.
-            local LeftHandHintVisible,RightHandHintVisible = self.Enabled and not LeftHandUp,self.Enabled and not RightHandUp
+            local LeftHandHintVisible, RightHandHintVisible = self.Enabled and not LeftHandUp, self.Enabled and not RightHandUp
             if self.LeftHandHintVisible ~= LeftHandHintVisible then
                 self.LeftHandHintVisible = LeftHandHintVisible
-                UpdateHintParts(LeftHandHintVisible,LeftMenuToggleHintAdornPart,LeftMenuToggleHintFrontArrow,LeftMenuToggleHintBackArrow,LeftMenuToggleHintFrontText,LeftMenuToggleHintBackText)
+                UpdateHintParts(LeftHandHintVisible, LeftMenuToggleHintAdornPart, LeftMenuToggleHintFrontArrow, LeftMenuToggleHintBackArrow, LeftMenuToggleHintFrontText, LeftMenuToggleHintBackText)
             end
             if self.RightHandHintVisible ~= RightHandHintVisible then
                 self.RightHandHintVisible = RightHandHintVisible
-                UpdateHintParts(RightHandHintVisible,RightMenuToggleHintAdornPart,RightMenuToggleHintFrontArrow,RightMenuToggleHintBackArrow,RightMenuToggleHintFrontText,RightMenuToggleHintBackText)
+                UpdateHintParts(RightHandHintVisible, RightMenuToggleHintAdornPart, RightMenuToggleHintFrontArrow, RightMenuToggleHintBackArrow, RightMenuToggleHintFrontText, RightMenuToggleHintBackText)
             end
             local Rotation = (tick() * 10) % 360
             LeftMenuToggleHintFrontArrow.Rotation = Rotation
@@ -400,7 +401,7 @@ Toggles the menu being open.
 --]]
 function MainMenu:Toggle()
     --Determine the start and end values.
-    local StartFieldOfView,EndFieldOfView = (self.Enabled and math.rad(40) or 0),(self.Enabled and 0 or math.rad(40))
+    local StartFieldOfView, EndFieldOfView = (self.Enabled and math.rad(40) or 0), (self.Enabled and 0 or math.rad(40))
 
     --Show the menu if it isn't visible.
     if not self.Enabled then
@@ -410,8 +411,8 @@ function MainMenu:Toggle()
     --Tween the field of view.
     local StartTime = tick()
     while tick() - StartTime < MENU_OPEN_TIME do
-        local Delta = (tick() - StartTime)/MENU_OPEN_TIME
-        Delta = (math.sin((Delta - 0.5) * math.pi)/2) + 0.5
+        local Delta = (tick() - StartTime) / MENU_OPEN_TIME
+        Delta = (math.sin((Delta - 0.5) * math.pi) / 2) + 0.5
         self.FieldOfView = StartFieldOfView + ((EndFieldOfView - StartFieldOfView) * Delta)
         RunService.RenderStepped:Wait()
     end
@@ -425,22 +426,50 @@ end
 --[[
 Registers a view.
 --]]
-function MainMenu:RegisterView(ViewName,ViewInstance)
+function MainMenu:RegisterView(ViewName: string, ViewInstance: any): nil
+    warn("MainMenu::RegisterView is deprecated and may be removed in the future. Use MainMenu::CreateView instead.")
+
     --Set up the view instance.
     ViewInstance.Visible = false
+    ViewInstance.Name = ViewName
     ViewInstance.Parent = self.ViewAdornFrame
 
     --Store the view.
-    table.insert(self.Views,{
-        Name = ViewName,
-        View = ViewInstance,
-    })
+    table.insert(self.Views, ViewInstance)
+end
+
+--[[
+Creates a menu view.
+--]]
+function MainMenu:CreateView(InitialViewName: string): table
+    --Create and store the view.
+    local View = ApiBaseView.new(InitialViewName)
+    View.Frame.Parent = self.ViewAdornFrame:GetWrappedInstance()
+    table.insert(self.Views, View)
+
+    --Connect the events.
+    View:GetPropertyChangedSignal("Name"):Connect(function()
+        self:UpdateVisibleView()
+    end)
+    View.Destroyed:Connect(function()
+        for i = 1, #self.Views do
+            if self.Views[i] == View then
+                table.remove(self.Views, i)
+                if self.CurrentView > i then
+                    self.CurrentView += -1
+                end
+                break
+            end
+        end
+        self:UpdateVisibleView()
+    end)
+    return View
 end
 
 --[[
 Updates the visible view.
 --]]
-function MainMenu:UpdateVisibleView()
+function MainMenu:UpdateVisibleView(): nil
     --Update the button visibility.
     self.LeftButton.Visible = (#self.Views > 1)
     self.RightButton.Visible = (#self.Views > 1)
@@ -449,8 +478,8 @@ function MainMenu:UpdateVisibleView()
     self.ViewTextLabel.Text = self.Views[self.CurrentView].Name
 
     --Update the view visibilites.
-    for i,View in pairs(self.Views) do
-        View.View.Visible = (i == self.CurrentView)
+    for i, View in self.Views do
+        View.Visible = (i == self.CurrentView)
     end
 end
 
