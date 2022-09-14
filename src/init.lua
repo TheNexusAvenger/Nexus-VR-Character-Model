@@ -145,4 +145,5 @@ end
 
 
 
+NexusVRCharacterModel.Api = NexusVRCharacterModel:GetResource("Api")(NexusVRCharacterModel)
 return NexusVRCharacterModel
