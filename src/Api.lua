@@ -88,12 +88,33 @@ return function(NexusVRCharacterModel)
             API:Register("Input", CreateShim(NexusVRCharacterModel:GetInstance("State.VRInputService"), {"Recenter", "SetEyeLevel", "Recentered", "EyeLevelSet",}))
             API:Register("Settings", CreateShim(NexusVRCharacterModel:GetInstance("State.Settings"), {"GetSetting", "SetSetting", "GetSettingsChangedSignal"}))
 
-            --Add the additional APIs for the shims.
+            --Add the additional API adapters for the shims.
             API.Camera.GetActiveCamera = function()
                 return CameraService.ActiveCamera
             end
             API.Controller.GetActiveController = function()
                 return ControlService.ActiveController
+            end
+
+            --Add the custom APIs for the shims.
+            local ActiveControllers = {}
+            API.Controller.SetControllerInputEnabled = function(_, Hand: Enum.UserCFrame, Enabled: boolean): nil
+                if Hand ~= Enum.UserCFrame.LeftHand and Hand ~= Enum.UserCFrame.RightHand then
+                    error("The following UserCFrame is invalid and can't be disabled: "..tostring(Hand))
+                end
+                ActiveControllers[Hand] = (Enabled ~= false)
+            end
+            API.Controller.EnableControllerInput = function(self, Hand: Enum.UserCFrame): nil
+                self:SetControllerInputEnabled(Hand, true)
+            end
+            API.Controller.DisableControllerInput = function(self, Hand: Enum.UserCFrame): nil
+                self:SetControllerInputEnabled(Hand, false)
+            end
+            API.Controller.IsControllerInputEnabled = function(_, Hand: Enum.UserCFrame): boolean
+                if Hand ~= Enum.UserCFrame.LeftHand and Hand ~= Enum.UserCFrame.RightHand then
+                    error("The following UserCFrame is invalid and can't be disabled: "..tostring(Hand))
+                end
+                return ActiveControllers[Hand] ~= false
             end
 
             --Create the Menu API.

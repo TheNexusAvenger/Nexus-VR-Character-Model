@@ -10,7 +10,6 @@ local THUMBSTICK_DEADZONE_RADIUS = 0.2
 
 
 local Players = game:GetService("Players")
-local VRService = game:GetService("VRService")
 local UserInputService = game:GetService("UserInputService")
 
 local NexusVRCharacterModel = require(script.Parent.Parent.Parent)
@@ -65,11 +64,13 @@ function SmoothLocomotionController:UpdateCharacter(): nil
 
     --Determine the direction to move the player.
     local ThumbstickPosition = VRInputService:GetThumbstickPosition(Enum.KeyCode.Thumbstick1)
-    if ThumbstickPosition.Magnitude < THUMBSTICK_DEADZONE_RADIUS then
-        ThumbstickPosition = Vector3.new(0,0,0)
+    local LeftHandInputActive = (not NexusVRCharacterModel.Api.Controller or NexusVRCharacterModel.Api.Controller:IsControllerInputEnabled(Enum.UserCFrame.LeftHand))
+    local RightHandInputActive = (not NexusVRCharacterModel.Api.Controller or NexusVRCharacterModel.Api.Controller:IsControllerInputEnabled(Enum.UserCFrame.RightHand))
+    if ThumbstickPosition.Magnitude < THUMBSTICK_DEADZONE_RADIUS or not LeftHandInputActive then
+        ThumbstickPosition = Vector3.new(0, 0, 0)
     end
-    local WDown,SDown = not UserInputService:GetFocusedTextBox() and UserInputService:IsKeyDown(Enum.KeyCode.W),not UserInputService:GetFocusedTextBox() and UserInputService:IsKeyDown(Enum.KeyCode.S)
-    local DDown,ADown = not UserInputService:GetFocusedTextBox() and UserInputService:IsKeyDown(Enum.KeyCode.D),not UserInputService:GetFocusedTextBox() and UserInputService:IsKeyDown(Enum.KeyCode.A)
+    local WDown, SDown = not UserInputService:GetFocusedTextBox() and UserInputService:IsKeyDown(Enum.KeyCode.W), not UserInputService:GetFocusedTextBox() and UserInputService:IsKeyDown(Enum.KeyCode.S)
+    local DDown, ADown = not UserInputService:GetFocusedTextBox() and UserInputService:IsKeyDown(Enum.KeyCode.D), not UserInputService:GetFocusedTextBox() and UserInputService:IsKeyDown(Enum.KeyCode.A)
     local ForwardDirection = (WDown and 1 or 0) + (SDown and -1 or 0) + ThumbstickPosition.Y
     local SideDirection = (DDown and 1 or 0) + (ADown and -1 or 0) + ThumbstickPosition.X
 
@@ -83,7 +84,7 @@ function SmoothLocomotionController:UpdateCharacter(): nil
 
         --Snap rotate the character.
         local HumanoidRootPart = self.Character.Parts.HumanoidRootPart
-        if StateChange == "Extended" then
+        if StateChange == "Extended" and RightHandInputActive then
             if DirectionState == "Left" then
                 --Turn the player to the left.
                 self:PlayBlur()

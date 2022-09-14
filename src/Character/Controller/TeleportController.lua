@@ -88,7 +88,7 @@ function TeleportController:UpdateCharacter()
 
     --Update the arcs.
     local SeatPart = self.Character:GetHumanoidSeatPart()
-    for _,ArcData in pairs(self.ArcControls) do
+    for _, ArcData in pairs(self.ArcControls) do
         --Reset the left arc if the player is in a vehicle seat.
         if ArcData.Thumbstick == Enum.KeyCode.Thumbstick1 and SeatPart and SeatPart:IsA("VehicleSeat") then
             ArcData.Arc:Hide()
@@ -96,7 +96,14 @@ function TeleportController:UpdateCharacter()
         end
 
         --Update and fetch the current state.
+        local InputActive = (not NexusVRCharacterModel.Api.Controller or NexusVRCharacterModel.Api.Controller:IsControllerInputEnabled(ArcData.UserCFrame))
         local DirectionState, RadiusState, StateChange = self:GetJoystickState(ArcData)
+        if not InputActive then
+            ArcData.Arc:Hide()
+            ArcData.WaitForRelease = false
+            ArcData.RadiusState = nil
+            continue
+        end
 
         --Cancel the input if it is forward facing, on the right hand, and the menu is visible.
         --This is an optimization for the Valve Index that has pressing the right thumbstick forward for opening the menu.
