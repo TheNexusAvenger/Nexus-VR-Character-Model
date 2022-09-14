@@ -26,10 +26,10 @@ local ReplicationReady = NexusVRCharacterModel:GetResource("ReplicationReady")
 Settings:SetDefaults(HttpService:JSONDecode(NexusVRCharacterModel:GetResource("Configuration").Value))
 
 --Connect replication for other players.
-UpdateInputs.OnClientEvent:Connect(function(Player,HeadCFrame,LeftHandCFrame,RightHandCFrame)
+UpdateInputs.OnClientEvent:Connect(function(Player, HeadCFrame, LeftHandCFrame, RightHandCFrame)
     local Character = CharacterService:GetCharacter(Player)
     if Character then
-        Character:UpdateFromInputs(HeadCFrame,LeftHandCFrame,RightHandCFrame)
+        Character:UpdateFromInputs(HeadCFrame, LeftHandCFrame, RightHandCFrame)
     end
 end)
 ReplicationReady:FireServer()
@@ -38,16 +38,16 @@ ReplicationReady:FireServer()
 if VRService.VREnabled then
     --Disable the native VR controller models.
     --Done in a pcall in case the SetCore is not registered or is removed.
-    coroutine.wrap(function()
-        for i = 1,600 do
+    task.spawn(function()
+        for i = 1, 600 do
             local Worked = pcall(function()
-                StarterGui:SetCore("VREnableControllerModels",false)
+                StarterGui:SetCore("VREnableControllerModels", false)
                 DefaultCursorService:SetCursorState("Detect")
             end)
             if Worked then break end
             task.wait(0.1)
         end
-    end)()
+    end)
 
     --Enable Nexus VR pointing.
     local NexusVRCore = require(ReplicatedStorage:WaitForChild("NexusVRCore"))
@@ -58,8 +58,7 @@ if VRService.VREnabled then
     --Display a message if R6 is used.
     local Character = Players.LocalPlayer.Character
     while not Character do
-        Character = Players.LocalPlayer.Character
-        wait()
+        Character = Players.LocalPlayer.CharacterAdded:Wait()
     end
     if Character:WaitForChild("Humanoid").RigType == Enum.HumanoidRigType.R6 then
         local R6Message = NexusVRCharacterModel:GetInstance("UI.R6Message")
@@ -85,7 +84,7 @@ if VRService.VREnabled then
     end
 
     --Start updating the VR character.
-    RunService:BindToRenderStep("NexusVRCharacterModelUpdate",Enum.RenderPriority.Camera.Value - 1,function()
+    RunService:BindToRenderStep("NexusVRCharacterModelUpdate", Enum.RenderPriority.Camera.Value - 1, function()
         ControlService:UpdateCharacter()
     end)
 end

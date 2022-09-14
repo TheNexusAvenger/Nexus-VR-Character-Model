@@ -58,7 +58,7 @@ function NexusVRCharacterModel:Load()
     --Set up the client scripts.
     local NexusVRCharacterModelClientLoader = script:WaitForChild("NexusVRCharacterModelClientLoader")
     for _,Player in pairs(Players:GetPlayers()) do
-        coroutine.wrap(function()
+        task.spawn(function()
             --Create and store a ScreenGui with the script.
             --This prevents the script disappearing on respawn.
             local ScreenGui = Instance.new("ScreenGui")
@@ -66,7 +66,7 @@ function NexusVRCharacterModel:Load()
             ScreenGui.Name = "NexusVRCharacterModelClientLoader"
             NexusVRCharacterModelClientLoader:Clone().Parent = ScreenGui
             ScreenGui.Parent = Player:WaitForChild("PlayerGui")
-        end)()
+        end)
     end
     NexusVRCharacterModelClientLoader:Clone().Parent = StarterPlayer:WaitForChild("StarterPlayerScripts")
 

@@ -33,7 +33,6 @@ Returns true if the provided part should be hidden in first person.
 --]]
 function DefaultCamera.ShouldHidePart(Part: BasePart): boolean
     local Parent: Instance? = Part.Parent
-
     if Parent then
         if Parent:IsA("Accessory") then
             local AccessoryType = Parent.AccessoryType
@@ -68,12 +67,12 @@ end
 --[[
 Enables the camera.
 --]]
-function DefaultCamera:Enable()
+function DefaultCamera:Enable(): nil
     self.TransparencyEvents = {}
     if Players.LocalPlayer.Character then
         --Connect children being added.
         local Transparency = Settings:GetSetting("Appearance.LocalCharacterTransparency")
-        table.insert(self.TransparencyEvents,Players.LocalPlayer.Character.DescendantAdded:Connect(function(Part)
+        table.insert(self.TransparencyEvents, Players.LocalPlayer.Character.DescendantAdded:Connect(function(Part)
             if Part:IsA("BasePart") then
                 if DefaultCamera.ShouldHidePart(Part) then
                     Part.LocalTransparencyModifier = 1
@@ -81,13 +80,13 @@ function DefaultCamera:Enable()
                     Part.LocalTransparencyModifier = 0
                 else
                     Part.LocalTransparencyModifier = Transparency
-                    table.insert(self.TransparencyEvents,Part:GetPropertyChangedSignal("LocalTransparencyModifier"):Connect(function()
+                    table.insert(self.TransparencyEvents, Part:GetPropertyChangedSignal("LocalTransparencyModifier"):Connect(function()
                         Part.LocalTransparencyModifier = Transparency
                     end))
                 end
             end
         end))
-        for _,Part in pairs(Players.LocalPlayer.Character:GetDescendants()) do
+        for _, Part in pairs(Players.LocalPlayer.Character:GetDescendants()) do
             if Part:IsA("BasePart") then
                 if DefaultCamera.ShouldHidePart(Part) then
                     Part.LocalTransparencyModifier = 1
@@ -95,7 +94,7 @@ function DefaultCamera:Enable()
                     Part.LocalTransparencyModifier = 0
                 else
                     Part.LocalTransparencyModifier = Transparency
-                    table.insert(self.TransparencyEvents,Part:GetPropertyChangedSignal("LocalTransparencyModifier"):Connect(function()
+                    table.insert(self.TransparencyEvents, Part:GetPropertyChangedSignal("LocalTransparencyModifier"):Connect(function()
                         Part.LocalTransparencyModifier = Transparency
                     end))
                 end
@@ -104,11 +103,11 @@ function DefaultCamera:Enable()
     end
 
     --Connect the character and local transparency changing.
-    table.insert(self.TransparencyEvents,Players.LocalPlayer:GetPropertyChangedSignal("Character"):Connect(function()
+    table.insert(self.TransparencyEvents, Players.LocalPlayer:GetPropertyChangedSignal("Character"):Connect(function()
         self:Disable()
         self:Enable()
     end))
-    table.insert(self.TransparencyEvents,Settings:GetSettingsChangedSignal("Appearance.LocalCharacterTransparency"):Connect(function()
+    table.insert(self.TransparencyEvents, Settings:GetSettingsChangedSignal("Appearance.LocalCharacterTransparency"):Connect(function()
         self:Disable()
         self:Enable()
     end))
@@ -117,7 +116,7 @@ end
 --[[
 Disables the camera.
 --]]
-function DefaultCamera:Disable()
+function DefaultCamera:Disable(): nil
     --Disconnect the character events.
     if self.TransparencyEvents then
         for _,Event in pairs(self.TransparencyEvents) do
@@ -128,7 +127,7 @@ function DefaultCamera:Disable()
 
     --Reset the local transparency modifiers.
     if Players.LocalPlayer.Character then
-        for _,Part in pairs(Players.LocalPlayer.Character:GetDescendants()) do
+        for _, Part in pairs(Players.LocalPlayer.Character:GetDescendants()) do
             if Part:IsA("BasePart") then
                 Part.LocalTransparencyModifier = 0
             end
@@ -139,8 +138,8 @@ end
 --[[
 Updates the camera.
 --]]
-function DefaultCamera:UpdateCamera(HeadsetCFrameWorld)
-    Workspace.CurrentCamera.CameraType = "Scriptable"
+function DefaultCamera:UpdateCamera(HeadsetCFrameWorld: CFrame): nil
+    Workspace.CurrentCamera.CameraType = Enum.CameraType.Scriptable
     if USE_HEAD_LOCKED_WORKAROUND then
         local HeadCFrame = VRService:GetUserCFrame(Enum.UserCFrame.Head)
         Workspace.CurrentCamera.HeadLocked = true

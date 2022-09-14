@@ -17,30 +17,30 @@ CameraService:SetClassName("CameraService")
 --[[
 Creates a camera service.
 --]]
-function CameraService:__new()
+function CameraService:__new(): nil
     self:InitializeSuper()
 
     --Register the default controllers.
     self.RegisteredCameras = {}
-    self:RegisterCamera("Default",DefaultCamera.new())
-    self:RegisterCamera("ThirdPersonTrack",ThirdPersonTrackCamera.new())
+    self:RegisterCamera("Default", DefaultCamera.new())
+    self:RegisterCamera("ThirdPersonTrack", ThirdPersonTrackCamera.new())
 end
 
 --[[
 Registers a camera.
 --]]
-function CameraService:RegisterCamera(Name,Camera)
+function CameraService:RegisterCamera(Name: string, Camera: table): nil
     self.RegisteredCameras[Name] = Camera
 end
 
 --[[
 Sets the active camera.
 --]]
-function CameraService:SetActiveCamera(Name)
+function CameraService:SetActiveCamera(Name: string): nil
     --Return if the camera didn't change.
     if self.ActiveCamera == Name then return end
     self.ActiveCamera = Name
-    
+
     --Disable the current camera.
     if self.CurrentCamera then
         self.CurrentCamera:Disable()
@@ -58,7 +58,7 @@ end
 --[[
 Updates the local camera.
 --]]
-function CameraService:UpdateCamera(HeadsetCFrameWorld)
+function CameraService:UpdateCamera(HeadsetCFrameWorld: CFrame): nil
     if self.CurrentCamera then
         self.CurrentCamera:UpdateCamera(HeadsetCFrameWorld)
     end

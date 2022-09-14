@@ -16,26 +16,26 @@ Head:SetClassName("Head")
 --[[
 Creates a head.
 --]]
-function Head:__new(Head)
+function Head:__new(HeadPart: BasePart): nil
     self:InitializeSuper()
 
     --Store the parts.
-    self.Head = Head
+    self.Head = HeadPart
 end
 
 --[[
 Returns the offset from the head to
 the location of the eyes.
 --]]
-function Head:GetEyesOffset()
-    return self:GetAttachmentCFrame(self.Head,"FaceFrontAttachment") * CFrame.new(0,self.Head.Size.Y/4,0)
+function Head:GetEyesOffset(): CFrame
+    return self:GetAttachmentCFrame(self.Head, "FaceFrontAttachment") * CFrame.new(0, self.Head.Size.Y / 4, 0)
 end
 
 --[[
 Returns the head CFrame for the
 given VR input in global world space.
 --]]
-function Head:GetHeadCFrame(VRHeadCFrame)
+function Head:GetHeadCFrame(VRHeadCFrame: CFrame): CFrame
     return VRHeadCFrame * self:GetEyesOffset():Inverse()
 end
 
@@ -43,11 +43,11 @@ end
 Returns the neck CFrame for the
 given VR input in global world space.
 --]]
-function Head:GetNeckCFrame(VRHeadCFrame,TargetAngle)
+function Head:GetNeckCFrame(VRHeadCFrame: CFrame, TargetAngle: number?): CFrame
     --Get the base neck CFrame and angles.
     local BaseNeckCFrame = self:GetHeadCFrame(VRHeadCFrame) * self:GetAttachmentCFrame(self.Head,"NeckRigAttachment")
     local BaseNeckLookVector = BaseNeckCFrame.LookVector
-    local BaseNeckLook,BaseNeckTilt = math.atan2(BaseNeckLookVector.X,BaseNeckLookVector.Z) + math.pi,math.asin(BaseNeckLookVector.Y)
+    local BaseNeckLook,BaseNeckTilt = math.atan2(BaseNeckLookVector.X, BaseNeckLookVector.Z) + math.pi, math.asin(BaseNeckLookVector.Y)
 
     --Clamp the new neck tilt.
     local NewNeckTilt = 0
@@ -100,7 +100,7 @@ function Head:GetNeckCFrame(VRHeadCFrame,TargetAngle)
     self.LastNeckRotationGlobal = BaseNeckLook
 
     --Return the new neck CFrame.
-    return CFrame.new(BaseNeckCFrame.Position) * CFrame.Angles(0,BaseNeckLook,0) * CFrame.Angles(NewNeckTilt,0,0)
+    return CFrame.new(BaseNeckCFrame.Position) * CFrame.Angles(0, BaseNeckLook, 0) * CFrame.Angles(NewNeckTilt, 0, 0)
 end
 
 

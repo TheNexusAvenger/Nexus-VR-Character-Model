@@ -20,7 +20,7 @@ local Settings = NexusVRCharacterModel:GetInstance("State.Settings")
 local VRInputService = NexusVRCharacterModel:GetInstance("State.VRInputService")
 local ChatView = NexusVRCharacterModel:GetResource("UI.View.ChatView")
 local SettingsView = NexusVRCharacterModel:GetResource("UI.View.SettingsView")
-local TextButtonFactory = NexusVRCharacterModel:GetResource("NexusButton.Factory.TextButtonFactory").CreateDefault(Color3.new(0,170/255,255/255))
+local TextButtonFactory = NexusVRCharacterModel:GetResource("NexusButton.Factory.TextButtonFactory").CreateDefault(Color3.fromRGB(0, 170, 255))
 TextButtonFactory:SetDefault("Theme", "RoundedCorners")
 local NexusVRCore = require(ReplicatedStorage:WaitForChild("NexusVRCore"))
 local ScreenGui = NexusVRCore:GetResource("Container.ScreenGui")
@@ -81,8 +81,8 @@ function MainMenu:__new()
     ViewTextLabel.Position = UDim2.new(0,100,0,520)
     ViewTextLabel.Font = Enum.Font.SourceSansBold
     ViewTextLabel.TextScaled = true
-    ViewTextLabel.TextColor3 = Color3.new(1,1,1)
-    ViewTextLabel.TextStrokeColor3 = Color3.new(0,0,0)
+    ViewTextLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+    ViewTextLabel.TextStrokeColor3 = Color3.fromRGB(0, 0, 0)
     ViewTextLabel.TextStrokeTransparency = 0
     ViewTextLabel.Parent = self
     self.ViewTextLabel = ViewTextLabel
@@ -134,7 +134,7 @@ function MainMenu:SetUpOpening()
     LeftAdornPart.Parent = Workspace.CurrentCamera
 
     local LeftAdorn = Instance.new("BoxHandleAdornment")
-    LeftAdorn.Color3 = Color3.new(0,170/255,255/255)
+    LeftAdorn.Color3 = Color3.fromRGB(0, 170, 255)
     LeftAdorn.AlwaysOnTop = true
     LeftAdorn.ZIndex = 0
     LeftAdorn.Adornee = LeftAdornPart
@@ -148,7 +148,7 @@ function MainMenu:SetUpOpening()
     RightAdornPart.Parent = Workspace.CurrentCamera
 
     local RightAdorn = Instance.new("BoxHandleAdornment")
-    RightAdorn.Color3 = Color3.new(0,170/255,255/255)
+    RightAdorn.Color3 = Color3.fromRGB(0, 170 , 255)
     RightAdorn.AlwaysOnTop = true
     RightAdorn.ZIndex = 0
     RightAdorn.Adornee = RightAdornPart
@@ -299,10 +299,10 @@ function MainMenu:SetUpOpening()
 
 
     --Start checking for the controllers to be upside down.
-    --Done in a coroutine since this function is non-yielding.
+    --Done in a task since this function is non-yielding.
     local BothControllersUpStartTime
     local MenuToggleReached = false
-    coroutine.wrap(function()
+    task.spawn(function()
         while true do
             --Determine if the gesture is active.
             local MenuToggleGestureActive = Settings:GetSetting("Menu.MenuToggleGestureActive")
@@ -342,9 +342,9 @@ function MainMenu:SetUpOpening()
                 --Toggle the menu if the time threshold was reached.
                 if DeltaTimePercent >= 1 then
                     MenuToggleReached = true
-                    coroutine.wrap(function()
+                    task.spawn(function()
                         self:Toggle()
-                    end)()
+                    end)
                 end
             else
                 LeftAdorn.Visible = false
@@ -392,7 +392,7 @@ function MainMenu:SetUpOpening()
             --Wait to poll again.
             RunService.RenderStepped:Wait()
         end
-    end)()
+    end)
 end
 
 --[[

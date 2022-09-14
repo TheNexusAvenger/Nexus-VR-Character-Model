@@ -23,7 +23,7 @@ DefaultCursorService:SetClassName("DefaultCursorService")
 --[[
 Creates a default cursor service.
 --]]
-function DefaultCursorService:__new()
+function DefaultCursorService:__new(): nil
     self:InitializeSuper()
 
     --Register the default values.

@@ -25,20 +25,20 @@ SmoothLocomotionController:SetClassName("SmoothLocomotionController")
 --[[
 Enables the controller.
 --]]
-function SmoothLocomotionController:Enable()
+function SmoothLocomotionController:Enable(): nil
     self.super:Enable()
     self.JoystickState = { Thumbstick = Enum.KeyCode.Thumbstick2 }
 
     --Connect requesting jumping.
     --ButtonA does not work with IsButtonDown.
     self.ButtonADown = false
-    table.insert(self.Connections,UserInputService.InputBegan:Connect(function(Input,Processsed)
+    table.insert(self.Connections, UserInputService.InputBegan:Connect(function(Input, Processsed)
         if Processsed then return end
         if Input.KeyCode == Enum.KeyCode.ButtonA then
             self.ButtonADown = true
         end
     end))
-    table.insert(self.Connections,UserInputService.InputEnded:Connect(function(Input)
+    table.insert(self.Connections, UserInputService.InputEnded:Connect(function(Input)
         if Input.KeyCode == Enum.KeyCode.ButtonA then
             self.ButtonADown = false
         end
@@ -48,7 +48,7 @@ end
 --[[
 Disables the controller.
 --]]
-function SmoothLocomotionController:Disable()
+function SmoothLocomotionController:Disable(): nil
     self.super:Disable()
     self.JoystickState = nil
 end
@@ -56,7 +56,7 @@ end
 --[[
 Updates the local character. Must also update the camara.
 --]]
-function SmoothLocomotionController:UpdateCharacter()
+function SmoothLocomotionController:UpdateCharacter(): nil
     --Update the base character.
     self.super:UpdateCharacter()
     if not self.Character then
@@ -74,24 +74,24 @@ function SmoothLocomotionController:UpdateCharacter()
     local SideDirection = (DDown and 1 or 0) + (ADown and -1 or 0) + ThumbstickPosition.X
 
     --Move the player in that direction.
-    Players.LocalPlayer:Move(Vector3.new(SideDirection,0,-ForwardDirection),true)
+    Players.LocalPlayer:Move(Vector3.new(SideDirection, 0, -ForwardDirection), true)
 
     --Snap rotate the character.
     if not self.Character.Humanoid.Sit then
         --Update and fetch the right joystick's state.
-        local DirectionState, RadiusState, StateChange = self:GetJoystickState(self.JoystickState)
-        
+        local DirectionState, _, StateChange = self:GetJoystickState(self.JoystickState)
+
         --Snap rotate the character.
         local HumanoidRootPart = self.Character.Parts.HumanoidRootPart
         if StateChange == "Extended" then
             self:PlayBlur()
-            
+
             if DirectionState == "Left" then
                 --Turn the player to the left.
-                HumanoidRootPart.CFrame = CFrame.new(HumanoidRootPart.Position) * CFrame.Angles(0,THUMBSTICK_MANUAL_ROTATION_ANGLE,0) * (CFrame.new(-HumanoidRootPart.Position) * HumanoidRootPart.CFrame)
+                HumanoidRootPart.CFrame = CFrame.new(HumanoidRootPart.Position) * CFrame.Angles(0, THUMBSTICK_MANUAL_ROTATION_ANGLE, 0) * (CFrame.new(-HumanoidRootPart.Position) * HumanoidRootPart.CFrame)
             elseif DirectionState == "Right" then
                 --Turn the player to the right.
-                HumanoidRootPart.CFrame = CFrame.new(HumanoidRootPart.Position) * CFrame.Angles(0,-THUMBSTICK_MANUAL_ROTATION_ANGLE,0) * (CFrame.new(-HumanoidRootPart.Position) * HumanoidRootPart.CFrame)
+                HumanoidRootPart.CFrame = CFrame.new(HumanoidRootPart.Position) * CFrame.Angles(0, -THUMBSTICK_MANUAL_ROTATION_ANGLE, 0) * (CFrame.new(-HumanoidRootPart.Position) * HumanoidRootPart.CFrame)
             end
         end
     end

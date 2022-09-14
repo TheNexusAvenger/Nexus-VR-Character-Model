@@ -31,8 +31,8 @@ BaseController:SetClassName("BaseController")
 --[[
 Returns the Y-axis angle of the given CFrame.
 --]]
-local function GetAngleToGlobalY(CF)
-    return math.atan2(-CF.LookVector.X,-CF.LookVector.Z)
+local function GetAngleToGlobalY(CF: CFrame): number
+    return math.atan2(-CF.LookVector.X, -CF.LookVector.Z)
 end
 
 
@@ -40,7 +40,7 @@ end
 --[[
 Updates the character. Returns if it changed.
 --]]
-function BaseController:UpdateCharacterReference()
+function BaseController:UpdateCharacterReference(): boolean
     local LastCharacter = self.Character
     self.Character = CharacterService:GetCharacter(Players.LocalPlayer)
     if not self.Character then
@@ -52,7 +52,7 @@ end
 --[[
 Enables the controller.
 --]]
-function BaseController:Enable()
+function BaseController:Enable(): nil
     if not self.Connections then self.Connections = {} end
 
     --Update the character and return if the character is nil.
@@ -62,14 +62,14 @@ function BaseController:Enable()
     end
 
     --Connect the eye level being set.
-    table.insert(self.Connections,VRInputService.EyeLevelSet:Connect(function()
+    table.insert(self.Connections, VRInputService.EyeLevelSet:Connect(function()
         if self.LastHeadCFrame.Y > 0 then
-            self.LastHeadCFrame = CFrame.new(0,-self.LastHeadCFrame.Y,0) * self.LastHeadCFrame
+            self.LastHeadCFrame = CFrame.new(0, -self.LastHeadCFrame.Y, 0) * self.LastHeadCFrame
         end
     end))
 
     --Connect the character entering a seat.
-    table.insert(self.Connections,self.Character.Humanoid:GetPropertyChangedSignal("SeatPart"):Connect(function()
+    table.insert(self.Connections, self.Character.Humanoid:GetPropertyChangedSignal("SeatPart"):Connect(function()
         local SeatPart = self.Character:GetHumanoidSeatPart()
         if SeatPart then
             self:PlayBlur()
@@ -82,26 +82,26 @@ function BaseController:Enable()
 
     --Disable the controls.
     --Done in a loop to ensure changed controllers are disabled.
-    coroutine.wrap(function()
+    task.spawn(function()
         local ControlModule = require(Players.LocalPlayer:WaitForChild("PlayerScripts"):WaitForChild("PlayerModule"):WaitForChild("ControlModule"))
         local Character = self.Character
         while self.Character == Character and Character.Humanoid.Health > 0 do
             if ControlModule.activeController and ControlModule.activeController.enabled then
                 ControlModule:Disable()
-                ContextActionService:BindActivate(Enum.UserInputType.Gamepad1,Enum.KeyCode.ButtonR2)
+                ContextActionService:BindActivate(Enum.UserInputType.Gamepad1, Enum.KeyCode.ButtonR2)
             end
-            wait()
+            task.wait()
         end
-    end)()
+    end)
 end
 
 --[[
 Disables the controller.
 --]]
-function BaseController:Disable()
+function BaseController:Disable(): nil
     self.Character = nil
     self.LastHeadCFrame = nil
-    for _,Connection in pairs(self.Connections) do
+    for _, Connection in pairs(self.Connections) do
         Connection:Disconnect()
     end
     self.Connections = nil
@@ -111,7 +111,7 @@ end
 Scales the local-space input CFrame based on
 the height multiplier of the character.
 --]]
-function BaseController:ScaleInput(InputCFrame)
+function BaseController:ScaleInput(InputCFrame: CFrame): CFrame
     --Return the original CFrame if there is no character.
     if not self.Character then
         return InputCFrame
@@ -122,17 +122,16 @@ function BaseController:ScaleInput(InputCFrame)
 end
 
 --[[
-Updates the provided 'Store' table with the state of its 
+Updates the provided 'Store' table with the state of its
 Thumbstick (Enum.KeyCode.ThumbstickX) field. Returns the
 direction state, radius state, and overall state change.
 --]]
-function BaseController:GetJoystickState(Store)
+function BaseController:GetJoystickState(Store: any): (string, string, string)
     local InputPosition = VRInputService:GetThumbstickPosition(Store.Thumbstick)
     local InputRadius = ((InputPosition.X ^ 2) + (InputPosition.Y ^ 2)) ^ 0.5
-    local InputAngle = math.atan2(InputPosition.X,InputPosition.Y)
+    local InputAngle = math.atan2(InputPosition.X, InputPosition.Y)
 
     local DirectionState, RadiusState
-
     if InputAngle >= math.rad(-135) and InputAngle <= math.rad(-45) then
         DirectionState = "Left"
     elseif InputAngle >= math.rad(-45) and InputAngle <= math.rad(45) then
@@ -179,7 +178,7 @@ end
 Plays a temporary blur effect to make
 teleports and snap turns less jarring.
 ]]--
-function BaseController:PlayBlur()
+function BaseController:PlayBlur(): nil
     local SnapTeleportBlur = Settings:GetSetting("Camera.SnapTeleportBlur")
     SnapTeleportBlur = (if SnapTeleportBlur == nil then true else SnapTeleportBlur)
 
@@ -202,7 +201,7 @@ end
 --[[
 Updates the reference world CFrame.
 --]]
-function BaseController:UpdateCharacter()
+function BaseController:UpdateCharacter(): nil
     --Return if the character is nil.
     local CharacterChanged = self:UpdateCharacterReference()
     if not self.Character then
@@ -216,7 +215,7 @@ function BaseController:UpdateCharacter()
     --Get the VR inputs.
     local VRInputs = VRInputService:GetVRInputs()
     local VRHeadCFrame = self:ScaleInput(VRInputs[Enum.UserCFrame.Head])
-    local VRLeftHandCFrame,VRRightHandCFrame = self:ScaleInput(VRInputs[Enum.UserCFrame.LeftHand]),self:ScaleInput(VRInputs[Enum.UserCFrame.RightHand])
+    local VRLeftHandCFrame,VRRightHandCFrame = self:ScaleInput(VRInputs[Enum.UserCFrame.LeftHand]), self:ScaleInput(VRInputs[Enum.UserCFrame.RightHand])
     local HeadToLeftHandCFrame = VRHeadCFrame:Inverse() * VRLeftHandCFrame
     local HeadToRightHandCFrame = VRHeadCFrame:Inverse() * VRRightHandCFrame
 
@@ -228,7 +227,7 @@ function BaseController:UpdateCharacter()
             --Get the eye CFrame of the current character, except the Y offset from the HumanoidRootPart.
             --The Y position will be added absolutely since doing it relatively will result in floating or short characters.
             local HumanoidRootPartCFrame = self.Character.Parts.HumanoidRootPart.CFrame
-            local LowerTorsoCFrame = HumanoidRootPartCFrame * self.Character.Attachments.HumanoidRootPart.RootRigAttachment.CFrame * CFrame.new(0,-self.Character.Motors.Root.Transform.Position.Y,0) * self.Character.Motors.Root.Transform * self.Character.Attachments.LowerTorso.RootRigAttachment.CFrame:Inverse()
+            local LowerTorsoCFrame = HumanoidRootPartCFrame * self.Character.Attachments.HumanoidRootPart.RootRigAttachment.CFrame * CFrame.new(0, -self.Character.Motors.Root.Transform.Position.Y, 0) * self.Character.Motors.Root.Transform * self.Character.Attachments.LowerTorso.RootRigAttachment.CFrame:Inverse()
             local UpperTorsoCFrame = LowerTorsoCFrame * self.Character.Attachments.LowerTorso.WaistRigAttachment.CFrame * self.Character.Motors.Waist.Transform * self.Character.Attachments.UpperTorso.WaistRigAttachment.CFrame:Inverse()
             local HeadCFrame = UpperTorsoCFrame * self.Character.Attachments.UpperTorso.NeckRigAttachment.CFrame * self.Character.Motors.Neck.Transform * self.Character.Attachments.Head.NeckRigAttachment.CFrame:Inverse()
             local EyesOffset = self.Character.Head:GetEyesOffset()
@@ -239,23 +238,23 @@ function BaseController:UpdateCharacter()
             if VRHeadCFrame.UpVector.Y < 0 then
                 InputDelta = CFrame.Angles(0,math.pi,0) * InputDelta
             end
-            local HeadRotationXZ = (CFrame.new(VRHeadCFrame.Position) * CFrame.Angles(0,math.atan2(-VRHeadCFrame.LookVector.X,-VRHeadCFrame.LookVector.Z),0)):Inverse() * VRHeadCFrame
+            local HeadRotationXZ = (CFrame.new(VRHeadCFrame.Position) * CFrame.Angles(0, math.atan2(-VRHeadCFrame.LookVector.X, -VRHeadCFrame.LookVector.Z), 0)):Inverse() * VRHeadCFrame
             local LastHeadAngleY = GetAngleToGlobalY(self.LastHeadCFrame)
             local HeadAngleY = GetAngleToGlobalY(VRHeadCFrame)
-            local HeightOffset = CFrame.new(0,(CFrame.new(0,EyesOffset.Y,0) * (VRHeadCFrame * EyesOffset:Inverse())).Y,0)
+            local HeightOffset = CFrame.new(0, (CFrame.new(0, EyesOffset.Y, 0) * (VRHeadCFrame * EyesOffset:Inverse())).Y, 0)
 
             --Offset the character eyes for the current input.
             local CurrentCharacterAngleY = GetAngleToGlobalY(CharacterEyeCFrame)
-            local RotationY = CFrame.Angles(0,CurrentCharacterAngleY + (HeadAngleY - LastHeadAngleY),0)
-            local NewCharacterEyePosition = (HeightOffset *  CFrame.new((RotationY * CFrame.new(InputDelta.X,0,InputDelta.Z)).Position) * CharacterEyeCFrame).Position
+            local RotationY = CFrame.Angles(0, CurrentCharacterAngleY + (HeadAngleY - LastHeadAngleY), 0)
+            local NewCharacterEyePosition = (HeightOffset *  CFrame.new((RotationY * CFrame.new(InputDelta.X, 0, InputDelta.Z)).Position) * CharacterEyeCFrame).Position
             local NewCharacterEyeCFrame = CFrame.new(NewCharacterEyePosition) * RotationY * HeadRotationXZ
 
             --Update the character.
-            self.Character:UpdateFromInputs(NewCharacterEyeCFrame,NewCharacterEyeCFrame * HeadToLeftHandCFrame,NewCharacterEyeCFrame * HeadToRightHandCFrame)
+            self.Character:UpdateFromInputs(NewCharacterEyeCFrame, NewCharacterEyeCFrame * HeadToLeftHandCFrame,NewCharacterEyeCFrame * HeadToRightHandCFrame)
         end
     else
         --Set the absolute positions of the character.
-        self.Character:UpdateFromInputsSeated(VRHeadCFrame,VRHeadCFrame * HeadToLeftHandCFrame,VRHeadCFrame * HeadToRightHandCFrame)
+        self.Character:UpdateFromInputsSeated(VRHeadCFrame, VRHeadCFrame * HeadToLeftHandCFrame,VRHeadCFrame * HeadToRightHandCFrame)
     end
     self.LastHeadCFrame = VRHeadCFrame
 
@@ -281,7 +280,7 @@ end
 --[[
 Updates the values of the vehicle seat.
 --]]
-function BaseController:UpdateVehicleSeat()
+function BaseController:UpdateVehicleSeat(): nil
     --Get the vehicle seat.
     local SeatPart = self.Character:GetHumanoidSeatPart()
     if not SeatPart or not SeatPart:IsA("VehicleSeat") then

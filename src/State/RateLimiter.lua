@@ -18,7 +18,7 @@ RateLimiter:SetClassName("RateLimiter")
 Creates a rate limiter.
 The rate limit must be >=1.
 --]]
-function RateLimiter:__new(RateLimit,RefrestDuration)
+function RateLimiter:__new(RateLimit: number, RefrestDuration: number): nil
     self:InitializeSuper()
     self.RateLimit = RateLimit or 1
     self.UsedLimits = {}
@@ -36,7 +36,7 @@ end
 Returns if the rate limit was reached
 for a given key.
 --]]
-function RateLimiter:RateLimitReached(Key)
+function RateLimiter:RateLimitReached(Key: string): boolean
     --Add the key if it isn't defined.
     if not self.UsedLimits[Key] then
         self.UsedLimits[Key] = {

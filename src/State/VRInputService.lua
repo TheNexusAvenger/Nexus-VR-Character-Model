@@ -22,7 +22,7 @@ VRInputService:SetClassName("VRInputService")
 --[[
 Creates a settings object.
 --]]
-function VRInputService:__new(VRService,UserInputService)
+function VRInputService:__new(VRService: VRService?, UserInputService: UserInputService?): nil
     self:InitializeSuper()
     self.RecenterOffset = CFrame.new()
 
@@ -75,7 +75,7 @@ end
 Returns the VR inputs to use. The inputs are normalized
 so that 0 is the head height.
 --]]
-function VRInputService:GetVRInputs()
+function VRInputService:GetVRInputs(): {[Enum.UserCFrame]: CFrame}
     --Get the head input.
     local VRInputs = {
         [Enum.UserCFrame.Head] = self.VRService:GetUserCFrame(Enum.UserCFrame.Head),
@@ -85,12 +85,12 @@ function VRInputService:GetVRInputs()
     if self.VRService:GetUserCFrameEnabled(Enum.UserCFrame.LeftHand) then
         VRInputs[Enum.UserCFrame.LeftHand] = self.VRService:GetUserCFrame(Enum.UserCFrame.LeftHand)
     else
-        VRInputs[Enum.UserCFrame.LeftHand] = VRInputs[Enum.UserCFrame.Head] * CFrame.new(-1,-2.5,0.5)
+        VRInputs[Enum.UserCFrame.LeftHand] = VRInputs[Enum.UserCFrame.Head] * CFrame.new(-1, -2.5, 0.5)
     end
     if self.VRService:GetUserCFrameEnabled(Enum.UserCFrame.RightHand) then
         VRInputs[Enum.UserCFrame.RightHand] = self.VRService:GetUserCFrame(Enum.UserCFrame.RightHand)
     else
-        VRInputs[Enum.UserCFrame.RightHand] = VRInputs[Enum.UserCFrame.Head] * CFrame.new(1,-2.5,0.5)
+        VRInputs[Enum.UserCFrame.RightHand] = VRInputs[Enum.UserCFrame.Head] * CFrame.new(1, -2.5, 0.5)
     end
 
     --Determine the height offset.
@@ -101,7 +101,7 @@ function VRInputService:GetVRInputs()
     else
         --Adjust to normalize the height around the highest value.
         --The head CFrame is moved back 0.5 studs for when the headset suddenly goes up (like putting on and taking off).
-        local CurrentVRHeadHeight = (VRInputs[Enum.UserCFrame.Head] * CFrame.new(0,0,0.5)).Y
+        local CurrentVRHeadHeight = (VRInputs[Enum.UserCFrame.Head] * CFrame.new(0, 0, 0.5)).Y
         if not self.HighestHeadHeight or CurrentVRHeadHeight > self.HighestHeadHeight then
             self.HighestHeadHeight = CurrentVRHeadHeight
         end
@@ -111,7 +111,7 @@ function VRInputService:GetVRInputs()
     --Normalize the CFrame heights.
     --A list of enums is used instead of VRInputs because modifying a table stops pairs().
     for _,InputEnum in pairs({Enum.UserCFrame.Head,Enum.UserCFrame.LeftHand,Enum.UserCFrame.RightHand}) do
-        VRInputs[InputEnum] = CFrame.new(0,HeightOffset,0) * self.RecenterOffset * VRInputs[InputEnum]
+        VRInputs[InputEnum] = CFrame.new(0, HeightOffset, 0) * self.RecenterOffset * VRInputs[InputEnum]
     end
 
     --Return the CFrames.
@@ -122,16 +122,16 @@ end
 Recenters the service.
 Does not alter the Y axis.
 --]]
-function VRInputService:Recenter()
+function VRInputService:Recenter(): nil
     local HeadCFrame = self.VRService:GetUserCFrame(Enum.UserCFrame.Head)
-    self.RecenterOffset = CFrame.Angles(0,-math.atan2(-HeadCFrame.LookVector.X,-HeadCFrame.LookVector.Z),0) * CFrame.new(-HeadCFrame.X,0,-HeadCFrame.Z)
+    self.RecenterOffset = CFrame.Angles(0, -math.atan2(-HeadCFrame.LookVector.X, -HeadCFrame.LookVector.Z), 0) * CFrame.new(-HeadCFrame.X, 0, -HeadCFrame.Z)
     self.Recentered:Fire()
 end
 
 --[[
 Sets the eye level.
 --]]
-function VRInputService:SetEyeLevel()
+function VRInputService:SetEyeLevel(): nil
     self.ManualNormalHeadLevel = self.VRService:GetUserCFrame(Enum.UserCFrame.Head).Y
     self.EyeLevelSet:Fire()
 end
@@ -139,7 +139,7 @@ end
 --[[
 Returns the current value for a thumbstick.
 --]]
-function VRInputService:GetThumbstickPosition(Thumbsick)
+function VRInputService:GetThumbstickPosition(Thumbsick: Enum.KeyCode): Vector3
     --Return if the value isn't supported.
     if not self.ThumbstickValues[Thumbsick] then
         return
@@ -163,7 +163,7 @@ function VRInputService:GetThumbstickPosition(Thumbsick)
 
     --Return either the stored value or the empty vector if the last polled samples are the same.
     if ValuesSame and not self.InputsDown[Thumbsick] then
-        return Vector3.new(0,0,0)
+        return Vector3.zero
     else
         return self.ThumbstickValues[Thumbsick]
     end

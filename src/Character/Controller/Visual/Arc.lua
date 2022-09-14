@@ -26,7 +26,7 @@ Arc:SetClassName("Arc")
 --[[
 Creates an arc.
 --]]
-function Arc:__new()
+function Arc:__new(): nil
     self:InitializeSuper()
     self.BeamParts = {}
     self:Hide()
@@ -36,24 +36,24 @@ end
 Updates the arc. Returns the part and
 position that were hit.
 --]]
-function Arc:Update(StartCFrame)
+function Arc:Update(StartCFrame: CFrame): nil
     --Calculate the starting angle.
     local StartPosition = StartCFrame.Position
-    local FaceAngle = math.atan2(-StartCFrame.LookVector.X,-StartCFrame.LookVector.Z)
+    local FaceAngle = math.atan2(-StartCFrame.LookVector.X, -StartCFrame.LookVector.Z)
     local StartAngle = math.asin(StartCFrame.LookVector.Y)
-    StartAngle = StartAngle + (BASE_POINTER_ANGLE * ((math.pi/2) - math.abs(StartAngle))/(math.pi/2))
-    
+    StartAngle = StartAngle + (BASE_POINTER_ANGLE * ((math.pi / 2) - math.abs(StartAngle)) / (math.pi / 2))
+
     --Calculate the start CFrame and start offset of the parabola.
     --The start is the where the derivative of POINTER_PARABOLA_HEIGHT_MULTIPLIER * x^2 is tan(StartAngle).
-    local StartCF = CFrame.new(StartPosition) * CFrame.Angles(0,FaceAngle,0)
+    local StartCF = CFrame.new(StartPosition) * CFrame.Angles(0, FaceAngle, 0)
     local StartOffset = math.tan(StartAngle) / (POINTER_PARABOLA_HEIGHT_MULTIPLIER * 2)
     local StartValue = POINTER_PARABOLA_HEIGHT_MULTIPLIER * (StartOffset ^ 2)
 
     --Create the parts until the limit is reached.
-    for i = 0,MAX_SEGMENTS - 1 do
+    for i = 0, MAX_SEGMENTS - 1 do
         --Calculate the current and next position.
-        local SegmentStartPosition = (StartCF * CFrame.new(0,POINTER_PARABOLA_HEIGHT_MULTIPLIER * ((i + StartOffset) ^ 2) - StartValue,-SEGMENT_SEPARATION * i)).Position
-        local SegmentEndPosition = (StartCF * CFrame.new(0,POINTER_PARABOLA_HEIGHT_MULTIPLIER * ((i + 1 + StartOffset) ^ 2) - StartValue,-SEGMENT_SEPARATION * (i + 1))).Position
+        local SegmentStartPosition = (StartCF * CFrame.new(0, POINTER_PARABOLA_HEIGHT_MULTIPLIER * ((i + StartOffset) ^ 2) - StartValue, -SEGMENT_SEPARATION * i)).Position
+        local SegmentEndPosition = (StartCF * CFrame.new(0, POINTER_PARABOLA_HEIGHT_MULTIPLIER * ((i + 1 + StartOffset) ^ 2) - StartValue, -SEGMENT_SEPARATION * (i + 1))).Position
 
         --Create the parts if they don't exist.
         if not self.BeamParts[i] then
@@ -66,21 +66,21 @@ function Arc:Update(StartCFrame)
 
             local Attachment = Instance.new("Attachment")
             Attachment.Name = "BeamAttachment"
-            Attachment.CFrame = CFrame.Angles(0,0,math.pi/2)
+            Attachment.CFrame = CFrame.Angles(0, 0, math.pi / 2)
             Attachment.Parent = self.BeamParts[i]
         end
         if not self.BeamParts[i + 1] then
             --Create the part and attachment.
             self.BeamParts[i + 1] = Instance.new("Part")
             self.BeamParts[i + 1].Transparency = 1
-            self.BeamParts[i + 1].Size = Vector3.new(0,0,0)
+            self.BeamParts[i + 1].Size = Vector3.new(0, 0, 0)
             self.BeamParts[i + 1].Anchored = true
             self.BeamParts[i + 1].CanCollide = false
             self.BeamParts[i + 1].Parent = Workspace.CurrentCamera
 
             local Attachment = Instance.new("Attachment")
             Attachment.Name = "BeamAttachment"
-            Attachment.CFrame = CFrame.Angles(0,0,math.pi/2)
+            Attachment.CFrame = CFrame.Angles(0, 0, math.pi / 2)
             Attachment.Parent = self.BeamParts[i + 1]
 
             --Create the beam.
@@ -96,15 +96,15 @@ function Arc:Update(StartCFrame)
 
         --Cast the ray to the end.
         --Return if an end was hit and make the arc blue.
-        local HitPart,HitPosition = FindCollidablePartOnRay(SegmentStartPosition,SegmentEndPosition - SegmentStartPosition,Players.LocalPlayer and Players.LocalPlayer.Character,Players.LocalPlayer and Players.LocalPlayer.Character and Players.LocalPlayer.Character:FindFirstChild("HumanoidRootPart"))
-        self.BeamParts[i].CFrame = CFrame.new(SegmentStartPosition) * CFrame.Angles(0,FaceAngle,0)
+        local HitPart,HitPosition = FindCollidablePartOnRay(SegmentStartPosition, SegmentEndPosition - SegmentStartPosition, Players.LocalPlayer and Players.LocalPlayer.Character,Players.LocalPlayer and Players.LocalPlayer.Character and Players.LocalPlayer.Character:FindFirstChild("HumanoidRootPart"))
+        self.BeamParts[i].CFrame = CFrame.new(SegmentStartPosition) * CFrame.Angles(0, FaceAngle, 0)
         self.BeamParts[i + 1].Beam.Enabled = true
         if HitPart then
             self.BeamParts[i + 1].CFrame = CFrame.new(HitPosition)
-            for j = 0,i do
-                self.BeamParts[j + 1].Beam.Color = ColorSequence.new(Color3.new(0,170/255,255/255))
+            for j = 0, i do
+                self.BeamParts[j + 1].Beam.Color = ColorSequence.new(Color3.fromRGB(0, 170, 255))
             end
-            for j = i + 1,#self.BeamParts - 1 do
+            for j = i + 1, #self.BeamParts - 1 do
                 self.BeamParts[j + 1].Beam.Enabled = false
             end
             return HitPart,HitPosition
@@ -114,16 +114,16 @@ function Arc:Update(StartCFrame)
     end
 
     --Set the beams to red.
-    for i = 0,#self.BeamParts - 1 do
-        self.BeamParts[i + 1].Beam.Color = ColorSequence.new(Color3.new(200/255,0,0))
+    for i = 0, #self.BeamParts - 1 do
+        self.BeamParts[i + 1].Beam.Color = ColorSequence.new(Color3.fromRGB(200, 0, 0))
     end
 end
 
 --[[
 Hides the arc.
 --]]
-function Arc:Hide()
-    for i = 0,#self.BeamParts - 1 do
+function Arc:Hide(): nil
+    for i = 0, #self.BeamParts - 1 do
         self.BeamParts[i + 1].Beam.Enabled = false
     end
 end
@@ -131,8 +131,8 @@ end
 --[[
 Destroys the arc.
 --]]
-function Arc:Destroy()
-    for _,BeamPart in pairs(self.BeamParts) do
+function Arc:Destroy(): nil
+    for _, BeamPart in pairs(self.BeamParts) do
         BeamPart:Destroy()
     end
     self.BeamParts = {}

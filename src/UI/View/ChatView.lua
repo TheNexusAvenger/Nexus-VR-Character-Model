@@ -24,26 +24,26 @@ ChatView:SetClassName("ChatView")
 --[[
 Creates the chat view.
 --]]
-function ChatView:__new()
+function ChatView:__new(): nil
     self:InitializeSuper()
 
     --Create the loading text.
     --May be needed if the chat structure changes.
     local LoadingText = NexusWrappedInstance.new("TextLabel")
     LoadingText.BackgroundTransparency = 1
-    LoadingText.Size = UDim2.new(0.6,0,0.2,0)
-    LoadingText.Position = UDim2.new(0.2,0,0.4,0)
+    LoadingText.Size = UDim2.new(0.6, 0, 0.2, 0)
+    LoadingText.Position = UDim2.new(0.2, 0, 0.4, 0)
     LoadingText.Font = Enum.Font.SourceSansBold
     LoadingText.Text = "Loading..."
     LoadingText.TextScaled = true
-    LoadingText.TextColor3 = Color3.new(1,1,1)
-    LoadingText.TextStrokeColor3 = Color3.new(0,0,0)
+    LoadingText.TextColor3 = Color3.fromRGB(255, 255, 255)
+    LoadingText.TextStrokeColor3 = Color3.fromRGB(0, 0, 0)
     LoadingText.TextStrokeTransparency = 0
     LoadingText.Parent = self
 
     --Set up the chat.
-    --Done in a coroutine in case it fails or yields.
-    coroutine.wrap(function()
+    --Done in a task in case it fails or yields.
+    task.spawn(function()
         --Load the chat.
         --Taken from the main script.
         local Chat = require(Players.LocalPlayer:WaitForChild("PlayerScripts"):WaitForChild("ChatScript"):WaitForChild("ChatMain"))
@@ -135,9 +135,9 @@ function ChatView:__new()
 
         --Move the chat GUI to the container.
         local ChatWindow = Players.LocalPlayer:WaitForChild("PlayerGui"):WaitForChild("Chat")
-        while #ChatWindow:GetChildren() == 0 do wait() end
+        while #ChatWindow:GetChildren() == 0 do task.wait() end
         local ChatFrame = ChatWindow:FindFirstChildOfClass("Frame")
-        ChatFrame.Size = UDim2.new(1,0,1,0)
+        ChatFrame.Size = UDim2.new(1, 0, 1, 0)
         ChatFrame.Parent = self:GetWrappedInstance()
 
         --Destroy the loading text.
@@ -159,9 +159,9 @@ function ChatView:__new()
         --Bit hacky and relies on checking for the passed value to be not false and not nil instead of checking if it true.
         while true do
             Chat:SetVisible(tick())
-            wait(0.1)
+            task.wait(0.1)
         end
-    end)()
+    end)
 end
 
 

@@ -17,7 +17,7 @@ Returns the CFrame of an attachment.
 Returns an empty CFrame if the attachment
 does not exist.
 --]]
-function Limb:GetAttachmentCFrame(Part,AttachmentName)
+function Limb:GetAttachmentCFrame(Part: BasePart, AttachmentName: string): CFrame
     local Attachment = Part:FindFirstChild(AttachmentName)
     return Attachment and Attachment.CFrame or CFrame.new()
 end

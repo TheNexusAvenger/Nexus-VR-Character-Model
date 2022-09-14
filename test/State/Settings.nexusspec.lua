@@ -112,7 +112,7 @@ NexusUnitTesting:RegisterUnitTest(SettingsTest.new("SetDefaults"):SetRun(functio
             },
         },
     })
-    wait()
+    task.wait()
     self:AssertEquals(ConnectionsFired,3)
     self:AssertEquals(self.CuT:GetSetting("TestValue1.TestValue2"),"Test7")
     self:AssertEquals(self.CuT:GetSetting("TestValue3.TestValue4.TestValue5"),"Test8")
@@ -124,7 +124,7 @@ NexusUnitTesting:RegisterUnitTest(SettingsTest.new("SetDefaults"):SetRun(functio
     self.CuT:SetSetting("TestValue3.TestValue4.TestValue5","Test11")
     self.CuT:SetSetting("TestValue3.TestValue4.TestValue7","Test12")
     self.CuT:SetSetting("TestValue3.TestValue4.TestValue8",true)
-    wait()
+    task.wait()
     self:AssertEquals(ConnectionsFired,6)
     self:AssertEquals(self.CuT:GetSetting("TestValue1.TestValue2"),"Test10")
     self:AssertEquals(self.CuT:GetSetting("TestValue3.TestValue4.TestValue5"),"Test11")
@@ -170,7 +170,7 @@ NexusUnitTesting:RegisterUnitTest(SettingsTest.new("SetOverrides"):SetRun(functi
             },
         },
     })
-    wait()
+    task.wait()
     self:AssertEquals(ConnectionsFired,3)
     self:AssertEquals(self.CuT:GetSetting("TestValue1.TestValue2"),"Test7")
     self:AssertEquals(self.CuT:GetSetting("TestValue3.TestValue4.TestValue5"),"Test8")
@@ -195,13 +195,13 @@ NexusUnitTesting:RegisterUnitTest(SettingsTest.new("GetSettingsChangedSignal"):S
 
     --Assert the fired connections are valid.
     self.CuT:SetSetting("TestValue1.TestValue2","Test7")
-    wait()
+    task.wait()
     self:AssertEquals(ConnectionsFired,1)
     self.CuT:SetSetting("TestValue3.TestValue4.TestValue5","Test8")
-    wait()
+    task.wait()
     self:AssertEquals(ConnectionsFired,2)
     self.CuT:SetSetting("TestValue3.TestValue4.TestValue7","Test9")
-    wait()
+    task.wait()
     self:AssertEquals(ConnectionsFired,3)
 end))
 

@@ -24,7 +24,7 @@ TeleportController:SetClassName("TeleportController")
 --[[
 Enables the controller.
 --]]
-function TeleportController:Enable()
+function TeleportController:Enable(): nil
     self.super:Enable()
 
     --Create the arcs.
@@ -46,7 +46,7 @@ function TeleportController:Enable()
     --Connect requesting jumping.
     --ButtonA does not work with IsButtonDown.
     self.ButtonADown = false
-    table.insert(self.Connections,UserInputService.InputBegan:Connect(function(Input,Processsed)
+    table.insert(self.Connections,UserInputService.InputBegan:Connect(function(Input, Processsed)
         if Processsed then return end
         if Input.KeyCode == Enum.KeyCode.ButtonA then
             self.ButtonADown = true
@@ -62,7 +62,7 @@ end
 --[[
 Disables the controller.
 --]]
-function TeleportController:Disable()
+function TeleportController:Disable(): nil
     self.super:Disable()
 
     --Destroy the arcs.
@@ -82,7 +82,7 @@ function TeleportController:UpdateCharacter()
 
     --Get the VR inputs.
     local VRInputs = VRInputService:GetVRInputs()
-    for _,InputEnum in pairs({Enum.UserCFrame.Head,Enum.UserCFrame.LeftHand,Enum.UserCFrame.RightHand}) do
+    for _, InputEnum in pairs(Enum.UserCFrame:GetEnumItems()) do
         VRInputs[InputEnum] = self:ScaleInput(VRInputs[InputEnum])
     end
 
@@ -97,7 +97,7 @@ function TeleportController:UpdateCharacter()
 
         --Update and fetch the current state.
         local DirectionState, RadiusState, StateChange = self:GetJoystickState(ArcData)
-        
+
         --Cancel the input if it is forward facing, on the right hand, and the menu is visible.
         --This is an optimization for the Valve Index that has pressing the right thumbstick forward for opening the menu.
         if IGNORE_RIGHT_INPUT_FORWARD_ON_MENU_OPEN and not ArcData.WaitForRelease and DirectionState == "Forward" and ArcData.Thumbstick == Enum.KeyCode.Thumbstick2 then
@@ -125,11 +125,11 @@ function TeleportController:UpdateCharacter()
                 if DirectionState == "Left" then
                     --Turn the player to the left.
                     self:PlayBlur()
-                    HumanoidRootPart.CFrame = CFrame.new(HumanoidRootPart.Position) * CFrame.Angles(0,THUMBSTICK_MANUAL_ROTATION_ANGLE,0) * (CFrame.new(-HumanoidRootPart.Position) * HumanoidRootPart.CFrame)
+                    HumanoidRootPart.CFrame = CFrame.new(HumanoidRootPart.Position) * CFrame.Angles(0, THUMBSTICK_MANUAL_ROTATION_ANGLE, 0) * (CFrame.new(-HumanoidRootPart.Position) * HumanoidRootPart.CFrame)
                 elseif DirectionState == "Right" then
                     --Turn the player to the right.
                     self:PlayBlur()
-                    HumanoidRootPart.CFrame = CFrame.new(HumanoidRootPart.Position) * CFrame.Angles(0,-THUMBSTICK_MANUAL_ROTATION_ANGLE,0) * (CFrame.new(-HumanoidRootPart.Position) * HumanoidRootPart.CFrame)
+                    HumanoidRootPart.CFrame = CFrame.new(HumanoidRootPart.Position) * CFrame.Angles(0, -THUMBSTICK_MANUAL_ROTATION_ANGLE, 0) * (CFrame.new(-HumanoidRootPart.Position) * HumanoidRootPart.CFrame)
                 end
             end
         elseif StateChange == "Released" then
@@ -152,10 +152,10 @@ function TeleportController:UpdateCharacter()
                         --Sit in the seat.
                         --Waiting is done if the player was in an existing seat because the player no longer sitting will prevent sitting.
                         if WasSitting then
-                            coroutine.wrap(function()
+                            task.spawn(function()
                                 while self.Character.Humanoid.SeatPart do task.wait() end
                                 ArcData.LastHitPart:Sit(self.Character.Humanoid)
-                            end)()
+                            end)
                         else
                             ArcData.LastHitPart:Sit(self.Character.Humanoid)
                         end
@@ -163,12 +163,12 @@ function TeleportController:UpdateCharacter()
                         --Teleport the player.
                         --Waiting is done if the player was in an existing seat because the player will teleport the seat.
                         if WasSitting then
-                            coroutine.wrap(function()
+                            task.spawn(function()
                                 while self.Character.Humanoid.SeatPart do task.wait() end
-                                HumanoidRootPart.CFrame = CFrame.new(ArcData.LastHitPosition) * CFrame.new(0,4.5 * self.Character.ScaleValues.BodyHeightScale.Value,0) * (CFrame.new(-HumanoidRootPart.Position) * HumanoidRootPart.CFrame)
-                            end)()
+                                HumanoidRootPart.CFrame = CFrame.new(ArcData.LastHitPosition) * CFrame.new(0, 4.5 * self.Character.ScaleValues.BodyHeightScale.Value, 0) * (CFrame.new(-HumanoidRootPart.Position) * HumanoidRootPart.CFrame)
+                            end)
                         else
-                            HumanoidRootPart.CFrame = CFrame.new(ArcData.LastHitPosition) * CFrame.new(0,4.5 * self.Character.ScaleValues.BodyHeightScale.Value,0) * (CFrame.new(-HumanoidRootPart.Position) * HumanoidRootPart.CFrame)
+                            HumanoidRootPart.CFrame = CFrame.new(ArcData.LastHitPosition) * CFrame.new(0, 4.5 * self.Character.ScaleValues.BodyHeightScale.Value, 0) * (CFrame.new(-HumanoidRootPart.Position) * HumanoidRootPart.CFrame)
                         end
                     end
                 end
@@ -176,7 +176,7 @@ function TeleportController:UpdateCharacter()
         elseif StateChange == "Cancel" then
             ArcData.Arc:Hide()
         elseif DirectionState == "Forward" and RadiusState == "Extended" then
-            ArcData.LastHitPart,ArcData.LastHitPosition = ArcData.Arc:Update(Workspace.CurrentCamera:GetRenderCFrame() * VRInputs[Enum.UserCFrame.Head]:Inverse() * VRInputs[ArcData.UserCFrame])
+            ArcData.LastHitPart, ArcData.LastHitPosition = ArcData.Arc:Update(Workspace.CurrentCamera:GetRenderCFrame() * VRInputs[Enum.UserCFrame.Head]:Inverse() * VRInputs[ArcData.UserCFrame])
         end
     end
 

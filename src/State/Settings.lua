@@ -29,7 +29,7 @@ end
 --[[
 Returns the value of a setting.
 --]]
-function Settings:GetSetting(Setting)
+function Settings:GetSetting(Setting: string): any
     --Return a cached entry if one exists.
     if self.SettingsCache[Setting] ~= nil then
         return self.SettingsCache[Setting]
@@ -38,7 +38,7 @@ function Settings:GetSetting(Setting)
     --Get the table containing the setting.
     local Defaults,Overrides = self.Defaults,self.Overrides
     local SplitSettingNames = string.split(Setting,".")
-    for i = 1,#SplitSettingNames - 1 do
+    for i = 1, #SplitSettingNames - 1 do
         Defaults = Defaults[SplitSettingNames[i]] or {}
         Overrides = Overrides[SplitSettingNames[i]] or {}
     end
@@ -55,11 +55,11 @@ end
 --[[
 Sets the value of a setting.
 --]]
-function Settings:SetSetting(Setting,Value)
+function Settings:SetSetting(Setting: string, Value: any): nil
     --Set the setting.
     local Overrides = self.Overrides
     local SplitSettingNames = string.split(Setting,".")
-    for i = 1,#SplitSettingNames - 1 do
+    for i = 1, #SplitSettingNames - 1 do
         if not Overrides[SplitSettingNames[i]] then
             Overrides[SplitSettingNames[i]] = {}
         end
@@ -78,13 +78,13 @@ end
 --[[
 Sets all the defaults.
 --]]
-function Settings:SetDefaults(Defaults)
+function Settings:SetDefaults(Defaults: {[string]: any}): nil
     --Set the defaults.
     self.Defaults = Defaults
     self.SettingsCache = {}
 
     --Fire all the event changes.
-    for _,Event in pairs(self.SettingsChangeEvents) do
+    for _, Event in pairs(self.SettingsChangeEvents) do
         Event:Fire()
     end
 end
@@ -92,13 +92,13 @@ end
 --[[
 Sets all the overrides.
 --]]
-function Settings:SetOverrides(Overrides)
+function Settings:SetOverrides(Overrides: {[string]: any}): nil
     --Set the overrides.
     self.Overrides = Overrides
     self.SettingsCache = {}
 
     --Fire all the event changes.
-    for _,Event in pairs(self.SettingsChangeEvents) do
+    for _, Event in pairs(self.SettingsChangeEvents) do
         Event:Fire()
     end
 end
@@ -106,7 +106,7 @@ end
 --[[
 Returns a changed signal for a setting.
 --]]
-function Settings:GetSettingsChangedSignal(SettingName)
+function Settings:GetSettingsChangedSignal(SettingName: string): CustomEvent
     SettingName = string.lower(SettingName)
 
     --Create the event if none exists.
@@ -121,7 +121,7 @@ end
 --[[
 Destroys the settings.
 --]]
-function Settings:Destroy()
+function Settings:Destroy(): nil
     --Disconnect the settings.
     for _,Event in pairs(self.SettingsChangeEvents) do
         Event:Disconnect()

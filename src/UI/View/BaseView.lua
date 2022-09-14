@@ -17,10 +17,10 @@ BaseView:SetClassName("BaseView")
 --[[
 Creates the base view.
 --]]
-function BaseView:__new()
+function BaseView:__new(): nil
     self:InitializeSuper("Frame")
     self.BackgroundTransparency = 1
-    self.Size = UDim2.new(1,0,1,0)
+    self.Size = UDim2.new(1, 0, 1, 0)
     self.SizeConstraint = Enum.SizeConstraint.RelativeXX
 end
 

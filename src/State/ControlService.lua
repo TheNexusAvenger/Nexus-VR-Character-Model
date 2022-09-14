@@ -18,27 +18,27 @@ ControlService:SetClassName("ControlService")
 --[[
 Creates a control service.
 --]]
-function ControlService:__new()
+function ControlService:__new(): nil
     self:InitializeSuper()
 
     --Register the default controllers.
     self.RegisteredControllers = {}
-    self:RegisterController("None",BaseController.new())
-    self:RegisterController("Teleport",TeleportController.new())
-    self:RegisterController("SmoothLocomotion",SmoothLocomotionController.new())
+    self:RegisterController("None", BaseController.new())
+    self:RegisterController("Teleport", TeleportController.new())
+    self:RegisterController("SmoothLocomotion", SmoothLocomotionController.new())
 end
 
 --[[
 Registers a controller.
 --]]
-function ControlService:RegisterController(Name,Controller)
+function ControlService:RegisterController(Name: string, Controller: any): nil
     self.RegisteredControllers[Name] = Controller
 end
 
 --[[
 Sets the active controller.
 --]]
-function ControlService:SetActiveController(Name)
+function ControlService:SetActiveController(Name: string): any
     --Return if the controller didn't change.
     if self.ActiveController == Name then return end
     self.ActiveController = Name

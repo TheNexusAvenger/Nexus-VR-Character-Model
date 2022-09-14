@@ -40,7 +40,7 @@ NexusUnitTesting:RegisterUnitTest(RateLimiterTest.new("RateLimitReached"):SetRun
     self:AssertFalse(self.CuT:RateLimitReached("Test2"))
 
     --Wait to refresh and assert that the rate limit is reached.
-    wait(0.2)
+    task.wait(0.2)
     for _ = 1,5 do
         self:AssertFalse(self.CuT:RateLimitReached("Test1"))
     end

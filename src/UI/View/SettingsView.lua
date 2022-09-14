@@ -13,7 +13,7 @@ local DefaultCursorService = NexusVRCharacterModel:GetInstance("State.DefaultCur
 local Settings = NexusVRCharacterModel:GetInstance("State.Settings")
 local VRInputService = NexusVRCharacterModel:GetInstance("State.VRInputService")
 local BaseView = NexusVRCharacterModel:GetResource("UI.View.BaseView")
-local TextButtonFactory = NexusVRCharacterModel:GetResource("NexusButton.Factory.TextButtonFactory").CreateDefault(Color3.new(0,170/255,255/255))
+local TextButtonFactory = NexusVRCharacterModel:GetResource("NexusButton.Factory.TextButtonFactory").CreateDefault(Color3.fromRGB(0, 170, 255))
 TextButtonFactory:SetDefault("Theme", "RoundedCorners")
 local NexusVRCore = require(ReplicatedStorage:WaitForChild("NexusVRCore"))
 local NexusWrappedInstance = NexusVRCore:GetResource("NexusWrappedInstance")
@@ -32,63 +32,63 @@ function SettingsView:__new()
     --Create the header.
     local HeaderLogo = NexusWrappedInstance.new("ImageLabel")
     HeaderLogo.BackgroundTransparency = 1
-    HeaderLogo.Size = UDim2.new(0.4,0,0.4,0)
-    HeaderLogo.Position = UDim2.new(0.3,0,-0.1,0)
+    HeaderLogo.Size = UDim2.new(0.4, 0, 0.4, 0)
+    HeaderLogo.Position = UDim2.new(0.3, 0, -0.1, 0)
     HeaderLogo.Image = "http://www.roblox.com/asset/?id=1499731139"
     HeaderLogo.Parent = self
 
     local NameText = NexusWrappedInstance.new("TextLabel")
     NameText.BackgroundTransparency = 1
-    NameText.Size = UDim2.new(0.8,0,0.1,0)
-    NameText.Position = UDim2.new(0.1,0,0.2,0)
+    NameText.Size = UDim2.new(0.8, 0, 0.1, 0)
+    NameText.Position = UDim2.new(0.1, 0, 0.2, 0)
     NameText.Font = Enum.Font.SourceSansBold
     NameText.Text = "Nexus VR Character Model"
     NameText.TextScaled = true
-    NameText.TextColor3 = Color3.new(1,1,1)
-    NameText.TextStrokeColor3 = Color3.new(0,0,0)
+    NameText.TextColor3 = Color3.fromRGB(255, 255, 255)
+    NameText.TextStrokeColor3 = Color3.fromRGB(0, 0, 0)
     NameText.TextStrokeTransparency = 0
     NameText.Parent = self
 
     --Create the settings.
     local CameraSettingFrame = NexusWrappedInstance.new("Frame")
     CameraSettingFrame.BackgroundTransparency = 1
-    CameraSettingFrame.Size = UDim2.new(0.8,0,0.11,0)
-    CameraSettingFrame.Position = UDim2.new(0.1,0,0.325,0)
+    CameraSettingFrame.Size = UDim2.new(0.8, 0,0.11, 0)
+    CameraSettingFrame.Position = UDim2.new(0.1, 0, 0.325, 0)
     CameraSettingFrame.Parent = self
-    self:PopulateSettingsFrame(CameraSettingFrame,"View","Camera.EnabledCameraOptions",function()
+    self:PopulateSettingsFrame(CameraSettingFrame, "View", "Camera.EnabledCameraOptions", function()
         return CameraService.ActiveCamera
-    end,function(NewValue)
+    end, function(NewValue)
         CameraService:SetActiveCamera(NewValue)
     end)
 
     local MovementSettingFrame = NexusWrappedInstance.new("Frame")
     MovementSettingFrame.BackgroundTransparency = 1
-    MovementSettingFrame.Size = UDim2.new(0.8,0,0.11,0)
-    MovementSettingFrame.Position = UDim2.new(0.1,0,0.325 + (0.15 * 1),0)
+    MovementSettingFrame.Size = UDim2.new(0.8, 0, 0.11, 0)
+    MovementSettingFrame.Position = UDim2.new(0.1, 0, 0.325 + (0.15 * 1), 0)
     MovementSettingFrame.Parent = self
-    self:PopulateSettingsFrame(MovementSettingFrame,"Control","Movement.EnabledMovementMethods",function()
+    self:PopulateSettingsFrame(MovementSettingFrame, "Control", "Movement.EnabledMovementMethods", function()
         return ControlService.ActiveController
-    end,function(NewValue)
+    end, function(NewValue)
         ControlService:SetActiveController(NewValue)
     end)
 
     local CursorSettingFrame = NexusWrappedInstance.new("Frame")
     CursorSettingFrame.BackgroundTransparency = 1
-    CursorSettingFrame.Size = UDim2.new(0.8,0,0.11,0)
-    CursorSettingFrame.Position = UDim2.new(0.1,0,0.325 + (0.15 * 2),0)
+    CursorSettingFrame.Size = UDim2.new(0.8, 0, 0.11, 0)
+    CursorSettingFrame.Position = UDim2.new(0.1, 0, 0.325 + (0.15 * 2), 0)
     CursorSettingFrame.Parent = self
-    self:PopulateSettingsFrame(CursorSettingFrame,"Roblox VR Cursor",function()
+    self:PopulateSettingsFrame(CursorSettingFrame, "Roblox VR Cursor", function()
         return DefaultCursorService.CursorOptionsList
-    end,function()
+    end, function()
         return DefaultCursorService.CurrentCursorState
-    end,function(NewValue)
+    end, function(NewValue)
         DefaultCursorService:SetCursorState(NewValue)
     end)
 
     --Create the callibration settings.
     local RecenterButton,RecenterText = TextButtonFactory:Create()
-    RecenterButton.Size = UDim2.new(0.4,0,0.075,0)
-    RecenterButton.Position = UDim2.new(0.075,0,0.85,0)
+    RecenterButton.Size = UDim2.new(0.4, 0, 0.075, 0)
+    RecenterButton.Position = UDim2.new(0.075, 0, 0.85, 0)
     RecenterButton.SizeConstraint = Enum.SizeConstraint.RelativeYY
     RecenterButton.Parent = self
     RecenterText.Text = "Recenter"
@@ -98,8 +98,8 @@ function SettingsView:__new()
     end)
 
     local SetEyeLevelButton,SetEyeLevelText = TextButtonFactory:Create()
-    SetEyeLevelButton.Size = UDim2.new(0.4,0,0.075,0)
-    SetEyeLevelButton.Position = UDim2.new(0.525,0,0.85,0)
+    SetEyeLevelButton.Size = UDim2.new(0.4, 0, 0.075, 0)
+    SetEyeLevelButton.Position = UDim2.new(0.525, 0, 0.85, 0)
     SetEyeLevelButton.SizeConstraint = Enum.SizeConstraint.RelativeYY
     SetEyeLevelButton.Parent = self
     SetEyeLevelText.Text = " Set Eye Level "
@@ -112,7 +112,7 @@ end
 --[[
 Popuulates a setting frame.
 --]]
-function SettingsView:PopulateSettingsFrame(ContainerFrame,HeaderName,GetOptionsSettings,GetValueFunction,SetValueFunction)
+function SettingsView:PopulateSettingsFrame(ContainerFrame: string, HeaderName: string, GetOptionsSettings: () -> ({string}), GetValueFunction: () -> (string), SetValueFunction: (string) -> ()?): nil
     --Converrt the GetOptionsSettings callback if it is a string.
     local OptionsSetting = nil
     if typeof(GetOptionsSettings) == "string" then
@@ -124,40 +124,40 @@ function SettingsView:PopulateSettingsFrame(ContainerFrame,HeaderName,GetOptions
 
     --Create the frames.
     local LeftButton,LeftText = TextButtonFactory:Create()
-    LeftButton.Size = UDim2.new(1,0,1,0)
-    LeftButton.Position = UDim2.new(0,0,0,0)
+    LeftButton.Size = UDim2.new(1, 0, 1, 0)
+    LeftButton.Position = UDim2.new(0, 0, 0, 0)
     LeftButton.SizeConstraint = Enum.SizeConstraint.RelativeYY
     LeftButton.Parent = ContainerFrame
     LeftText.Text = "<"
 
     local RightButton,RightText = TextButtonFactory:Create()
-    RightButton.AnchorPoint = Vector2.new(1,0)
-    RightButton.Size = UDim2.new(1,0,1,0)
-    RightButton.Position = UDim2.new(1,0,0,0)
+    RightButton.AnchorPoint = Vector2.new(1, 0)
+    RightButton.Size = UDim2.new(1, 0, 1, 0)
+    RightButton.Position = UDim2.new(1, 0, 0, 0)
     RightButton.SizeConstraint = Enum.SizeConstraint.RelativeYY
     RightButton.Parent = ContainerFrame
     RightText.Text = ">"
 
     local OptionHeaderText = NexusWrappedInstance.new("TextLabel")
     OptionHeaderText.BackgroundTransparency = 1
-    OptionHeaderText.Size = UDim2.new(0.8,0,0.5,0)
-    OptionHeaderText.Position = UDim2.new(0.1,0,-0.0125,0)
+    OptionHeaderText.Size = UDim2.new(0.8, 0, 0.5, 0)
+    OptionHeaderText.Position = UDim2.new(0.1, 0, -0.0125, 0)
     OptionHeaderText.Font = Enum.Font.SourceSansBold
     OptionHeaderText.Text = HeaderName
     OptionHeaderText.TextScaled = true
-    OptionHeaderText.TextColor3 = Color3.new(1,1,1)
-    OptionHeaderText.TextStrokeColor3 = Color3.new(0,0,0)
+    OptionHeaderText.TextColor3 = Color3.fromRGB(255, 255, 255)
+    OptionHeaderText.TextStrokeColor3 = Color3.fromRGB(0, 0, 0)
     OptionHeaderText.TextStrokeTransparency = 0
     OptionHeaderText.Parent = ContainerFrame
 
     local OptionText = NexusWrappedInstance.new("TextLabel")
     OptionText.BackgroundTransparency = 1
-    OptionText.Size = UDim2.new(0.6,0,0.7,0)
-    OptionText.Position = UDim2.new(0.2,0,0.3,0)
+    OptionText.Size = UDim2.new(0.6, 0, 0.7, 0)
+    OptionText.Position = UDim2.new(0.2, 0, 0.3, 0)
     OptionText.Font = Enum.Font.SourceSansBold
     OptionText.TextScaled = true
-    OptionText.TextColor3 = Color3.new(1,1,1)
-    OptionText.TextStrokeColor3 = Color3.new(0,0,0)
+    OptionText.TextColor3 = Color3.fromRGB(255, 255, 255)
+    OptionText.TextStrokeColor3 = Color3.fromRGB(0, 0, 0)
     OptionText.TextStrokeTransparency = 0
     OptionText.Parent = ContainerFrame
 
@@ -193,7 +193,7 @@ function SettingsView:PopulateSettingsFrame(ContainerFrame,HeaderName,GetOptions
 
         --Update the display text.
         OptionText.Text = Options[CurrentValue] or "(N/A)"
-       
+
         --Set the new value.
         if Increment and Increment ~= 0 and Options[CurrentValue] then
             SetValueFunction(Options[CurrentValue])

@@ -18,7 +18,7 @@ CharacterService:SetClassName("CharacterService")
 --[[
 Creates a character service.
 --]]
-function CharacterService:__new()
+function CharacterService:__new(): nil
     self:InitializeSuper()
     self.Characters = {}
 
@@ -31,7 +31,7 @@ end
 --[[
 Returns the VR character for a player.
 --]]
-function CharacterService:GetCharacter(Player)
+function CharacterService:GetCharacter(Player): any
     --Return if the character is nil.
     if not Player.Character then
         return

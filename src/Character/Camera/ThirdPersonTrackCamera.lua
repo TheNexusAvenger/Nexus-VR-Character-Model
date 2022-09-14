@@ -27,25 +27,25 @@ ThirdPersonTrackCamera:SetClassName("ThirdPersonTrackCamera")
 --[[
 Enables the camera.
 --]]
-function ThirdPersonTrackCamera:Enable()
+function ThirdPersonTrackCamera:Enable(): nil
     self.FetchInitialCFrame = true
 end
 
 --[[
 Disables the camera.
 --]]
-function ThirdPersonTrackCamera:Disable()
+function ThirdPersonTrackCamera:Disable(): nil
     self.FetchInitialCFrame = nil
 end
 
 --[[
 Updates the camera.
 --]]
-function ThirdPersonTrackCamera:UpdateCamera(HeadsetCFrameWorld)
+function ThirdPersonTrackCamera:UpdateCamera(HeadsetCFrameWorld: CFrame): nil
     --Set the initial CFrame to use.
     if self.FetchInitialCFrame then
-        self.BaseFaceAngleY = math.atan2(-HeadsetCFrameWorld.LookVector.X,-HeadsetCFrameWorld.LookVector.Z)
-        self.BaseCFrame = CFrame.new(HeadsetCFrameWorld.Position) * CFrame.Angles(0,self.BaseFaceAngleY,0)
+        self.BaseFaceAngleY = math.atan2(-HeadsetCFrameWorld.LookVector.X, -HeadsetCFrameWorld.LookVector.Z)
+        self.BaseCFrame = CFrame.new(HeadsetCFrameWorld.Position) * CFrame.Angles(0, self.BaseFaceAngleY, 0)
         self.FetchInitialCFrame = nil
     end
 
@@ -64,10 +64,10 @@ function ThirdPersonTrackCamera:UpdateCamera(HeadsetCFrameWorld)
 
     --Calculate the third person CFrame.
     local HeadsetRelative = self.BaseCFrame:Inverse() * HeadsetCFrameWorld
-    local TargetCFrame = self.BaseCFrame * CFrame.new(0,0,-THIRD_PERSON_ZOOM * Scale) * CFrame.Angles(0,math.pi,0) * HeadsetRelative
+    local TargetCFrame = self.BaseCFrame * CFrame.new(0, 0, -THIRD_PERSON_ZOOM * Scale) * CFrame.Angles(0, math.pi, 0) * HeadsetRelative
 
     --Update the camaera.
-    Workspace.CurrentCamera.CameraType = "Scriptable"
+    Workspace.CurrentCamera.CameraType = Enum.CameraType.Scriptable
     Workspace.CurrentCamera.HeadLocked = false
     if USE_HEAD_LOCKED_WORKAROUND then
         local HeadCFrame = VRService:GetUserCFrame(Enum.UserCFrame.Head)
