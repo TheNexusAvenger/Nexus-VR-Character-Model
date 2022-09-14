@@ -27,12 +27,25 @@ return function(NexusVRCharacterModel)
         return {}
     end
 
-    --Build and return the API.
-    return {
-        --TODO: Camera API
-        --TODO: Control API
+    --Build the initial shims for the APIs.
+    local CameraService = NexusVRCharacterModel:GetInstance("State.CameraService")
+    local ControlService = NexusVRCharacterModel:GetInstance("State.ControlService")
+    local Api = {
+        Camera = CreateShim(CameraService, {"SetActiveCamera",}),
+        Controller = CreateShim(ControlService, {"SetActiveController",}),
         Settings = CreateShim(NexusVRCharacterModel:GetInstance("State.Settings"), {"GetSetting", "SetSetting", "GetSettingsChangedSignal"}),
         Input = CreateShim(NexusVRCharacterModel:GetInstance("State.VRInputService"), {"Recenter", "SetEyeLevel", "Recentered", "EyeLevelSet",}),
         --TODO: Menu API
     }
+
+    --Add the additional APIs.
+    Api.Camera.GetActiveCamera = function()
+        return CameraService.ActiveCamera
+    end
+    Api.Controller.GetActiveController = function()
+        return ControlService.ActiveController
+    end
+
+    --Return the APIs.
+    return Api
 end
