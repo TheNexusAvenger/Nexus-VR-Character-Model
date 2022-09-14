@@ -120,6 +120,9 @@ function TeleportController:UpdateCharacter()
 
         --Update from the state.
         local HumanoidRootPart = self.Character.Parts.HumanoidRootPart
+        if DirectionState ~= "Forward" or RadiusState == "Released" then
+            ArcData.Arc:Hide()
+        end
         if StateChange == "Extended" then
             if not self.Character.Humanoid.Sit then
                 if DirectionState == "Left" then
