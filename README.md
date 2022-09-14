@@ -24,7 +24,7 @@ games.
 * The menu gesture is not obvious. Most players may
   not know about it.
 
-# Setup
+## Setup
 The repository can be synced into Roblox using
 [Rojo](https://github.com/rojo-rbx/rojo), which
 will include the [loader](NexusVRCharacterModelLoader.server.lua)
@@ -45,6 +45,10 @@ Character Model is loaded, a module named
 See Nexus VR Core's docs on how to use it
 to make user interfaces that can be interacted
 with by VR users.
+
+## API
+See [included-apis.md](docs/included-apis.md) for the APIs
+that can be referenced.
 
 ## Contributing
 Both issues and pull requests are accepted for this project.

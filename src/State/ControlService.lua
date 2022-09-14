@@ -38,11 +38,11 @@ end
 --[[
 Sets the active controller.
 --]]
-function ControlService:SetActiveController(Name: string): any
+function ControlService:SetActiveController(Name: string): nil
     --Return if the controller didn't change.
     if self.ActiveController == Name then return end
     self.ActiveController = Name
-    
+
     --Disable the current controller.
     if self.CurrentController then
         self.CurrentController:Disable()
