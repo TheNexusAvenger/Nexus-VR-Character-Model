@@ -55,6 +55,9 @@ function NexusVRCharacterModel:Load()
     script:WaitForChild("NexusVRCore").Parent = ReplicatedStorage
     script.Parent = ReplicatedStorage
 
+    --Output any warnings.
+    require(ReplicatedStorage:WaitForChild("NexusVRCharacterModel"):WaitForChild("Util"):WaitForChild("Warnings"))()
+
     --Set up the client scripts.
     local NexusVRCharacterModelClientLoader = script:WaitForChild("NexusVRCharacterModelClientLoader")
     for _,Player in pairs(Players:GetPlayers()) do

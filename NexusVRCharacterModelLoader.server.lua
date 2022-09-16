@@ -59,6 +59,12 @@ local Configuration = {
         MenuToggleGestureActive = true,
     },
     Output = {
+        --To suppress warnings from Nexus VR Character Model
+        --where supported (missing configuration entries),
+        --the names of the warnings can be added here.
+        --Add "All" to suppress all warnings.
+        SuppressWarnings = {},
+
         --If true, clients can check the client output to see
         --if Nexus VR Character Model is loaded. In order for
         --the message to appear, the client must hold down Ctrl
