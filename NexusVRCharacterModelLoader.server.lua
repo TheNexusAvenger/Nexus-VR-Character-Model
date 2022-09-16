@@ -58,6 +58,13 @@ local Configuration = {
         --recallibration, and chat.
         MenuToggleGestureActive = true,
     },
+    Output = {
+        --If true, clients can check the client output to see
+        --if Nexus VR Character Model is loaded. In order for
+        --the message to appear, the client must hold down Ctrl
+        --(left or right) when opening the F9 developer console.
+        AllowClientToOutputLoadedMessage = true,
+    },
     Extra = {
         --If true, Nexus VR Backpack (https://github.com/TheNexusAvenger/Nexus-VR-Backpack)
         --will be inserted into the game and loaded. This replaces

@@ -9,6 +9,7 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local StarterGui = game:GetService("StarterGui")
 local HttpService = game:GetService("HttpService")
 local RunService = game:GetService("RunService")
+local UserInputService = game:GetService("UserInputService")
 local VRService = game:GetService("VRService")
 
 local NexusVRCharacterModel = require(ReplicatedStorage:WaitForChild("NexusVRCharacterModel"))
@@ -33,6 +34,15 @@ UpdateInputs.OnClientEvent:Connect(function(Player, HeadCFrame, LeftHandCFrame, 
     end
 end)
 ReplicationReady:FireServer()
+
+--Allow checking if Nexus VR Character Model is loaded without being in VR.
+local LoadedPrintStatementPrinted = false
+UserInputService.InputBegan:Connect(function(Input)
+    if not LoadedPrintStatementPrinted and Input.KeyCode == Enum.KeyCode.F9 and (UserInputService:IsKeyDown(Enum.KeyCode.LeftControl) or UserInputService:IsKeyDown(Enum.KeyCode.RightControl)) and Settings:GetSetting("Output.AllowClientToOutputLoadedMessage") ~= false then
+        LoadedPrintStatementPrinted = true
+        print("Nexus VR Character Model is loaded.")
+    end
+end)
 
 --Connect the local player if VR is enabled.
 if VRService.VREnabled then
