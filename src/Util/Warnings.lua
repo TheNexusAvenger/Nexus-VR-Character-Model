@@ -44,7 +44,7 @@ return function()
     for _, Warning in Warnings do
         if not SupressedWarnings[string.lower(Warning.Key)] and Warning.Condition() then
             warn(Warning.Message)
-            warn("\tThis warning can be disabled by adding \""..Warning.Key.."\" or \"All\" to Output.SuppressWarnings in the configuration.")
+            warn("\tThis warning can be disabled by adding \""..Warning.Key.."\" or \"All\" to Output.SuppressWarnings in the configuration of Nexus VR Character Model.")
         end
     end
 end
