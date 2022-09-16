@@ -86,7 +86,7 @@ if VRService.VREnabled then
     MainMenu:SetUpOpening()
 
     --Load the backpack.
-    if Settings:GetSetting("Extra.NexusVRBackpackEnabled") then
+    if Settings:GetSetting("Extra.NexusVRBackpackEnabled") ~= false then
         task.spawn(function()
             local NexusVRBackpack = require(ReplicatedStorage:WaitForChild("NexusVRBackpack"))
             NexusVRBackpack:Load()

@@ -113,7 +113,7 @@ function NexusVRCharacterModel:Load()
 
     --Load Nexus VR Backpack.
     local Settings = NexusVRCharacterModel:GetInstance("State.Settings")
-    if Settings:GetSetting("Extra.NexusVRBackpackEnabled") then
+    if Settings:GetSetting("Extra.NexusVRBackpackEnabled") ~= false then
         require(10728805649)()
     end
 end

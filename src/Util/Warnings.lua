@@ -26,7 +26,7 @@ return function()
     local Warnings = {
         {
             Key = "MissingNexusVRBackpackEnabled",
-            Message = "The configuration entry Extra.NexusVRBackpackEnabled is missing (defaults to false).",
+            Message = "The configuration entry Extra.NexusVRBackpackEnabled is missing (defaults to true).",
             Condition = function()
                return Configuration.Extra == nil or Configuration.Extra.NexusVRBackpackEnabled == nil
             end
