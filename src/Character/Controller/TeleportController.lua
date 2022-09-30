@@ -107,11 +107,13 @@ function TeleportController:UpdateCharacter()
 
         --Cancel the input if it is forward facing, on the right hand, and the menu is visible.
         --This is an optimization for the Valve Index that has pressing the right thumbstick forward for opening the menu.
+        --PositionLocked only appears when a user is pointing at the main user interface. This will not work if the player toggles
+        --the Roblox UI but doesn't point at it. Ideally, there should be a way to know that this input opens the Roblox UI.
         if IGNORE_RIGHT_INPUT_FORWARD_ON_MENU_OPEN and not ArcData.WaitForRelease and DirectionState == "Forward" and ArcData.Thumbstick == Enum.KeyCode.Thumbstick2 then
             local VRCorePanelParts = Workspace.CurrentCamera:FindFirstChild("VRCorePanelParts")
             if VRCorePanelParts then
-                local UserGui = VRCorePanelParts:FindFirstChild("UserGui")
-                if UserGui and UserGui.Position.Magnitude > 0.001 then
+                local PositionLocked = VRCorePanelParts:FindFirstChild("PositionLocked")
+                if PositionLocked and PositionLocked.Position.Magnitude > 0.001 then
                     ArcData.WaitForRelease = true
                 end
             end
