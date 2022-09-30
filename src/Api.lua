@@ -119,39 +119,36 @@ return function(NexusVRCharacterModel)
 
             --Create the Menu API.
             --The Menu API does not work outside of VR.
-            local MenuAPI = nil
+            --Release 454 and later has/had a bug that made VREnabled false on start. This mitigates that now and in the future if VR loads dynamically.
+            local MenuAPI = {}
+            local function GetMainMenu()
+                if not MenuAPI.Enabled then
+                    error("Menu API is not enabled for non-VR players. Check Api.Menu.Enabled before calling.")
+                end
+                return NexusVRCharacterModel:GetInstance("UI.MainMenu")
+            end
             if UserInputService.VREnabled then
-                local MainMenu = NexusVRCharacterModel:GetInstance("UI.MainMenu")
-                MenuAPI = CreateShim(MainMenu, {"CreateView",})
                 MenuAPI.Enabled = true
-
-                MenuAPI.IsOpen = function()
-                    return MainMenu.Enabled
-                end
-                MenuAPI.Open = function(self)
-                    if self:IsOpen() then return end
-                    MainMenu:Toggle()
-                end
-                MenuAPI.Close = function(self)
-                    if not self:IsOpen() then return end
-                    MainMenu:Toggle()
-                end
             else
-                MenuAPI = {}
                 MenuAPI.Enabled = false
+                UserInputService:GetPropertyChangedSignal("VREnabled"):Connect(function()
+                    MenuAPI.Enabled = UserInputService.VREnabled
+                end)
+            end
 
-                MenuAPI.CreateView = function()
-                    error("Menu API is not enabled for non-VR players. Check Api.Menu.Enabled before calling.")
-                end
-                MenuAPI.IsOpen = function()
-                    error("Menu API is not enabled for non-VR players. Check Api.Menu.Enabled before calling.")
-                end
-                MenuAPI.Open = function()
-                    error("Menu API is not enabled for non-VR players. Check Api.Menu.Enabled before calling.")
-                end
-                MenuAPI.Close = function()
-                    error("Menu API is not enabled for non-VR players. Check Api.Menu.Enabled before calling.")
-                end
+            MenuAPI.CreateView = function(_, ...)
+                return GetMainMenu():CreateView(...)
+            end
+            MenuAPI.IsOpen = function()
+                return GetMainMenu().Enabled
+            end
+            MenuAPI.Open = function(self)
+                if self:IsOpen() then return end
+                GetMainMenu():Toggle()
+            end
+            MenuAPI.Close = function(self)
+                if not self:IsOpen() then return end
+                GetMainMenu():Toggle()
             end
             API:Register("Menu", MenuAPI)
         end)
