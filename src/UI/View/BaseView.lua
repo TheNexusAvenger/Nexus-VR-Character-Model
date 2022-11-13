@@ -22,7 +22,7 @@ function BaseView:__new(): nil
     self.BackgroundTransparency = 1
     self.Size = UDim2.new(1, 0, 1, 0)
     self.SizeConstraint = Enum.SizeConstraint.RelativeXX
-    warn("MainMenu::RegisterView is deprecated and may be removed in the future.")
+    warn("BaseView is deprecated and will be removed on April 15th, 2023.\n\tMore information: https://github.com/TheNexusAvenger/Nexus-VR-Core/blob/master/docs/custom-pointing-deprecation.md")
 end
 
 

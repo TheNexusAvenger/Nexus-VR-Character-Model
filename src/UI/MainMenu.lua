@@ -25,7 +25,6 @@ local TextButtonFactory = NexusVRCharacterModel:GetResource("NexusButton.Factory
 TextButtonFactory:SetDefault("Theme", "RoundedCorners")
 local NexusVRCore = require(ReplicatedStorage:WaitForChild("NexusVRCore"))
 local ScreenGui = NexusVRCore:GetResource("Container.ScreenGui")
-local NexusWrappedInstance = NexusVRCore:GetResource("NexusWrappedInstance")
 
 local MainMenu = ScreenGui:Extend()
 MainMenu:SetClassName("MainMenu")
@@ -56,27 +55,27 @@ function MainMenu:__new()
     self:DisableChangeReplication("RightHandHintVisible")
 
     --Create the parent frame, display text, and toggle buttons.
-    local ViewAdornFrame = NexusWrappedInstance.new("Frame")
+    local ViewAdornFrame = Instance.new("Frame")
     ViewAdornFrame.BackgroundTransparency = 1
     ViewAdornFrame.Size = UDim2.new(0, 500, 0, 500)
-    ViewAdornFrame.Parent = self
+    ViewAdornFrame.Parent = self:GetContainer()
     self.ViewAdornFrame = ViewAdornFrame
 
     local LeftButton,LeftText = TextButtonFactory:Create()
     LeftButton.Size = UDim2.new(0, 80, 0, 80)
     LeftButton.Position = UDim2.new(0, 10, 0, 510)
-    LeftButton.Parent = self
+    LeftButton.Parent = self:GetContainer()
     LeftText.Text = "<"
     self.LeftButton = LeftButton
 
     local RightButton,RightText = TextButtonFactory:Create()
     RightButton.Size = UDim2.new(0, 80, 0, 80)
     RightButton.Position = UDim2.new(0, 410, 0, 510)
-    RightButton.Parent = self
+    RightButton.Parent = self:GetContainer()
     RightText.Text = ">"
     self.RightButton = RightButton
 
-    local ViewTextLabel = NexusWrappedInstance.new("TextLabel")
+    local ViewTextLabel = Instance.new("TextLabel")
     ViewTextLabel.BackgroundTransparency = 1
     ViewTextLabel.Size = UDim2.new(0, 300, 0, 60)
     ViewTextLabel.Position = UDim2.new(0, 100, 0, 520)
@@ -85,7 +84,7 @@ function MainMenu:__new()
     ViewTextLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
     ViewTextLabel.TextStrokeColor3 = Color3.fromRGB(0, 0, 0)
     ViewTextLabel.TextStrokeTransparency = 0
-    ViewTextLabel.Parent = self
+    ViewTextLabel.Parent = self:GetContainer()
     self.ViewTextLabel = ViewTextLabel
 
     --Set up the default views.

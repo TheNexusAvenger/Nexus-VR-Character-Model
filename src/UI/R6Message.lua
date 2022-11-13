@@ -17,7 +17,6 @@ local TextButtonFactory = NexusVRCharacterModel:GetResource("NexusButton.Factory
 TextButtonFactory:SetDefault("Theme", "RoundedCorners")
 local NexusVRCore = require(ReplicatedStorage:WaitForChild("NexusVRCore"))
 local ScreenGui = NexusVRCore:GetResource("Container.ScreenGui")
-local NexusWrappedInstance = NexusVRCore:GetResource("NexusWrappedInstance")
 
 local R6Message = ScreenGui:Extend()
 R6Message:SetClassName("R6Message")
@@ -38,14 +37,14 @@ function R6Message:__new(): nil
     self.Easing = 0.25
 
     --Create the logo and message.
-    local Logo = NexusWrappedInstance.new("ImageLabel")
+    local Logo = Instance.new("ImageLabel")
     Logo.BackgroundTransparency = 1
     Logo.Size = UDim2.new(0.4, 0, 0.4, 0)
     Logo.Position = UDim2.new(0.3, 0, -0.1, 0)
     Logo.Image = "http://www.roblox.com/asset/?id=1499731139"
-    Logo.Parent = self
+    Logo.Parent = self:GetContainer()
 
-    local UpperText = NexusWrappedInstance.new("TextLabel")
+    local UpperText = Instance.new("TextLabel")
     UpperText.BackgroundTransparency = 1
     UpperText.Size = UDim2.new(0.8, 0, 0.1, 0)
     UpperText.Position = UDim2.new(0.1, 0, 0.25, 0)
@@ -55,9 +54,9 @@ function R6Message:__new(): nil
     UpperText.TextColor3 = Color3.fromRGB(255, 255, 255)
     UpperText.TextStrokeColor3 = Color3.fromRGB(0, 0, 0)
     UpperText.TextStrokeTransparency = 0
-    UpperText.Parent = self
+    UpperText.Parent = self:GetContainer()
 
-    local LowerText = NexusWrappedInstance.new("TextLabel")
+    local LowerText = Instance.new("TextLabel")
     LowerText.BackgroundTransparency = 1
     LowerText.Size = UDim2.new(0.8, 0, 0.25, 0)
     LowerText.Position = UDim2.new(0.1, 0, 0.4, 0)
@@ -67,13 +66,13 @@ function R6Message:__new(): nil
     LowerText.TextColor3 = Color3.fromRGB(255, 255, 255)
     LowerText.TextStrokeColor3 = Color3.fromRGB(0, 0, 0)
     LowerText.TextStrokeTransparency = 0
-    LowerText.Parent = self
+    LowerText.Parent = self:GetContainer()
 
     --Create and connect the close button.
     local CloseButton,CloseText = TextButtonFactory:Create()
     CloseButton.Size = UDim2.new(0.3, 0, 0.1, 0)
     CloseButton.Position = UDim2.new(0.35, 0, 0.7, 0)
-    CloseButton.Parent = self
+    CloseButton.Parent = self:GetContainer()
     CloseText.Text = "Ok"
 
     CloseButton.MouseButton1Click:Connect(function()
