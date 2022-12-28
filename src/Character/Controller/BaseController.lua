@@ -180,7 +180,6 @@ teleports and snap turns less jarring.
 ]]--
 function BaseController:PlayBlur(): nil
     local SnapTeleportBlur = Settings:GetSetting("Movement.SnapTeleportBlur")
-    warn(SnapTeleportBlur)
     SnapTeleportBlur = (if SnapTeleportBlur == nil then true else SnapTeleportBlur)
 
     if not SnapTeleportBlur then
