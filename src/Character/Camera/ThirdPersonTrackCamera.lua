@@ -3,6 +3,7 @@ TheNexusAvenger
 
 Third person camera that moves with the player.
 --]]
+--!strict
 
 --Workaround for Roblox's CoreGuis relying on HeadLocked.
 --https://devforum.roblox.com/t/coregui-vr-components-rely-on-headlocked-being-true/100460
@@ -16,32 +17,37 @@ local Workspace = game:GetService("Workspace")
 local Players = game:GetService("Players")
 local VRService = game:GetService("VRService")
 
-local NexusVRCharacterModel = require(script.Parent.Parent.Parent)
-local NexusObject = NexusVRCharacterModel:GetResource("NexusInstance.NexusObject")
 
-local ThirdPersonTrackCamera = NexusObject:Extend()
-ThirdPersonTrackCamera:SetClassName("ThirdPersonTrackCamera")
+local ThirdPersonTrackCamera = {}
+ThirdPersonTrackCamera.__index = ThirdPersonTrackCamera
 
 
 
 --[[
+Creates a third-person camera object.
+--]]
+function ThirdPersonTrackCamera.new(): any
+    return setmetatable({}, ThirdPersonTrackCamera)
+end
+
+--[[
 Enables the camera.
 --]]
-function ThirdPersonTrackCamera:Enable(): nil
+function ThirdPersonTrackCamera:Enable(): ()
     self.FetchInitialCFrame = true
 end
 
 --[[
 Disables the camera.
 --]]
-function ThirdPersonTrackCamera:Disable(): nil
+function ThirdPersonTrackCamera:Disable(): ()
     self.FetchInitialCFrame = nil
 end
 
 --[[
 Updates the camera.
 --]]
-function ThirdPersonTrackCamera:UpdateCamera(HeadsetCFrameWorld: CFrame): nil
+function ThirdPersonTrackCamera:UpdateCamera(HeadsetCFrameWorld: CFrame): ()
     --Set the initial CFrame to use.
     if self.FetchInitialCFrame then
         self.BaseFaceAngleY = math.atan2(-HeadsetCFrameWorld.LookVector.X, -HeadsetCFrameWorld.LookVector.Z)

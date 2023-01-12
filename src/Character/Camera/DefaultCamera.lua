@@ -3,6 +3,7 @@ TheNexusAvenger
 
 Default camera that follows the character.
 --]]
+--!strict
 
 --Workaround for Roblox's CoreGuis relying on HeadLocked.
 --https://devforum.roblox.com/t/coregui-vr-components-rely-on-headlocked-being-true/100460
@@ -20,12 +21,12 @@ local Workspace = game:GetService("Workspace")
 local Players = game:GetService("Players")
 local VRService = game:GetService("VRService")
 
-local NexusVRCharacterModel = require(script.Parent.Parent.Parent)
-local NexusObject = NexusVRCharacterModel:GetResource("NexusInstance.NexusObject")
-local Settings = NexusVRCharacterModel:GetInstance("State.Settings")
+local NexusVRCharacterModel = script.Parent.Parent.Parent
+local Settings = require(NexusVRCharacterModel:WaitForChild("State"):WaitForChild("Settings")).GetInstance()
 
-local DefaultCamera = NexusObject:Extend()
-DefaultCamera:SetClassName("DefaultCamera")
+local DefaultCamera = {}
+DefaultCamera.__index = DefaultCamera
+
 
 
 --[[
@@ -59,15 +60,22 @@ function DefaultCamera.IsInTool(Part: BasePart): boolean
         if Part:IsA("Tool") then
             return true
         end
-        Part = Part.Parent
+        Part = (Part :: any).Parent
     end
     return false
 end
 
 --[[
+Creates a default camera object.
+--]]
+function DefaultCamera.new(): any
+    return setmetatable({}, DefaultCamera)
+end
+
+--[[
 Enables the camera.
 --]]
-function DefaultCamera:Enable(): nil
+function DefaultCamera:Enable(): ()
     self.TransparencyEvents = {}
     if Players.LocalPlayer.Character then
         --Connect children being added.
@@ -86,7 +94,7 @@ function DefaultCamera:Enable(): nil
                 end
             end
         end))
-        for _, Part in pairs(Players.LocalPlayer.Character:GetDescendants()) do
+        for _, Part in Players.LocalPlayer.Character:GetDescendants() do
             if Part:IsA("BasePart") then
                 if DefaultCamera.ShouldHidePart(Part) then
                     Part.LocalTransparencyModifier = 1
@@ -116,10 +124,10 @@ end
 --[[
 Disables the camera.
 --]]
-function DefaultCamera:Disable(): nil
+function DefaultCamera:Disable(): ()
     --Disconnect the character events.
     if self.TransparencyEvents then
-        for _,Event in pairs(self.TransparencyEvents) do
+        for _, Event in self.TransparencyEvents do
             Event:Disconnect()
         end
         self.TransparencyEvents = {}
@@ -127,7 +135,7 @@ function DefaultCamera:Disable(): nil
 
     --Reset the local transparency modifiers.
     if Players.LocalPlayer.Character then
-        for _, Part in pairs(Players.LocalPlayer.Character:GetDescendants()) do
+        for _, Part in Players.LocalPlayer.Character:GetDescendants() do
             if Part:IsA("BasePart") then
                 Part.LocalTransparencyModifier = 0
             end
@@ -138,7 +146,7 @@ end
 --[[
 Updates the camera.
 --]]
-function DefaultCamera:UpdateCamera(HeadsetCFrameWorld: CFrame): nil
+function DefaultCamera:UpdateCamera(HeadsetCFrameWorld: CFrame): ()
     Workspace.CurrentCamera.CameraType = Enum.CameraType.Scriptable
     if USE_HEAD_LOCKED_WORKAROUND then
         local HeadCFrame = VRService:GetUserCFrame(Enum.UserCFrame.Head)

@@ -10,9 +10,11 @@ local NexusEvent = require(NexusVRCharacterModel:WaitForChild("NexusInstance"):W
 
 local Settings ={}
 Settings.__index = Settings
+local StaticInstance = nil
 
 export type Settings ={
     new: () -> (Settings),
+    GetInstance: () -> (Settings),
 
     GetSetting: (self: Settings, Setting: string) -> (any),
     SetSetting: (self: Settings, Setting: string, Value: any) -> (),
@@ -34,6 +36,16 @@ function Settings.new(): Settings
         SettingsChangeEvents = {},
         SettingsCache = {},
     }, Settings) :: any) :: Settings
+end
+
+--[[
+Returns a singleton instance of settings.
+--]]
+function Settings.GetInstance(): Settings
+    if not StaticInstance then
+        StaticInstance = Settings.new()
+    end
+    return StaticInstance
 end
 
 --[[
