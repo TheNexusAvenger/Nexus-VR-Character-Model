@@ -24,7 +24,7 @@ DefaultCursorService:SetClassName("DefaultCursorService")
 Creates a default cursor service.
 --]]
 function DefaultCursorService:__new(): nil
-    self:InitializeSuper()
+    NexusObject.__new(self)
 
     --Register the default values.
     self.CursorOptionsList = {"Detect", "Enabled", "Disabled"}

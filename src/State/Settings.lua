@@ -3,27 +3,37 @@ TheNexusAvenger
 
 Stores settings.
 --]]
+--!strict
 
-local NexusVRCharacterModel = require(script.Parent.Parent)
-local NexusObject = NexusVRCharacterModel:GetResource("NexusInstance.NexusObject")
-local NexusEvent = NexusVRCharacterModel:GetResource("NexusInstance.Event.NexusEvent")
+local NexusVRCharacterModel = script.Parent.Parent
+local NexusEvent = require(NexusVRCharacterModel:WaitForChild("NexusInstance"):WaitForChild("Event"):WaitForChild("NexusEvent"))
 
-local Settings = NexusObject:Extend()
-Settings:SetClassName("Settings")
+local Settings ={}
+Settings.__index = Settings
+
+export type Settings ={
+    new: () -> (Settings),
+
+    GetSetting: (self: Settings, Setting: string) -> (any),
+    SetSetting: (self: Settings, Setting: string, Value: any) -> (),
+    SetDefaults: (self: Settings, Defaults: {[string]: any}) -> (),
+    SetOverrides: (self: Settings, Overrides: {[string]: any}) -> (),
+    GetSettingsChangedSignal: (self: Settings, Setting: string) -> (NexusEvent.NexusEvent<>),
+    Destroy: (self: Settings) -> (),
+}
 
 
 
 --[[
 Creates a settings object.
 --]]
-function Settings:__new()
-    self:InitializeSuper()
-
-    --Store the settings.
-    self.Defaults = {}
-    self.Overrides = {}
-    self.SettingsChangeEvents = {}
-    self.SettingsCache = {}
+function Settings.new(): Settings
+    return (setmetatable({
+        Defaults = {},
+        Overrides = {},
+        SettingsChangeEvents = {},
+        SettingsCache = {},
+    }, Settings) :: any) :: Settings
 end
 
 --[[
@@ -36,8 +46,8 @@ function Settings:GetSetting(Setting: string): any
     end
 
     --Get the table containing the setting.
-    local Defaults,Overrides = self.Defaults,self.Overrides
-    local SplitSettingNames = string.split(Setting,".")
+    local Defaults, Overrides = self.Defaults, self.Overrides
+    local SplitSettingNames = string.split(Setting, ".")
     for i = 1, #SplitSettingNames - 1 do
         Defaults = Defaults[SplitSettingNames[i]] or {}
         Overrides = Overrides[SplitSettingNames[i]] or {}
@@ -55,7 +65,7 @@ end
 --[[
 Sets the value of a setting.
 --]]
-function Settings:SetSetting(Setting: string, Value: any): nil
+function Settings:SetSetting(Setting: string, Value: any): ()
     --Set the setting.
     local Overrides = self.Overrides
     local SplitSettingNames = string.split(Setting,".")
@@ -78,13 +88,13 @@ end
 --[[
 Sets all the defaults.
 --]]
-function Settings:SetDefaults(Defaults: {[string]: any}): nil
+function Settings:SetDefaults(Defaults: {[string]: any}): ()
     --Set the defaults.
     self.Defaults = Defaults
     self.SettingsCache = {}
 
     --Fire all the event changes.
-    for _, Event in pairs(self.SettingsChangeEvents) do
+    for _, Event in self.SettingsChangeEvents do
         Event:Fire()
     end
 end
@@ -92,13 +102,13 @@ end
 --[[
 Sets all the overrides.
 --]]
-function Settings:SetOverrides(Overrides: {[string]: any}): nil
+function Settings:SetOverrides(Overrides: {[string]: any}): ()
     --Set the overrides.
     self.Overrides = Overrides
     self.SettingsCache = {}
 
     --Fire all the event changes.
-    for _, Event in pairs(self.SettingsChangeEvents) do
+    for _, Event in self.SettingsChangeEvents do
         Event:Fire()
     end
 end
@@ -106,24 +116,24 @@ end
 --[[
 Returns a changed signal for a setting.
 --]]
-function Settings:GetSettingsChangedSignal(SettingName: string): CustomEvent
-    SettingName = string.lower(SettingName)
+function Settings:GetSettingsChangedSignal(Overrides: string): NexusEvent.NexusEvent<>
+    Overrides = string.lower(Overrides)
 
     --Create the event if none exists.
-    if not self.SettingsChangeEvents[SettingName] then
-        self.SettingsChangeEvents[SettingName] = NexusEvent.new()
+    if not self.SettingsChangeEvents[Overrides] then
+        self.SettingsChangeEvents[Overrides] = NexusEvent.new()
     end
 
     --Return the event.
-    return self.SettingsChangeEvents[SettingName]
+    return self.SettingsChangeEvents[Overrides]
 end
 
 --[[
 Destroys the settings.
 --]]
-function Settings:Destroy(): nil
+function Settings:Destroy(): ()
     --Disconnect the settings.
-    for _,Event in pairs(self.SettingsChangeEvents) do
+    for _,Event in self.SettingsChangeEvents do
         Event:Disconnect()
     end
     self.SettingsChangeEvents = {}

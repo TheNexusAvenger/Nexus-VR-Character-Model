@@ -17,7 +17,7 @@ Appendage:SetClassName("Appendage")
 Creates an appendage.
 --]]
 function Appendage:__new(UpperLimb: BasePart, LowerLimb: BasePart, LimbEnd: BasePart, StartAttachment: string, LimbJointAttachment: string, LimbEndAttachment: string, LimbHoldAttachment: string, PreventDisconnection: boolean?): nil
-    self:InitializeSuper()
+    Limb.__new(self)
 
     --Store the parts and attachment names.
     self.UpperLimb = UpperLimb

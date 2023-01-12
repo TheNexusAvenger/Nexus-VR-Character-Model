@@ -3,40 +3,60 @@ TheNexusAvenger
 
 Manages the local camera.
 --]]
+--!strict
 
-local NexusVRCharacterModel = require(script.Parent.Parent)
-local NexusObject = NexusVRCharacterModel:GetResource("NexusInstance.NexusObject")
-local DefaultCamera = NexusVRCharacterModel:GetResource("Character.Camera.DefaultCamera")
-local ThirdPersonTrackCamera = NexusVRCharacterModel:GetResource("Character.Camera.ThirdPersonTrackCamera")
+local NexusVRCharacterModel = script.Parent.Parent
+local DefaultCamera = require(NexusVRCharacterModel:WaitForChild("Character"):WaitForChild("Camera"):WaitForChild("DefaultCamera"))
+local ThirdPersonTrackCamera = require(NexusVRCharacterModel:WaitForChild("Character"):WaitForChild("Camera"):WaitForChild("ThirdPersonTrackCamera"))
 
-local CameraService = NexusObject:Extend()
-CameraService:SetClassName("CameraService")
+local CameraService = {}
+CameraService.__index = CameraService
+
+export type CameraService = {
+    new: () -> (CameraService),
+
+    RegisterCamera: (self: CameraService, Name: string, Camera: CameraInterface) -> (),
+    SetActiveCamera: (self: CameraService, Name: string) -> (),
+    UpdateCamera: (self: CameraService, HeadsetCFrameWorld: CFrame) -> (),
+}
+
+export type CameraInterface = {
+    Enable: (self: CameraInterface) -> (),
+    Disable: (self: CameraInterface) -> (),
+    UpdateCamera: (self: CameraInterface, HeadsetCFrameWorld: CFrame) -> (),
+}
 
 
 
 --[[
 Creates a camera service.
 --]]
-function CameraService:__new(): nil
-    self:InitializeSuper()
+function CameraService.new(): CameraService
+    --Create the object.
+    local self = {
+        RegisteredCameras = {},
+    }
+    setmetatable(self, CameraService)
 
     --Register the default controllers.
-    self.RegisteredCameras = {}
     self:RegisterCamera("Default", DefaultCamera.new())
     self:RegisterCamera("ThirdPersonTrack", ThirdPersonTrackCamera.new())
+
+    --Return the object.
+    return (self :: any) :: CameraService
 end
 
 --[[
 Registers a camera.
 --]]
-function CameraService:RegisterCamera(Name: string, Camera: table): nil
+function CameraService:RegisterCamera(Name: string, Camera: CameraInterface): ()
     self.RegisteredCameras[Name] = Camera
 end
 
 --[[
 Sets the active camera.
 --]]
-function CameraService:SetActiveCamera(Name: string): nil
+function CameraService:SetActiveCamera(Name: string): ()
     --Return if the camera didn't change.
     if self.ActiveCamera == Name then return end
     self.ActiveCamera = Name
@@ -58,7 +78,7 @@ end
 --[[
 Updates the local camera.
 --]]
-function CameraService:UpdateCamera(HeadsetCFrameWorld: CFrame): nil
+function CameraService:UpdateCamera(HeadsetCFrameWorld: CFrame): ()
     if self.CurrentCamera then
         self.CurrentCamera:UpdateCamera(HeadsetCFrameWorld)
     end
@@ -66,4 +86,4 @@ end
 
 
 
-return CameraService
+return (CameraService :: any) :: CameraService

@@ -24,7 +24,7 @@ ChatView:SetClassName("ChatView")
 Creates the chat view.
 --]]
 function ChatView:__new(View: table): nil
-    self:InitializeSuper()
+    NexusInstance.__new(self)
 
     task.spawn(function()
         --Wait for a request to load the chat.

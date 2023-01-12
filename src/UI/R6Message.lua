@@ -27,7 +27,7 @@ R6Message:SetClassName("R6Message")
 Creates the R6 message.
 --]]
 function R6Message:__new(): nil
-    self:InitializeSuper()
+    ScreenGui.__new(self)
 
     --Set up the ScreenGui.
     self.ResetOnSpawn = false

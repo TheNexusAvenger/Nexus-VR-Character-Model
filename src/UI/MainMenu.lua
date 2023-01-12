@@ -35,7 +35,7 @@ MainMenu:SetClassName("MainMenu")
 Creates the main menu.
 --]]
 function MainMenu:__new()
-    self:InitializeSuper()
+    ScreenGui.__new(self)
 
     --Set up the ScreenGui.
     self.ResetOnSpawn = false

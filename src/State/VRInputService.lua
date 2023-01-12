@@ -5,26 +5,40 @@ Manages VR inputs. This normalizes the inputs from
 the headsets as the Y position of the inputs is arbitrary,
 meaning it can be the floor, eye level, or random.
 --]]
+--!strict
 
 local THUMBSTICK_SAMPLES_TO_RESET = 5
 
 
 
-local NexusVRCharacterModel = require(script.Parent.Parent)
-local NexusObject = NexusVRCharacterModel:GetResource("NexusInstance.NexusObject")
-local NexusEvent = NexusVRCharacterModel:GetResource("NexusInstance.Event.NexusEvent")
+local NexusVRCharacterModel = script.Parent.Parent
+local NexusEvent = require(NexusVRCharacterModel:WaitForChild("NexusInstance"):WaitForChild("Event"):WaitForChild("NexusEvent"))
 
-local VRInputService = NexusObject:Extend()
-VRInputService:SetClassName("VRInputService")
+local VRInputService = {}
+VRInputService.__index = VRInputService
+
+export type VRInputService = {
+    new: (VRService: VRService?, UserInputService: UserInputService?) -> (VRInputService),
+
+    Recentered: NexusEvent.NexusEvent<>,
+    EyeLevelSet: NexusEvent.NexusEvent<>,
+    GetVRInputs: (self: VRInputService) -> ({[Enum.UserCFrame]: CFrame}),
+    Recenter: (self: VRInputService) -> (),
+    SetEyeLevel: (self: VRInputService) -> (),
+    GetThumbstickPosition: (self: VRInputService, Thumbsick: Enum.KeyCode) -> (Vector3),
+}
 
 
 
 --[[
 Creates a settings object.
 --]]
-function VRInputService:__new(VRService: VRService?, UserInputService: UserInputService?): nil
-    self:InitializeSuper()
-    self.RecenterOffset = CFrame.new()
+function VRInputService.new(VRService: VRService?, UserInputService: UserInputService?): VRInputService
+    --Create the object.
+    local self = {
+        RecenterOffset = CFrame.new(),
+    }
+    setmetatable(self, VRInputService)
 
     --Store the services for testing.
     self.VRService = VRService or game:GetService("VRService")
@@ -69,6 +83,9 @@ function VRInputService:__new(VRService: VRService?, UserInputService: UserInput
             self.ThumbstickValues[Input.KeyCode] = Input.Position
         end
     end)
+
+    --Return the object.
+    return (self :: any) :: VRInputService
 end
 
 --[[
@@ -79,7 +96,7 @@ function VRInputService:GetVRInputs(): {[Enum.UserCFrame]: CFrame}
     --Get the head input.
     local VRInputs = {
         [Enum.UserCFrame.Head] = self.VRService:GetUserCFrame(Enum.UserCFrame.Head),
-    }
+    } :: {[Enum.UserCFrame]: CFrame}
 
     --Get the hand inputs.
     if self.VRService:GetUserCFrameEnabled(Enum.UserCFrame.LeftHand) then
@@ -110,7 +127,7 @@ function VRInputService:GetVRInputs(): {[Enum.UserCFrame]: CFrame}
 
     --Normalize the CFrame heights.
     --A list of enums is used instead of VRInputs because modifying a table stops pairs().
-    for _,InputEnum in pairs({Enum.UserCFrame.Head,Enum.UserCFrame.LeftHand,Enum.UserCFrame.RightHand}) do
+    for _, InputEnum in {Enum.UserCFrame.Head, Enum.UserCFrame.LeftHand, Enum.UserCFrame.RightHand} do
         VRInputs[InputEnum] = CFrame.new(0, HeightOffset, 0) * self.RecenterOffset * VRInputs[InputEnum]
     end
 
@@ -122,7 +139,7 @@ end
 Recenters the service.
 Does not alter the Y axis.
 --]]
-function VRInputService:Recenter(): nil
+function VRInputService:Recenter(): ()
     local HeadCFrame = self.VRService:GetUserCFrame(Enum.UserCFrame.Head)
     self.RecenterOffset = CFrame.Angles(0, -math.atan2(-HeadCFrame.LookVector.X, -HeadCFrame.LookVector.Z), 0) * CFrame.new(-HeadCFrame.X, 0, -HeadCFrame.Z)
     self.Recentered:Fire()
@@ -131,7 +148,7 @@ end
 --[[
 Sets the eye level.
 --]]
-function VRInputService:SetEyeLevel(): nil
+function VRInputService:SetEyeLevel(): ()
     self.ManualNormalHeadLevel = self.VRService:GetUserCFrame(Enum.UserCFrame.Head).Y
     self.EyeLevelSet:Fire()
 end
@@ -142,19 +159,19 @@ Returns the current value for a thumbstick.
 function VRInputService:GetThumbstickPosition(Thumbsick: Enum.KeyCode): Vector3
     --Return if the value isn't supported.
     if not self.ThumbstickValues[Thumbsick] then
-        return
+        return Vector3.zero
     end
 
     --Store the polled value.
     self.PreviousThumbstickValues[Thumbsick][self.CurrentThumbstickPointers[Thumbsick]] = self.ThumbstickValues[Thumbsick]
-    self.CurrentThumbstickPointers[Thumbsick] = (self.CurrentThumbstickPointers[Thumbsick] % THUMBSTICK_SAMPLES_TO_RESET) + 1
+    self.CurrentThumbstickPointers[Thumbsick] = (self.CurrentThumbstickPointers[Thumbsick] :: number % THUMBSTICK_SAMPLES_TO_RESET) + 1
 
     --Determine if the polled values are exactly the same.
     --Closeness is not used as the thumbstick being held in place will register as slightly different values.
     --This happens if the trigger is released (such as a touchpad, which may not automatically reset).
     local ValuesSame = true
     local InitialValue = self.PreviousThumbstickValues[Thumbsick][1]
-    for i = 2,THUMBSTICK_SAMPLES_TO_RESET do
+    for i = 2, THUMBSTICK_SAMPLES_TO_RESET do
         if self.PreviousThumbstickValues[Thumbsick][i] ~= InitialValue then
             ValuesSame = false
             break
@@ -171,4 +188,4 @@ end
 
 
 
-return VRInputService
+return (VRInputService :: any) :: VRInputService

@@ -17,7 +17,7 @@ Head:SetClassName("Head")
 Creates a head.
 --]]
 function Head:__new(HeadPart: BasePart): nil
-    self:InitializeSuper()
+    Limb.__new(self)
 
     --Store the parts.
     self.Head = HeadPart

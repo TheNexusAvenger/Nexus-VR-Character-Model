@@ -3,42 +3,62 @@ TheNexusAvenger
 
 Manages controlling the local characters.
 --]]
+--!strict
 
 local NexusVRCharacterModel = require(script.Parent.Parent)
-local NexusObject = NexusVRCharacterModel:GetResource("NexusInstance.NexusObject")
 local BaseController = NexusVRCharacterModel:GetResource("Character.Controller.BaseController")
 local TeleportController = NexusVRCharacterModel:GetResource("Character.Controller.TeleportController")
 local SmoothLocomotionController = NexusVRCharacterModel:GetResource("Character.Controller.SmoothLocomotionController")
 
-local ControlService = NexusObject:Extend()
-ControlService:SetClassName("ControlService")
+local ControlService = {}
+ControlService.__index = ControlService
+
+export type ControlService = {
+    new: () -> (ControlService),
+
+    RegisterController: (self: ControlService, Name: string, Controller: ControllerInterface) -> (),
+    SetActiveController: (self: ControlService, Name: string) -> (),
+    UpdateCharacter: (self: ControlService) -> (),
+}
+
+export type ControllerInterface = {
+    Disable: (self: ControllerInterface) -> (),
+    Enable: (self: ControllerInterface) -> (),
+    UpdateCharacter: (self: ControllerInterface) -> (),
+}
 
 
 
 --[[
 Creates a control service.
 --]]
-function ControlService:__new(): nil
-    self:InitializeSuper()
+function ControlService.new(): ControlService
+    --Create the object.
+    local self = {
+        RegisteredControllers = {},
+    }
+    setmetatable(self, ControlService)
 
     --Register the default controllers.
-    self.RegisteredControllers = {}
     self:RegisterController("None", BaseController.new())
     self:RegisterController("Teleport", TeleportController.new())
     self:RegisterController("SmoothLocomotion", SmoothLocomotionController.new())
+
+    --Return the object.
+    return (self :: any) :: ControlService
 end
 
 --[[
 Registers a controller.
 --]]
-function ControlService:RegisterController(Name: string, Controller: any): nil
+function ControlService:RegisterController(Name: string, Controller: any): ()
     self.RegisteredControllers[Name] = Controller
 end
 
 --[[
 Sets the active controller.
 --]]
-function ControlService:SetActiveController(Name: string): nil
+function ControlService:SetActiveController(Name: string): ()
     --Return if the controller didn't change.
     if self.ActiveController == Name then return end
     self.ActiveController = Name
@@ -68,4 +88,4 @@ end
 
 
 
-return ControlService
+return (ControlService :: any) :: ControlService

@@ -17,7 +17,7 @@ ArcWithBeacon:SetClassName("ArcWithBeacon")
 Creates an arc.
 --]]
 function ArcWithBeacon:__new(): nil
-    self:InitializeSuper()
+    Arc.__new(self)
     self.BeamParts = {}
     self.Beacon = Beacon.new()
     self:Hide()
@@ -29,7 +29,7 @@ position that were hit.
 --]]
 function ArcWithBeacon:Update(StartCFrame: CFrame): nil
     --Update the arc.
-    local HitPart, HitPosition = self.super:Update(StartCFrame)
+    local HitPart, HitPosition = Arc:Update(self, StartCFrame)
 
     --Update the beacon.
     if HitPart then
@@ -46,7 +46,7 @@ end
 Hides the arc.
 --]]
 function ArcWithBeacon:Hide(): nil
-    self.super:Hide()
+    Arc:Hide(self)
     self.Beacon:Hide()
 end
 
@@ -54,7 +54,7 @@ end
 Destroys the arc.
 --]]
 function ArcWithBeacon:Destroy(): nil
-    self.super:Destroy()
+    Arc:Destroy(self)
     self.Beacon:Destroy()
 end
 

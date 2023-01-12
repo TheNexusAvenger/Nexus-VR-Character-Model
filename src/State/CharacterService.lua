@@ -3,38 +3,50 @@ TheNexusAvenger
 
 Manages VR characters.
 --]]
+--!strict
 
 local Players = game:GetService("Players")
 
-local NexusVRCharacterModel = require(script.Parent.Parent)
-local NexusObject = NexusVRCharacterModel:GetResource("NexusInstance.NexusObject")
-local Character = NexusVRCharacterModel:GetResource("Character")
+local NexusVRCharacterModel = script.Parent.Parent
+local Character = require(NexusVRCharacterModel:WaitForChild("Character"))
 
-local CharacterService = NexusObject:Extend()
-CharacterService:SetClassName("CharacterService")
+local CharacterService = {}
+CharacterService.__index = CharacterService
+
+export type CharacterService = {
+    new: () -> (CharacterService),
+
+    GetCharacter: (self: CharacterService, Player: Player) -> (any?), --TODO: Add Character type.
+}
 
 
 
 --[[
 Creates a character service.
 --]]
-function CharacterService:__new(): nil
-    self:InitializeSuper()
-    self.Characters = {}
+function CharacterService.new(): CharacterService
+    --Create the object.
+    local self = {
+        Characters = {},
+    }
+    setmetatable(self, CharacterService)
 
     --Connect clearing players.
     Players.PlayerRemoving:Connect(function(Player)
         self.Characters[Player] = nil
     end)
+
+    --Return the object.
+    return (self :: any) :: CharacterService
 end
 
 --[[
 Returns the VR character for a player.
 --]]
-function CharacterService:GetCharacter(Player): any
+function CharacterService:GetCharacter(Player: Player): any? --TODO: Add Character type.
     --Return if the character is nil.
     if not Player.Character then
-        return
+        return nil
     end
 
     --Create the VR character if it isn't valid.
@@ -51,4 +63,4 @@ end
 
 
 
-return CharacterService
+return (CharacterService :: any) :: CharacterService

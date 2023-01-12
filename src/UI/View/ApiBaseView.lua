@@ -17,7 +17,7 @@ ApiBaseView:SetClassName("ApiBaseView")
 Creates the view.
 --]]
 function ApiBaseView:__new(InitialName: string): nil
-    self:InitializeSuper()
+    NexusInstance.__new(self)
     self.Name = InitialName
     self.Destroyed = NexusEvent.new()
 
@@ -46,7 +46,7 @@ end
 Destroys the view.
 --]]
 function ApiBaseView:Destroy(): nil
-    self.super:Destroy()
+    ApiBaseView.Destroy(self)
     self.Destroyed:Fire()
     self.Destroyed:Disconnect()
 end

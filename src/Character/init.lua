@@ -25,7 +25,7 @@ Character:SetClassName("Character")
 Creates a character.
 --]]
 function Character:__new(CharacterModel: Model): nil
-    self:InitializeSuper()
+    NexusObject.__new(self)
     self.CharacterModel = CharacterModel
     self.TweenComponents = true
 

@@ -23,7 +23,7 @@ SettingsView:SetClassName("SettingsView")
 Creates the settings view.
 --]]
 function SettingsView:__new(View: table): nil
-    self:InitializeSuper()
+    NexusInstance.__new(self)
 
     --Create the header.
     local Container = View:GetContainer()

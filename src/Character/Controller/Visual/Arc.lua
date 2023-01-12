@@ -27,7 +27,7 @@ Arc:SetClassName("Arc")
 Creates an arc.
 --]]
 function Arc:__new(): nil
-    self:InitializeSuper()
+    NexusObject.__new(self)
     self.BeamParts = {}
     self:Hide()
 end

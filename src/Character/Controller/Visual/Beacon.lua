@@ -22,7 +22,7 @@ Beacon:SetClassName("Beacon")
 Creates a beacon.
 --]]
 function Beacon:__new(): nil
-    self:InitializeSuper()
+    NexusObject.__new(self)
 
     --Create the parts.
     self.Sphere = Instance.new("Part")

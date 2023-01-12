@@ -17,7 +17,7 @@ Torso:SetClassName("Torso")
 Creates a torso.
 --]]
 function Torso:__new(LowerTorso: BasePart, UpperTorso: BasePart): nil
-    self:InitializeSuper()
+    Limb.__new(self)
 
     --Store the parts.
     self.LowerTorso = LowerTorso

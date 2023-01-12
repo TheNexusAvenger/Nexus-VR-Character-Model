@@ -25,7 +25,7 @@ SmoothLocomotionController:SetClassName("SmoothLocomotionController")
 Enables the controller.
 --]]
 function SmoothLocomotionController:Enable(): nil
-    self.super:Enable()
+    BaseController.Enable(self)
     self.JoystickState = { Thumbstick = Enum.KeyCode.Thumbstick2 }
 
     --Connect requesting jumping.
@@ -48,7 +48,7 @@ end
 Disables the controller.
 --]]
 function SmoothLocomotionController:Disable(): nil
-    self.super:Disable()
+    BaseController.Disable(self)
     self.JoystickState = nil
 end
 
@@ -57,7 +57,7 @@ Updates the local character. Must also update the camara.
 --]]
 function SmoothLocomotionController:UpdateCharacter(): nil
     --Update the base character.
-    self.super:UpdateCharacter()
+    BaseController.UpdateCharacter(self)
     if not self.Character then
         return
     end

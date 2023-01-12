@@ -25,7 +25,7 @@ TeleportController:SetClassName("TeleportController")
 Enables the controller.
 --]]
 function TeleportController:Enable(): nil
-    self.super:Enable()
+    BaseController.Enable(self)
 
     --Create the arcs.
     self.LeftArc = ArcWithBeacon.new()
@@ -63,7 +63,7 @@ end
 Disables the controller.
 --]]
 function TeleportController:Disable(): nil
-    self.super:Disable()
+    BaseController.Disable(self)
 
     --Destroy the arcs.
     self.LeftArc:Destroy()
@@ -75,7 +75,7 @@ Updates the local character. Must also update the camara.
 --]]
 function TeleportController:UpdateCharacter()
     --Update the base character.
-    self.super:UpdateCharacter()
+    BaseController.UpdateCharacter(self)
     if not self.Character then
         return
     end

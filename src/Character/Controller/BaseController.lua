@@ -208,7 +208,7 @@ function BaseController:UpdateCharacter(): nil
         return
     end
     if CharacterChanged then
-        self.object:Enable()
+        self:Enable()
     end
     self.Character.TweenComponents = false
 
