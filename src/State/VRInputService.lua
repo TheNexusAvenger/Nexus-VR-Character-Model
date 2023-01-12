@@ -16,9 +16,11 @@ local NexusEvent = require(NexusVRCharacterModel:WaitForChild("NexusInstance"):W
 
 local VRInputService = {}
 VRInputService.__index = VRInputService
+local StaticInstance = nil
 
 export type VRInputService = {
     new: (VRService: VRService?, UserInputService: UserInputService?) -> (VRInputService),
+    GetInstance: () -> (VRInputService),
 
     Recentered: NexusEvent.NexusEvent<>,
     EyeLevelSet: NexusEvent.NexusEvent<>,
@@ -86,6 +88,16 @@ function VRInputService.new(VRService: VRService?, UserInputService: UserInputSe
 
     --Return the object.
     return (self :: any) :: VRInputService
+end
+
+--[[
+Returns a singleton instance of the VR input service.
+--]]
+function VRInputService.GetInstance(): VRInputService
+    if not StaticInstance then
+        StaticInstance = VRInputService.new()
+    end
+    return StaticInstance
 end
 
 --[[

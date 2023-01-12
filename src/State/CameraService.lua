@@ -11,9 +11,11 @@ local ThirdPersonTrackCamera = require(NexusVRCharacterModel:WaitForChild("Chara
 
 local CameraService = {}
 CameraService.__index = CameraService
+local StaticInstance = nil
 
 export type CameraService = {
     new: () -> (CameraService),
+    GetInstance: () -> (CameraService),
 
     RegisterCamera: (self: CameraService, Name: string, Camera: CameraInterface) -> (),
     SetActiveCamera: (self: CameraService, Name: string) -> (),
@@ -44,6 +46,16 @@ function CameraService.new(): CameraService
 
     --Return the object.
     return (self :: any) :: CameraService
+end
+
+--[[
+Returns a singleton instance of the camera service.
+--]]
+function CameraService.GetInstance(): CameraService
+    if not StaticInstance then
+        StaticInstance = CameraService.new()
+    end
+    return StaticInstance
 end
 
 --[[

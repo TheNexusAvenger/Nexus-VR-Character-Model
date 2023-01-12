@@ -3,28 +3,38 @@ TheNexusAvenger
 
 Local character controller using teleporting.
 --]]
+--!strict
 
 local IGNORE_RIGHT_INPUT_FORWARD_ON_MENU_OPEN = true
 local THUMBSTICK_MANUAL_ROTATION_ANGLE = math.rad(45)
 
 
+
 local Workspace = game:GetService("Workspace")
 local UserInputService = game:GetService("UserInputService")
 
-local NexusVRCharacterModel = require(script.Parent.Parent.Parent)
-local BaseController = NexusVRCharacterModel:GetResource("Character.Controller.BaseController")
-local ArcWithBeacon = NexusVRCharacterModel:GetResource("Character.Controller.Visual.ArcWithBeacon")
-local VRInputService = NexusVRCharacterModel:GetInstance("State.VRInputService")
+local NexusVRCharacterModel = script.Parent.Parent.Parent
+local BaseController = require(script.Parent:WaitForChild("BaseController"))
+local ArcWithBeacon = require(script.Parent:WaitForChild("Visual"):WaitForChild("ArcWithBeacon"))
+local VRInputService = require(NexusVRCharacterModel:WaitForChild("State"):WaitForChild("VRInputService")).GetInstance()
 
-local TeleportController = BaseController:Extend()
-TeleportController:SetClassName("TeleportController")
+local TeleportController = {}
+TeleportController.__index = TeleportController
+setmetatable(TeleportController, BaseController)
 
 
 
 --[[
+Creates a teleport controller object.
+--]]
+function TeleportController.new(): any
+    return setmetatable(BaseController.new(), TeleportController)
+end
+
+--[[
 Enables the controller.
 --]]
-function TeleportController:Enable(): nil
+function TeleportController:Enable(): ()
     BaseController.Enable(self)
 
     --Create the arcs.
@@ -46,13 +56,13 @@ function TeleportController:Enable(): nil
     --Connect requesting jumping.
     --ButtonA does not work with IsButtonDown.
     self.ButtonADown = false
-    table.insert(self.Connections,UserInputService.InputBegan:Connect(function(Input, Processsed)
+    table.insert(self.Connections, UserInputService.InputBegan:Connect(function(Input, Processsed)
         if Processsed then return end
         if Input.KeyCode == Enum.KeyCode.ButtonA then
             self.ButtonADown = true
         end
     end))
-    table.insert(self.Connections,UserInputService.InputEnded:Connect(function(Input)
+    table.insert(self.Connections, UserInputService.InputEnded:Connect(function(Input)
         if Input.KeyCode == Enum.KeyCode.ButtonA then
             self.ButtonADown = false
         end
@@ -62,7 +72,7 @@ end
 --[[
 Disables the controller.
 --]]
-function TeleportController:Disable(): nil
+function TeleportController:Disable(): ()
     BaseController.Disable(self)
 
     --Destroy the arcs.
@@ -73,7 +83,7 @@ end
 --[[
 Updates the local character. Must also update the camara.
 --]]
-function TeleportController:UpdateCharacter()
+function TeleportController:UpdateCharacter(): ()
     --Update the base character.
     BaseController.UpdateCharacter(self)
     if not self.Character then
@@ -82,13 +92,13 @@ function TeleportController:UpdateCharacter()
 
     --Get the VR inputs.
     local VRInputs = VRInputService:GetVRInputs()
-    for _, InputEnum in pairs(Enum.UserCFrame:GetEnumItems()) do
+    for _, InputEnum in Enum.UserCFrame:GetEnumItems() do
         VRInputs[InputEnum] = self:ScaleInput(VRInputs[InputEnum])
     end
 
     --Update the arcs.
     local SeatPart = self.Character:GetHumanoidSeatPart()
-    for _, ArcData in pairs(self.ArcControls) do
+    for _, ArcData in self.ArcControls do
         --Reset the left arc if the player is in a vehicle seat.
         if ArcData.Thumbstick == Enum.KeyCode.Thumbstick1 and SeatPart and SeatPart:IsA("VehicleSeat") then
             ArcData.Arc:Hide()

@@ -3,6 +3,7 @@ TheNexusAvenger
 
 Local character controller using teleporting.
 --]]
+--!strict
 
 local THUMBSTICK_MANUAL_ROTATION_ANGLE = math.rad(45)
 local THUMBSTICK_DEADZONE_RADIUS = 0.2
@@ -12,19 +13,27 @@ local THUMBSTICK_DEADZONE_RADIUS = 0.2
 local Players = game:GetService("Players")
 local UserInputService = game:GetService("UserInputService")
 
-local NexusVRCharacterModel = require(script.Parent.Parent.Parent)
-local BaseController = NexusVRCharacterModel:GetResource("Character.Controller.BaseController")
-local VRInputService = NexusVRCharacterModel:GetInstance("State.VRInputService")
+local NexusVRCharacterModel = script.Parent.Parent.Parent
+local BaseController = require(script.Parent:WaitForChild("BaseController"))
+local VRInputService = require(NexusVRCharacterModel:WaitForChild("State"):WaitForChild("VRInputService")).GetInstance()
 
-local SmoothLocomotionController = BaseController:Extend()
-SmoothLocomotionController:SetClassName("SmoothLocomotionController")
+local SmoothLocomotionController = {}
+SmoothLocomotionController.__index = SmoothLocomotionController
+setmetatable(SmoothLocomotionController, BaseController)
 
 
 
 --[[
+Creates a smooth locomotion controller object.
+--]]
+function SmoothLocomotionController.new(): any
+    return setmetatable(BaseController.new(), SmoothLocomotionController)
+end
+
+--[[
 Enables the controller.
 --]]
-function SmoothLocomotionController:Enable(): nil
+function SmoothLocomotionController:Enable(): ()
     BaseController.Enable(self)
     self.JoystickState = { Thumbstick = Enum.KeyCode.Thumbstick2 }
 
@@ -47,7 +56,7 @@ end
 --[[
 Disables the controller.
 --]]
-function SmoothLocomotionController:Disable(): nil
+function SmoothLocomotionController:Disable(): ()
     BaseController.Disable(self)
     self.JoystickState = nil
 end
@@ -55,7 +64,7 @@ end
 --[[
 Updates the local character. Must also update the camara.
 --]]
-function SmoothLocomotionController:UpdateCharacter(): nil
+function SmoothLocomotionController:UpdateCharacter(): ()
     --Update the base character.
     BaseController.UpdateCharacter(self)
     if not self.Character then
@@ -67,7 +76,7 @@ function SmoothLocomotionController:UpdateCharacter(): nil
     local LeftHandInputActive = (not NexusVRCharacterModel.Api.Controller or NexusVRCharacterModel.Api.Controller:IsControllerInputEnabled(Enum.UserCFrame.LeftHand))
     local RightHandInputActive = (not NexusVRCharacterModel.Api.Controller or NexusVRCharacterModel.Api.Controller:IsControllerInputEnabled(Enum.UserCFrame.RightHand))
     if ThumbstickPosition.Magnitude < THUMBSTICK_DEADZONE_RADIUS or not LeftHandInputActive then
-        ThumbstickPosition = Vector3.new(0, 0, 0)
+        ThumbstickPosition = Vector3.zero
     end
     local WDown, SDown = not UserInputService:GetFocusedTextBox() and UserInputService:IsKeyDown(Enum.KeyCode.W), not UserInputService:GetFocusedTextBox() and UserInputService:IsKeyDown(Enum.KeyCode.S)
     local DDown, ADown = not UserInputService:GetFocusedTextBox() and UserInputService:IsKeyDown(Enum.KeyCode.D), not UserInputService:GetFocusedTextBox() and UserInputService:IsKeyDown(Enum.KeyCode.A)

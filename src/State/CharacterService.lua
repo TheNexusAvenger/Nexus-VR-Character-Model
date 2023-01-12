@@ -12,9 +12,11 @@ local Character = require(NexusVRCharacterModel:WaitForChild("Character"))
 
 local CharacterService = {}
 CharacterService.__index = CharacterService
+local StaticInstance = nil
 
 export type CharacterService = {
     new: () -> (CharacterService),
+    GetInstance: () -> (CharacterService),
 
     GetCharacter: (self: CharacterService, Player: Player) -> (any?), --TODO: Add Character type.
 }
@@ -38,6 +40,16 @@ function CharacterService.new(): CharacterService
 
     --Return the object.
     return (self :: any) :: CharacterService
+end
+
+--[[
+Returns a singleton instance of the character service.
+--]]
+function CharacterService.GetInstance(): CharacterService
+    if not StaticInstance then
+        StaticInstance = CharacterService.new()
+    end
+    return StaticInstance
 end
 
 --[[

@@ -3,6 +3,7 @@ TheNexusAvenger
 
 Base class for controlling the local character.
 --]]
+--!strict
 
 local THUMBSTICK_INPUT_START_RADIUS = 0.6
 local THUMBSTICK_INPUT_RELEASE_RADIUS = 0.4
@@ -16,15 +17,14 @@ local ContextActionService = game:GetService("ContextActionService")
 local UserInputService = game:GetService("UserInputService")
 local TweenService = game:GetService("TweenService")
 
-local NexusVRCharacterModel = require(script.Parent.Parent.Parent)
-local NexusObject = NexusVRCharacterModel:GetResource("NexusInstance.NexusObject")
-local CameraService = NexusVRCharacterModel:GetInstance("State.CameraService")
-local CharacterService = NexusVRCharacterModel:GetInstance("State.CharacterService")
-local VRInputService = NexusVRCharacterModel:GetInstance("State.VRInputService")
-local Settings = NexusVRCharacterModel:GetInstance("State.Settings")
+local NexusVRCharacterModel = script.Parent.Parent.Parent
+local CameraService = require(NexusVRCharacterModel:WaitForChild("State"):WaitForChild("CameraService")).GetInstance()
+local CharacterService = require(NexusVRCharacterModel:WaitForChild("State"):WaitForChild("CharacterService")).GetInstance()
+local Settings = require(NexusVRCharacterModel:WaitForChild("State"):WaitForChild("Settings")).GetInstance()
+local VRInputService = require(NexusVRCharacterModel:WaitForChild("State"):WaitForChild("VRInputService")).GetInstance()
 
-local BaseController = NexusObject:Extend()
-BaseController:SetClassName("BaseController")
+local BaseController = {}
+BaseController.__index = {}
 
 
 
@@ -38,13 +38,20 @@ end
 
 
 --[[
+Creates a base controller object.
+--]]
+function BaseController.new(): any
+    return setmetatable({}, BaseController)
+end
+
+--[[
 Updates the character. Returns if it changed.
 --]]
 function BaseController:UpdateCharacterReference(): boolean
     local LastCharacter = self.Character
     self.Character = CharacterService:GetCharacter(Players.LocalPlayer)
     if not self.Character then
-        return
+        return false
     end
     return LastCharacter ~= self.Character
 end
@@ -52,7 +59,7 @@ end
 --[[
 Enables the controller.
 --]]
-function BaseController:Enable(): nil
+function BaseController:Enable(): ()
     if not self.Connections then self.Connections = {} end
 
     --Update the character and return if the character is nil.
@@ -83,7 +90,7 @@ function BaseController:Enable(): nil
     --Disable the controls.
     --Done in a loop to ensure changed controllers are disabled.
     task.spawn(function()
-        local ControlModule = require(Players.LocalPlayer:WaitForChild("PlayerScripts"):WaitForChild("PlayerModule"):WaitForChild("ControlModule"))
+        local ControlModule = require(Players.LocalPlayer:WaitForChild("PlayerScripts"):WaitForChild("PlayerModule"):WaitForChild("ControlModule")) :: any
         local Character = self.Character
         while self.Character == Character and Character.Humanoid.Health > 0 do
             if ControlModule.activeController and ControlModule.activeController.enabled then
@@ -98,10 +105,10 @@ end
 --[[
 Disables the controller.
 --]]
-function BaseController:Disable(): nil
+function BaseController:Disable(): ()
     self.Character = nil
     self.LastHeadCFrame = nil
-    for _, Connection in pairs(self.Connections) do
+    for _, Connection in self.Connections do
         Connection:Disconnect()
     end
     self.Connections = nil
@@ -178,7 +185,7 @@ end
 Plays a temporary blur effect to make
 teleports and snap turns less jarring.
 ]]--
-function BaseController:PlayBlur(): nil
+function BaseController:PlayBlur(): ()
     local SnapTeleportBlur = Settings:GetSetting("Movement.SnapTeleportBlur")
     SnapTeleportBlur = (if SnapTeleportBlur == nil then true else SnapTeleportBlur)
 
@@ -201,7 +208,7 @@ end
 --[[
 Updates the reference world CFrame.
 --]]
-function BaseController:UpdateCharacter(): nil
+function BaseController:UpdateCharacter(): ()
     --Return if the character is nil.
     local CharacterChanged = self:UpdateCharacterReference()
     if not self.Character then
@@ -280,7 +287,7 @@ end
 --[[
 Updates the values of the vehicle seat.
 --]]
-function BaseController:UpdateVehicleSeat(): nil
+function BaseController:UpdateVehicleSeat(): ()
     --Get the vehicle seat.
     local SeatPart = self.Character:GetHumanoidSeatPart()
     if not SeatPart or not SeatPart:IsA("VehicleSeat") then
@@ -290,7 +297,7 @@ function BaseController:UpdateVehicleSeat(): nil
     --Get the direction.
     local ThumbstickPosition = VRInputService:GetThumbstickPosition(Enum.KeyCode.Thumbstick1)
     if ThumbstickPosition.Magnitude < THUMBSTICK_DEADZONE_RADIUS then
-        ThumbstickPosition = Vector3.new(0,0,0)
+        ThumbstickPosition = Vector3.zero
     end
     local ForwardDirection = (UserInputService:IsKeyDown(Enum.KeyCode.W) and 1 or 0) + (UserInputService:IsKeyDown(Enum.KeyCode.S) and -1 or 0) + ThumbstickPosition.Y
     local SideDirection = (UserInputService:IsKeyDown(Enum.KeyCode.D) and 1 or 0) + (UserInputService:IsKeyDown(Enum.KeyCode.A) and -1 or 0) + ThumbstickPosition.X
