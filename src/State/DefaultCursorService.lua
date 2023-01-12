@@ -4,27 +4,30 @@ TheNexusAvenger
 Manages toggling the default cursor.
 Workaround for: https://github.com/TheNexusAvenger/Nexus-VR-Character-Model/issues/10
 --]]
+--!strict
 
 local Workspace = game:GetService("Workspace")
-local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local StarterGui = game:GetService("StarterGui")
 local RunService = game:GetService("RunService")
 
-local NexusVRCharacterModel = require(script.Parent.Parent)
-local NexusVRCore = require(ReplicatedStorage:WaitForChild("NexusVRCore"))
-local NexusObject = NexusVRCharacterModel:GetResource("NexusInstance.NexusObject")
-local VRPointing = NexusVRCore:GetResource("Interaction.VRPointing")
+local DefaultCursorService = {}
+DefaultCursorService.__index = DefaultCursorService
 
-local DefaultCursorService = NexusObject:Extend()
-DefaultCursorService:SetClassName("DefaultCursorService")
+export type DefaultCursorService = {
+    new: () -> (DefaultCursorService),
+
+    SetCursorState: (self: DefaultCursorService, OptionName: string) -> (),
+}
 
 
 
 --[[
 Creates a default cursor service.
 --]]
-function DefaultCursorService:__new(): nil
-    NexusObject.__new(self)
+function DefaultCursorService.new(): DefaultCursorService
+    --Create the object.
+    local self = {}
+    setmetatable(self, DefaultCursorService)
 
     --Register the default values.
     self.CursorOptionsList = {"Detect", "Enabled", "Disabled"}
@@ -32,7 +35,6 @@ function DefaultCursorService:__new(): nil
         Detect = function()
             --Enable the pointer.
             StarterGui:SetCore("VRLaserPointerMode", "Pointer")
-            VRPointing.PointersEnabled = false
 
             --Wait until the next frame to register the BindToRenderStep. Otherwise, the order is
             RunService.Stepped:Wait()
@@ -64,15 +66,17 @@ function DefaultCursorService:__new(): nil
     self.CursorDisabledOptions = {
         Detect = function()
             RunService:UnbindFromRenderStep("NexusVRCharacterModel_MoveCursorWorkaround")
-            VRPointing.PointersEnabled = true
         end,
     }
+
+    --Return the object.
+    return (self :: any) :: DefaultCursorService
 end
 
 --[[
 Sets the cursor state.
 --]]
-function DefaultCursorService:SetCursorState(OptionName: string): nil
+function DefaultCursorService:SetCursorState(OptionName: string): ()
     if self.CurrentCursorState == OptionName then return end
     if self.CurrentCursorState and self.CursorDisabledOptions[self.CurrentCursorState] then
         self.CursorDisabledOptions[self.CurrentCursorState]()
