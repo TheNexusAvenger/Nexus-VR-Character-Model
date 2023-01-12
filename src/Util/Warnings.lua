@@ -3,12 +3,13 @@ TheNexusAvenger
 
 Displays warnings when loading Nexus VR Character Model.
 --]]
+--!strict
 
 local HttpService = game:GetService("HttpService")
 
 
 
-return function()
+return function(): ()
     --Load the configuration.
     local ConfigurationValue = script.Parent.Parent:WaitForChild("Configuration")
     local Configuration = HttpService:JSONDecode(ConfigurationValue.Value)

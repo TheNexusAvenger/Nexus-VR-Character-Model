@@ -4,19 +4,19 @@ TheNexusAvenger
 Helper function that ray casts to
 find a collidable part.
 --]]
+--!strict
 
 local Workspace = game:GetService("Workspace")
-local PhysicsService = game:GetService("PhysicsService")
 
 
 
 --[[
 Ray casts to find a collidable part.
 --]]
-local function FindCollidablePartOnRay(StartPosition: Vector3, Direction: Vector3, IgnoreList: Instance | {}?, CollisionGroup: string?): (BasePart?, Vector3)
+local function FindCollidablePartOnRay(StartPosition: Vector3, Direction: Vector3, IgnoreList: Instance | {Instance}?, CollisionGroup: string?): (BasePart?, Vector3)
     --Convert the collision group.
     if typeof(CollisionGroup) == "Instance" and CollisionGroup:IsA("BasePart") then
-        CollisionGroup = PhysicsService:GetCollisionGroupName(CollisionGroup.CollisionGroupId)
+        CollisionGroup = CollisionGroup.CollisionGroup
     end
 
     --Create the ignore list.
@@ -25,7 +25,7 @@ local function FindCollidablePartOnRay(StartPosition: Vector3, Direction: Vector
     if typeof(IgnoreList) == "Instance" then
         table.insert(NewIgnoreList, IgnoreList)
     elseif typeof(IgnoreList) == "table" then
-        for _,Entry in pairs(IgnoreList) do
+        for _, Entry in IgnoreList do
             if Entry ~= Camera then
                 table.insert(NewIgnoreList, Entry)
             end
