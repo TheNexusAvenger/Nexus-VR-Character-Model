@@ -3,6 +3,7 @@ TheNexusAvenger
 
 Visual indicator aiming with an arc.
 --]]
+--!strict
 
 local MAX_SEGMENTS = 100
 local SEGMENT_SEPARATION = 2
@@ -14,29 +15,38 @@ local POINTER_PARABOLA_HEIGHT_MULTIPLIER = -0.2
 local Workspace = game:GetService("Workspace")
 local Players = game:GetService("Players")
 
-local NexusVRCharacterModel = require(script.Parent.Parent.Parent.Parent)
-local NexusObject = NexusVRCharacterModel:GetResource("NexusInstance.NexusObject")
-local FindCollidablePartOnRay = NexusVRCharacterModel:GetResource("Util.FindCollidablePartOnRay")
+local NexusVRCharacterModel = script.Parent.Parent.Parent.Parent
+local FindCollidablePartOnRay = require(NexusVRCharacterModel:WaitForChild("Util"):WaitForChild("FindCollidablePartOnRay"))
 
-local Arc = NexusObject:Extend()
-Arc:SetClassName("Arc")
+local Arc = {}
+Arc.__index = Arc
+
+export type Arc = {
+    new: () -> (Arc),
+
+    Update: (self: Arc, StartCFrame: CFrame) -> (BasePart?, Vector3?),
+    Hide: (self: Arc) -> (),
+    Destroy: (self: Arc) -> (),
+}
 
 
 
 --[[
 Creates an arc.
 --]]
-function Arc:__new(): nil
-    NexusObject.__new(self)
-    self.BeamParts = {}
+function Arc.new(): Arc
+    local self = setmetatable({
+        BeamParts = {},
+    }, Arc)
     self:Hide()
+    return (self :: any) :: Arc
 end
 
 --[[
 Updates the arc. Returns the part and
 position that were hit.
 --]]
-function Arc:Update(StartCFrame: CFrame): nil
+function Arc:Update(StartCFrame: CFrame): (BasePart?, Vector3?)
     --Calculate the starting angle.
     local StartPosition = StartCFrame.Position
     local FaceAngle = math.atan2(-StartCFrame.LookVector.X, -StartCFrame.LookVector.Z)
@@ -59,7 +69,7 @@ function Arc:Update(StartCFrame: CFrame): nil
         if not self.BeamParts[i] then
             self.BeamParts[i] = Instance.new("Part")
             self.BeamParts[i].Transparency = 1
-            self.BeamParts[i].Size = Vector3.new(0,0,0)
+            self.BeamParts[i].Size = Vector3.new(0, 0, 0)
             self.BeamParts[i].Anchored = true
             self.BeamParts[i].CanCollide = false
             self.BeamParts[i].Parent = Workspace.CurrentCamera
@@ -86,7 +96,7 @@ function Arc:Update(StartCFrame: CFrame): nil
             --Create the beam.
             local Beam = Instance.new("Beam")
             Beam.Name = "Beam"
-            Beam.Attachment0 = self.BeamParts[i].BeamAttachment
+            Beam.Attachment0 = (self.BeamParts[i] :: any).BeamAttachment
             Beam.Attachment1 = Attachment
             Beam.Segments = 1
             Beam.Width0 = 0.1
@@ -96,18 +106,18 @@ function Arc:Update(StartCFrame: CFrame): nil
 
         --Cast the ray to the end.
         --Return if an end was hit and make the arc blue.
-        local HitPart,HitPosition = FindCollidablePartOnRay(SegmentStartPosition, SegmentEndPosition - SegmentStartPosition, Players.LocalPlayer and Players.LocalPlayer.Character,Players.LocalPlayer and Players.LocalPlayer.Character and Players.LocalPlayer.Character:FindFirstChild("HumanoidRootPart"))
-        self.BeamParts[i].CFrame = CFrame.new(SegmentStartPosition) * CFrame.Angles(0, FaceAngle, 0)
-        self.BeamParts[i + 1].Beam.Enabled = true
+        local HitPart, HitPosition = FindCollidablePartOnRay(SegmentStartPosition, SegmentEndPosition - SegmentStartPosition, Players.LocalPlayer and Players.LocalPlayer.Character,Players.LocalPlayer and Players.LocalPlayer.Character and Players.LocalPlayer.Character:FindFirstChild("HumanoidRootPart"))
+        self.BeamParts[i].CFrame = CFrame.new(SegmentStartPosition) * CFrame.Angles(0, FaceAngle, 0);
+        (self.BeamParts[i + 1] :: any).Beam.Enabled = true
         if HitPart then
             self.BeamParts[i + 1].CFrame = CFrame.new(HitPosition)
             for j = 0, i do
-                self.BeamParts[j + 1].Beam.Color = ColorSequence.new(Color3.fromRGB(0, 170, 255))
+                (self.BeamParts[j + 1] :: any).Beam.Color = ColorSequence.new(Color3.fromRGB(0, 170, 255))
             end
             for j = i + 1, #self.BeamParts - 1 do
-                self.BeamParts[j + 1].Beam.Enabled = false
+                (self.BeamParts[j + 1] :: any).Beam.Enabled = false
             end
-            return HitPart,HitPosition
+            return HitPart, HitPosition
         else
             self.BeamParts[i + 1].CFrame = CFrame.new(SegmentEndPosition)
         end
@@ -115,14 +125,15 @@ function Arc:Update(StartCFrame: CFrame): nil
 
     --Set the beams to red.
     for i = 0, #self.BeamParts - 1 do
-        self.BeamParts[i + 1].Beam.Color = ColorSequence.new(Color3.fromRGB(200, 0, 0))
+        (self.BeamParts[i + 1] :: any).Beam.Color = ColorSequence.new(Color3.fromRGB(200, 0, 0))
     end
+    return nil, nil
 end
 
 --[[
 Hides the arc.
 --]]
-function Arc:Hide(): nil
+function Arc:Hide(): ()
     for i = 0, #self.BeamParts - 1 do
         self.BeamParts[i + 1].Beam.Enabled = false
     end
@@ -131,8 +142,8 @@ end
 --[[
 Destroys the arc.
 --]]
-function Arc:Destroy(): nil
-    for _, BeamPart in pairs(self.BeamParts) do
+function Arc:Destroy(): ()
+    for _, BeamPart in self.BeamParts do
         BeamPart:Destroy()
     end
     self.BeamParts = {}
@@ -140,4 +151,4 @@ end
 
 
 
-return Arc
+return (Arc :: any) :: Arc

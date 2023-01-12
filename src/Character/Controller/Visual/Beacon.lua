@@ -3,6 +3,7 @@ TheNexusAvenger
 
 Visual indicator for the end of aiming.
 --]]
+--!strict
 
 local BEACON_SPEED_MULTIPLIER = 2
 
@@ -10,24 +11,31 @@ local BEACON_SPEED_MULTIPLIER = 2
 
 local Workspace = game:GetService("Workspace")
 
-local NexusVRCharacterModel = require(script.Parent.Parent.Parent.Parent)
-local NexusObject = NexusVRCharacterModel:GetResource("NexusInstance.NexusObject")
+local Beacon = {}
+Beacon.__index = Beacon
 
-local Beacon = NexusObject:Extend()
-Beacon:SetClassName("Beacon")
+export type Beacon = {
+    new: () -> (Beacon),
+
+    Update: (self: Beacon, CenterCFrame: CFrame, HoverPart: BasePart) -> (),
+    Hide: (self: Beacon) -> (),
+    Destroy: (self: Beacon) -> (),
+}
 
 
 
 --[[
 Creates a beacon.
 --]]
-function Beacon:__new(): nil
-    NexusObject.__new(self)
+function Beacon.new(): Beacon
+    --Create the object.
+    local self = {}
+    setmetatable(self, Beacon)
 
     --Create the parts.
     self.Sphere = Instance.new("Part")
     self.Sphere.Transparency = 1
-    self.Sphere.Material = "Neon"
+    self.Sphere.Material = Enum.Material.Neon
     self.Sphere.Anchored = true
     self.Sphere.CanCollide = false
     self.Sphere.Size = Vector3.new(0.5, 0.5, 0.5)
@@ -47,12 +55,15 @@ function Beacon:__new(): nil
     self.MovingRing.Image = "rbxasset://textures/ui/VR/VRPointerDiscBlue.png"
     self.MovingRing.Visible = false
     self.MovingRing.Parent = self.Sphere
+
+    --Return the object.
+    return (self :: any) :: Beacon
 end
 
 --[[
 Updates the beacon at a given CFrame.
 --]]
-function Beacon:Update(CenterCFrame: CFrame, HoverPart: BasePart): nil
+function Beacon:Update(CenterCFrame: CFrame, HoverPart: BasePart): ()
     --Calculate the size for the current time.
     local Height = 0.4 + (-math.cos(tick() * 2 * BEACON_SPEED_MULTIPLIER) / 8)
     local BeaconSize = 2 * ((tick() * BEACON_SPEED_MULTIPLIER) % math.pi) / math.pi
@@ -67,7 +78,7 @@ function Beacon:Update(CenterCFrame: CFrame, HoverPart: BasePart): nil
     --Update the beacon color.
     local BeaconColor = Color3.fromRGB(0, 170, 0)
     if HoverPart then
-        local VRBeaconColor = HoverPart:FindFirstChild("VRBeaconColor")
+        local VRBeaconColor = HoverPart:FindFirstChild("VRBeaconColor") :: Color3Value
         if VRBeaconColor then
             BeaconColor = VRBeaconColor.Value
         elseif (HoverPart:IsA("Seat") or HoverPart:IsA("VehicleSeat")) and not HoverPart.Disabled then
@@ -85,7 +96,7 @@ end
 --[[
 Hides the beacon.
 --]]
-function Beacon:Hide(): nil
+function Beacon:Hide(): ()
     --Hide the beacon.
     self.Sphere.Transparency = 1
     self.ConstantRing.Visible = false
@@ -95,10 +106,10 @@ end
 --[[
 Destroys the beacon.
 --]]
-function Beacon:Destroy(): nil
+function Beacon:Destroy(): ()
     self.Sphere:Destroy()
 end
 
 
 
-return Beacon
+return (Beacon :: any) :: Beacon
