@@ -3,6 +3,7 @@ TheNexusAvenger
 
 Loads Nexus VR Character Model on the client.
 --]]
+--!strict
 
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
@@ -11,19 +12,19 @@ local HttpService = game:GetService("HttpService")
 local RunService = game:GetService("RunService")
 local UserInputService = game:GetService("UserInputService")
 
-local NexusVRCharacterModel = require(ReplicatedStorage:WaitForChild("NexusVRCharacterModel"))
-local CameraService = NexusVRCharacterModel:GetInstance("State.CameraService")
-local CharacterService = NexusVRCharacterModel:GetInstance("State.CharacterService")
-local ControlService = NexusVRCharacterModel:GetInstance("State.ControlService")
-local DefaultCursorService = NexusVRCharacterModel:GetInstance("State.DefaultCursorService")
-local Settings = NexusVRCharacterModel:GetInstance("State.Settings")
-local UpdateInputs = NexusVRCharacterModel:GetResource("UpdateInputs")
-local ReplicationReady = NexusVRCharacterModel:GetResource("ReplicationReady")
+local NexusVRCharacterModel = ReplicatedStorage:WaitForChild("NexusVRCharacterModel") :: ModuleScript
+local CameraService = (require(ReplicatedStorage:WaitForChild("State"):WaitForChild("CameraService")) :: any).GetInstance()
+local CharacterService = (require(ReplicatedStorage:WaitForChild("State"):WaitForChild("CharacterService")) :: any).GetInstance()
+local ControlService = (require(ReplicatedStorage:WaitForChild("State"):WaitForChild("ControlService")) :: any).GetInstance()
+local DefaultCursorService = (require(ReplicatedStorage:WaitForChild("State"):WaitForChild("DefaultCursorService")) :: any).GetInstance()
+local Settings = (require(ReplicatedStorage:WaitForChild("State"):WaitForChild("Settings")) :: any).GetInstance()
+local UpdateInputs = ReplicatedStorage:WaitForChild("UpdateInputs") :: RemoteEvent
+local ReplicationReady = ReplicatedStorage:WaitForChild("ReplicationReady") :: RemoteEvent
 
 
 
 --Load the settings.
-Settings:SetDefaults(HttpService:JSONDecode(NexusVRCharacterModel:GetResource("Configuration").Value))
+Settings:SetDefaults(HttpService:JSONDecode((NexusVRCharacterModel:WaitForChild("Configuration") :: StringValue).Value))
 
 --Connect replication for other players.
 UpdateInputs.OnClientEvent:Connect(function(Player, HeadCFrame, LeftHandCFrame, RightHandCFrame)
@@ -62,19 +63,13 @@ task.spawn(function()
     end
 end)
 
---Enable Nexus VR pointing.
-local NexusVRCore = require(ReplicatedStorage:WaitForChild("NexusVRCore"))
-local VRPointing = NexusVRCore:GetResource("Interaction.VRPointing")
-VRPointing:ConnectEvents()
-VRPointing:RunUpdating()
-
 --Display a message if R6 is used.
 local Character = Players.LocalPlayer.Character
 while not Character do
     Character = Players.LocalPlayer.CharacterAdded:Wait()
 end
 if Character:WaitForChild("Humanoid").RigType == Enum.HumanoidRigType.R6 then
-    local R6Message = NexusVRCharacterModel:GetInstance("UI.R6Message")
+    local R6Message = (require(NexusVRCharacterModel:WaitForChild("UI"):WaitForChild("R6Message")) :: any).new()
     R6Message:Open()
     return
 end
@@ -85,13 +80,13 @@ ControlService:SetActiveController(Settings:GetSetting("Movement.DefaultMovement
 CameraService:SetActiveCamera(Settings:GetSetting("Camera.DefaultCameraOption"))
 
 --Load the menu.
-local MainMenu = NexusVRCharacterModel:GetInstance("UI.MainMenu")
+local MainMenu = (require(NexusVRCharacterModel:WaitForChild("UI"):WaitForChild("MainMenu")) :: any).new()
 MainMenu:SetUpOpening()
 
 --Load the backpack.
 if Settings:GetSetting("Extra.NexusVRBackpackEnabled") ~= false then
     task.defer(function()
-        local NexusVRBackpack = require(ReplicatedStorage:WaitForChild("NexusVRBackpack"))
+        local NexusVRBackpack = require(ReplicatedStorage:WaitForChild("NexusVRBackpack")) :: {Load: (any) -> ()}
         NexusVRBackpack:Load()
     end)
 end

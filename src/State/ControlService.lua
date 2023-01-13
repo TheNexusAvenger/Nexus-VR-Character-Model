@@ -12,9 +12,11 @@ local SmoothLocomotionController = NexusVRCharacterModel:GetResource("Character.
 
 local ControlService = {}
 ControlService.__index = ControlService
+local StaticInstance = nil
 
 export type ControlService = {
     new: () -> (ControlService),
+    GetInstance: () -> (ControlService),
 
     RegisterController: (self: ControlService, Name: string, Controller: ControllerInterface) -> (),
     SetActiveController: (self: ControlService, Name: string) -> (),
@@ -46,6 +48,16 @@ function ControlService.new(): ControlService
 
     --Return the object.
     return (self :: any) :: ControlService
+end
+
+--[[
+Returns a singleton instance of the character service.
+--]]
+function ControlService.GetInstance(): ControlService
+    if not StaticInstance then
+        StaticInstance = ControlService.new()
+    end
+    return StaticInstance
 end
 
 --[[

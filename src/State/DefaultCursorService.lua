@@ -12,9 +12,11 @@ local RunService = game:GetService("RunService")
 
 local DefaultCursorService = {}
 DefaultCursorService.__index = DefaultCursorService
+local StaticInstance = nil
 
 export type DefaultCursorService = {
     new: () -> (DefaultCursorService),
+    GetInstance: () -> (DefaultCursorService),
 
     SetCursorState: (self: DefaultCursorService, OptionName: string) -> (),
 }
@@ -71,6 +73,16 @@ function DefaultCursorService.new(): DefaultCursorService
 
     --Return the object.
     return (self :: any) :: DefaultCursorService
+end
+
+--[[
+Returns a singleton instance of the character service.
+--]]
+function DefaultCursorService.GetInstance(): DefaultCursorService
+    if not StaticInstance then
+        StaticInstance = DefaultCursorService.new()
+    end
+    return StaticInstance
 end
 
 --[[
