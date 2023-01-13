@@ -18,7 +18,7 @@ export type CharacterService = {
     new: () -> (CharacterService),
     GetInstance: () -> (CharacterService),
 
-    GetCharacter: (self: CharacterService, Player: Player) -> (any?), --TODO: Add Character type.
+    GetCharacter: (self: CharacterService, Player: Player) -> (Character.Character?),
 }
 
 
@@ -55,7 +55,7 @@ end
 --[[
 Returns the VR character for a player.
 --]]
-function CharacterService:GetCharacter(Player: Player): any? --TODO: Add Character type.
+function CharacterService:GetCharacter(Player: Player): Character.Character?
     --Return if the character is nil.
     if not Player.Character then
         return nil
@@ -65,7 +65,7 @@ function CharacterService:GetCharacter(Player: Player): any? --TODO: Add Charact
     if not self.Characters[Player] or self.Characters[Player].Character ~= Player.Character then
         self.Characters[Player] = {
             Character = Player.Character,
-            VRCharacter = Character.new(Player.Character),
+            VRCharacter = Character.new(Player.Character :: Model),
         }
     end
 

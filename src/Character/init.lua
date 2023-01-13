@@ -3,31 +3,39 @@ TheNexusAvenger
 
 Manipulates a character model.
 --]]
+--!strict
 
 local Players = game:GetService("Players")
 local TweenService = game:GetService("TweenService")
 
-local NexusVRCharacterModel = require(script.Parent)
-local NexusObject = NexusVRCharacterModel:GetResource("NexusInstance.NexusObject")
-local Head = NexusVRCharacterModel:GetResource("Character.Head")
-local Torso = NexusVRCharacterModel:GetResource("Character.Torso")
-local Appendage = NexusVRCharacterModel:GetResource("Character.Appendage")
-local FootPlanter = NexusVRCharacterModel:GetResource("Character.FootPlanter")
-local Settings = NexusVRCharacterModel:GetInstance("State.Settings")
-local UpdateInputs = NexusVRCharacterModel:GetResource("UpdateInputs")
+local NexusVRCharacterModel = script.Parent
+local Head = require(NexusVRCharacterModel:WaitForChild("Character"):WaitForChild("Head"))
+local Torso = require(NexusVRCharacterModel:WaitForChild("Character"):WaitForChild("Torso"))
+local Appendage = require(NexusVRCharacterModel:WaitForChild("Character"):WaitForChild("Appendage"))
+local FootPlanter = require(NexusVRCharacterModel:WaitForChild("Character"):WaitForChild("FootPlanter"))
+local Settings = require(NexusVRCharacterModel:WaitForChild("State"):WaitForChild("Settings")).GetInstance()
+local UpdateInputs = require(NexusVRCharacterModel:WaitForChild("UpdateInputs")) :: RemoteEvent
 
-local Character = NexusObject:Extend()
-Character:SetClassName("Character")
+local Character = {}
+Character.__index = Character
+
+export type Character = {
+    new: (CharacterModel: Model) -> Character,
+
+    UpdateFromInputs: (self: Character, HeadControllerCFrame: CFrame, LeftHandControllerCFrame: CFrame, RightHandControllerCFrame: CFrame) -> (),
+}
 
 
 
 --[[
 Creates a character.
 --]]
-function Character:__new(CharacterModel: Model): nil
-    NexusObject.__new(self)
-    self.CharacterModel = CharacterModel
-    self.TweenComponents = true
+function Character.new(CharacterModel: Model): Character
+    local self = {
+        CharacterModel = CharacterModel,
+        TweenComponents = true,
+    }
+    setmetatable(self, Character)
 
     --Determine if the arms can be disconnected.
     --Checking for the setting to be explicitly false is done in case the setting is undefined (default is true).
@@ -157,7 +165,7 @@ function Character:__new(CharacterModel: Model): nil
     --Add the missing attachments that not all rigs have.
     if not self.Attachments.RightFoot.RightFootAttachment then
         local NewAttachment = Instance.new("Attachment")
-        NewAttachment.Position = Vector3.new(0, -self.Parts.RightFoot.Size.Y / 2, 0)
+        NewAttachment.Position = Vector3.new(0, -(self.Parts.RightFoot :: BasePart).Size.Y / 2, 0)
         NewAttachment.Name = "RightFootAttachment"
 
         local OriginalPositionValue = Instance.new("Vector3Value")
@@ -169,7 +177,7 @@ function Character:__new(CharacterModel: Model): nil
     end
     if not self.Attachments.LeftFoot.LeftFootAttachment then
         local NewAttachment = Instance.new("Attachment")
-        NewAttachment.Position = Vector3.new(0, -self.Parts.LeftFoot.Size.Y / 2, 0)
+        NewAttachment.Position = Vector3.new(0, -(self.Parts.LeftFoot :: BasePart).Size.Y / 2, 0)
         NewAttachment.Name = "LeftFootAttachment"
 
         local OriginalPositionValue = Instance.new("Vector3Value")
@@ -181,22 +189,22 @@ function Character:__new(CharacterModel: Model): nil
     end
 
     --Store the limbs.
-    self.Head = Head.new(self.Parts.Head)
-    self.Torso = Torso.new(self.Parts.LowerTorso,self.Parts.UpperTorso)
-    self.LeftArm = Appendage.new(CharacterModel:WaitForChild("LeftUpperArm"), CharacterModel:WaitForChild("LeftLowerArm"), CharacterModel:WaitForChild("LeftHand"), "LeftShoulderRigAttachment", "LeftElbowRigAttachment", "LeftWristRigAttachment", "LeftGripAttachment", PreventArmDisconnection)
-    self.RightArm = Appendage.new(CharacterModel:WaitForChild("RightUpperArm"), CharacterModel:WaitForChild("RightLowerArm"), CharacterModel:WaitForChild("RightHand"), "RightShoulderRigAttachment", "RightElbowRigAttachment", "RightWristRigAttachment", "RightGripAttachment", PreventArmDisconnection)
-    self.LeftLeg = Appendage.new(CharacterModel:WaitForChild("LeftUpperLeg"), CharacterModel:WaitForChild("LeftLowerLeg"), CharacterModel:WaitForChild("LeftFoot"), "LeftHipRigAttachment", "LeftKneeRigAttachment", "LeftAnkleRigAttachment", "LeftFootAttachment", true)
+    self.Head = Head.new(self.Parts.Head :: BasePart)
+    self.Torso = Torso.new(self.Parts.LowerTorso :: BasePart, self.Parts.UpperTorso :: BasePart)
+    self.LeftArm = Appendage.new(CharacterModel:WaitForChild("LeftUpperArm") :: BasePart, CharacterModel:WaitForChild("LeftLowerArm") :: BasePart, CharacterModel:WaitForChild("LeftHand") :: BasePart, "LeftShoulderRigAttachment", "LeftElbowRigAttachment", "LeftWristRigAttachment", "LeftGripAttachment", PreventArmDisconnection)
+    self.RightArm = Appendage.new(CharacterModel:WaitForChild("RightUpperArm") :: BasePart, CharacterModel:WaitForChild("RightLowerArm") :: BasePart, CharacterModel:WaitForChild("RightHand") :: BasePart, "RightShoulderRigAttachment", "RightElbowRigAttachment", "RightWristRigAttachment", "RightGripAttachment", PreventArmDisconnection)
+    self.LeftLeg = Appendage.new(CharacterModel:WaitForChild("LeftUpperLeg") :: BasePart, CharacterModel:WaitForChild("LeftLowerLeg") :: BasePart, CharacterModel:WaitForChild("LeftFoot") :: BasePart, "LeftHipRigAttachment", "LeftKneeRigAttachment", "LeftAnkleRigAttachment", "LeftFootAttachment", true)
     self.LeftLeg.InvertBendDirection = true
-    self.RightLeg = Appendage.new(CharacterModel:WaitForChild("RightUpperLeg"), CharacterModel:WaitForChild("RightLowerLeg"), CharacterModel:WaitForChild("RightFoot"), "RightHipRigAttachment", "RightKneeRigAttachment", "RightAnkleRigAttachment", "RightFootAttachment", true)
+    self.RightLeg = Appendage.new(CharacterModel:WaitForChild("RightUpperLeg") :: BasePart, CharacterModel:WaitForChild("RightLowerLeg") :: BasePart, CharacterModel:WaitForChild("RightFoot") :: BasePart, "RightHipRigAttachment", "RightKneeRigAttachment", "RightAnkleRigAttachment", "RightFootAttachment", true)
     self.RightLeg.InvertBendDirection = true
     self.FootPlanter = FootPlanter:CreateSolver(CharacterModel:WaitForChild("LowerTorso"), self.ScaleValues.BodyHeightScale)
 
     --Stop the character animations.
-    local Animator = self.Humanoid:FindFirstChild("Animator")
+    local Animator = self.Humanoid:FindFirstChild("Animator") :: Animator
     if Animator then
         if Players.LocalPlayer and Players.LocalPlayer.Character == CharacterModel then
             CharacterModel:WaitForChild("Animate"):Destroy()
-            for _, Track in pairs(Animator:GetPlayingAnimationTracks()) do
+            for _, Track in Animator:GetPlayingAnimationTracks() do
                 Track:AdjustWeight(0, 0)
                 Track:Stop(0)
             end
@@ -212,7 +220,7 @@ function Character:__new(CharacterModel: Model): nil
         if NewAnimator:IsA("Animator") then
             if Players.LocalPlayer and Players.LocalPlayer.Character == CharacterModel then
                 CharacterModel:WaitForChild("Animate"):Destroy()
-                for _, Track in pairs(NewAnimator:GetPlayingAnimationTracks()) do
+                for _, Track in NewAnimator:GetPlayingAnimationTracks() do
                     Track:AdjustWeight(0, 0)
                     Track:Stop(0)
                 end
@@ -229,11 +237,11 @@ function Character:__new(CharacterModel: Model): nil
     --Set up replication at 30hz.
     if Players.LocalPlayer and Players.LocalPlayer.Character == CharacterModel then
         task.spawn(function()
-            while self.Humanoid.Health > 0 do
+            while (self.Humanoid :: Humanoid).Health > 0 do
                 --Send the new CFrames if the CFrames changed.
-                if self.LastReplicationCFrames ~= self.ReplicationCFrames then
-                    self.LastReplicationCFrames = self.ReplicationCFrames
-                    UpdateInputs:FireServer(unpack(self.ReplicationCFrames))
+                if (self :: any).LastReplicationCFrames ~= (self :: any).ReplicationCFrames then
+                    (self :: any).LastReplicationCFrames = (self :: any).ReplicationCFrames
+                    UpdateInputs:FireServer(unpack((self :: any).ReplicationCFrames))
                 end
 
                 --Wait 1/30th of a second to send the next set of CFrames.
@@ -241,6 +249,8 @@ function Character:__new(CharacterModel: Model): nil
             end
         end)
     end
+    
+    return (self :: any) :: Character
 end
 
 --[[
@@ -262,18 +272,19 @@ function Character:GetHumanoidSeatPart(): BasePart?
 
     --Iterated through the connected parts and return if a seat exists.
     --While SeatPart may not be set, a SeatWeld does exist.
-    for _, ConnectedPart in pairs(self.Parts.HumanoidRootPart:GetConnectedParts()) do
+    for _, ConnectedPart in self.Parts.HumanoidRootPart:GetConnectedParts() do
         if ConnectedPart:IsA("Seat") or ConnectedPart:IsA("VehicleSeat") then
             return ConnectedPart
         end
     end
+    return nil
 end
 --[[
 Sets a property. The property will either be
 set instantly or tweened depending on how
 it is configured.
 --]]
-function Character:SetCFrameProperty(Object: Instance, PropertyName: string, PropertyValue: any): nil
+function Character:SetCFrameProperty(Object: Instance, PropertyName: string, PropertyValue: any): ()
     if self.TweenComponents then
         TweenService:Create(
             Object,
@@ -283,21 +294,21 @@ function Character:SetCFrameProperty(Object: Instance, PropertyName: string, Pro
             }
         ):Play()
     else
-        Object[PropertyName] = PropertyValue
+        (Object :: any)[PropertyName] = PropertyValue
     end
 end
 
 --[[
 Sets the transform of a motor.
 --]]
-function Character:SetTransform(MotorName: string, AttachmentName: string, StartLimbName: string, EndLimbName: string, StartCFrame: CFrame, EndCFrame: CFrame): nil
+function Character:SetTransform(MotorName: string, AttachmentName: string, StartLimbName: string, EndLimbName: string, StartCFrame: CFrame, EndCFrame: CFrame): ()
     self:SetCFrameProperty(self.Motors[MotorName], "Transform", (StartCFrame * self.Attachments[StartLimbName][AttachmentName].CFrame):Inverse() * (EndCFrame * self.Attachments[EndLimbName][AttachmentName].CFrame))
 end
 
 --[[
 Updates the character from the inputs.
 --]]
-function Character:UpdateFromInputs(HeadControllerCFrame: CFrame, LeftHandControllerCFrame: CFrame, RightHandControllerCFrame: CFrame): nil
+function Character:UpdateFromInputs(HeadControllerCFrame: CFrame, LeftHandControllerCFrame: CFrame, RightHandControllerCFrame: CFrame): ()
     --Return if the humanoid is dead.
     if self.Humanoid.Health <= 0 then
         return
@@ -315,7 +326,7 @@ function Character:UpdateFromInputs(HeadControllerCFrame: CFrame, LeftHandContro
     --Get the CFrames.
     local HeadCFrame = self.Head:GetHeadCFrame(HeadControllerCFrame)
     local NeckCFrame = self.Head:GetNeckCFrame(HeadControllerCFrame)
-	local LowerTorsoCFrame, UpperTorsoCFrame = self.Torso:GetTorsoCFrames(NeckCFrame)
+	local LowerTorsoCFrame: CFrame, UpperTorsoCFrame = self.Torso:GetTorsoCFrames(NeckCFrame)
 	local JointCFrames = self.Torso:GetAppendageJointCFrames(LowerTorsoCFrame, UpperTorsoCFrame)
 	local LeftUpperArmCFrame, LeftLowerArmCFrame, LeftHandCFrame = self.LeftArm:GetAppendageCFrames(JointCFrames["LeftShoulder"], LeftHandControllerCFrame)
 	local RightUpperArmCFrame, RightLowerArmCFrame, RightHandCFrame = self.RightArm:GetAppendageCFrames(JointCFrames["RightShoulder"], RightHandControllerCFrame)
@@ -324,11 +335,11 @@ function Character:UpdateFromInputs(HeadControllerCFrame: CFrame, LeftHandContro
     --HumanoidRootParts must always face up. This makes the math more complicated.
     --Setting the CFrame directly to something not facing directly up will result in the physics
     --attempting to correct that within the next frame, causing the character to appear to move.
-    local LeftFoot,RightFoot = self.FootPlanter:GetFeetCFrames()
+    local LeftFoot: CFrame, RightFoot: CFrame = self.FootPlanter:GetFeetCFrames()
     local LeftUpperLegCFrame, LeftLowerLegCFrame, LeftFootCFrame = self.LeftLeg:GetAppendageCFrames(JointCFrames["LeftHip"], LeftFoot * CFrame.Angles(0, math.pi, 0))
     local RightUpperLegCFrame, RightLowerLegCFrame, RightFootCFrame = self.RightLeg:GetAppendageCFrames(JointCFrames["RightHip"], RightFoot * CFrame.Angles(0, math.pi, 0))
     local TargetHumanoidRootPartCFrame = LowerTorsoCFrame * self.Attachments.LowerTorso.RootRigAttachment.CFrame * self.Attachments.HumanoidRootPart.RootRigAttachment.CFrame:Inverse()
-    local ActualHumanoidRootPartCFrame = self.Parts.HumanoidRootPart.CFrame
+    local ActualHumanoidRootPartCFrame: CFrame = self.Parts.HumanoidRootPart.CFrame
     local HumanoidRootPartHeightDifference = ActualHumanoidRootPartCFrame.Y - TargetHumanoidRootPartCFrame.Y
     local NewTargetHumanoidRootPartCFrame = CFrame.new(TargetHumanoidRootPartCFrame.Position)
     self:SetCFrameProperty(self.Parts.HumanoidRootPart, "CFrame", CFrame.new(0, HumanoidRootPartHeightDifference, 0) * NewTargetHumanoidRootPartCFrame)
@@ -359,7 +370,7 @@ Updates the character from the inputs while seated.
 The CFrames are in the local space instead of global space
 since the seat maintains the global space.
 --]]
-function Character:UpdateFromInputsSeated(HeadControllerCFrame: CFrame, LeftHandControllerCFrame: CFrame, RightHandControllerCFrame: CFrame): nil
+function Character:UpdateFromInputsSeated(HeadControllerCFrame: CFrame, LeftHandControllerCFrame: CFrame, RightHandControllerCFrame: CFrame): ()
     --Return if the humanoid is dead.
     if self.Humanoid.Health <= 0 then
         return
@@ -402,4 +413,4 @@ end
 
 
 
-return Character
+return (Character :: any) :: Character
