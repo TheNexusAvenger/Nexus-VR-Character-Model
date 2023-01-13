@@ -55,7 +55,7 @@ end
 --[[
 Returns true if the provided part is in a tool.
 --]]
-function DefaultCamera.IsInTool(Part: BasePart): boolean
+function DefaultCamera.IsInTool(Part: Instance): boolean
     while Part do
         if Part:IsA("Tool") then
             return true
