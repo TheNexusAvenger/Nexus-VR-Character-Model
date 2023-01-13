@@ -3,24 +3,25 @@ TheNexusAvenger
 
 Stores information about the head of a character.
 --]]
+--!strict
 
-local NexusVRCharacterModel = require(script.Parent.Parent)
-local Limb = NexusVRCharacterModel:GetResource("Character.Limb")
-local Settings = NexusVRCharacterModel:GetInstance("State.Settings")
+local NexusVRCharacterModel = script.Parent.Parent
+local Limb = require(script.Parent:WaitForChild("Limb"))
+local Settings = require(NexusVRCharacterModel:WaitForChild("State"):WaitForChild("Settings")).GetInstance()
 
-local Head = Limb:Extend()
-Head:SetClassName("Head")
+local Head = {}
+Head.__index = Head
+setmetatable(Head, Limb)
 
 
 
 --[[
 Creates a head.
 --]]
-function Head:__new(HeadPart: BasePart): nil
-    Limb.__new(self)
-
-    --Store the parts.
+function Head.new(HeadPart: BasePart): any
+    local self = Limb.new()
     self.Head = HeadPart
+    return setmetatable(self, Head)
 end
 
 --[[
@@ -28,7 +29,7 @@ Returns the offset from the head to
 the location of the eyes.
 --]]
 function Head:GetEyesOffset(): CFrame
-    return self:GetAttachmentCFrame(self.Head, "FaceFrontAttachment") * CFrame.new(0, self.Head.Size.Y / 4, 0)
+    return (self:GetAttachmentCFrame(self.Head, "FaceFrontAttachment") :: CFrame) * CFrame.new(0, (self.Head :: BasePart).Size.Y / 4, 0)
 end
 
 --[[
@@ -45,7 +46,7 @@ given VR input in global world space.
 --]]
 function Head:GetNeckCFrame(VRHeadCFrame: CFrame, TargetAngle: number?): CFrame
     --Get the base neck CFrame and angles.
-    local BaseNeckCFrame = self:GetHeadCFrame(VRHeadCFrame) * self:GetAttachmentCFrame(self.Head,"NeckRigAttachment")
+    local BaseNeckCFrame = (self:GetHeadCFrame(VRHeadCFrame) :: CFrame) * (self:GetAttachmentCFrame(self.Head, "NeckRigAttachment") :: CFrame)
     local BaseNeckLookVector = BaseNeckCFrame.LookVector
     local BaseNeckLook,BaseNeckTilt = math.atan2(BaseNeckLookVector.X, BaseNeckLookVector.Z) + math.pi, math.asin(BaseNeckLookVector.Y)
 

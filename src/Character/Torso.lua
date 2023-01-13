@@ -3,25 +3,26 @@ TheNexusAvenger
 
 Stores information about the torso of a character.
 --]]
+--!strict
 
-local NexusVRCharacterModel = require(script.Parent.Parent)
-local Limb = NexusVRCharacterModel:GetResource("Character.Limb")
-local Settings = NexusVRCharacterModel:GetInstance("State.Settings")
+local NexusVRCharacterModel = script.Parent.Parent
+local Limb = require(script.Parent:WaitForChild("Limb"))
+local Settings = require(NexusVRCharacterModel:WaitForChild("State"):WaitForChild("Settings")).GetInstance()
 
-local Torso = Limb:Extend()
-Torso:SetClassName("Torso")
+local Torso = {}
+Torso.__index = Torso
+setmetatable(Torso, Limb)
 
 
 
 --[[
 Creates a torso.
 --]]
-function Torso:__new(LowerTorso: BasePart, UpperTorso: BasePart): nil
-    Limb.__new(self)
-
-    --Store the parts.
+function Torso.new(LowerTorso: BasePart, UpperTorso: BasePart): any
+    local self = Limb.new()
     self.LowerTorso = LowerTorso
     self.UpperTorso = UpperTorso
+    return setmetatable(self, Torso)
 end
 
 --[[

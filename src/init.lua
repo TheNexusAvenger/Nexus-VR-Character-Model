@@ -133,19 +133,6 @@ function NexusVRCharacterModel:GetInstance(Path)
     return NexusVRCharacterModel.SingletonInstances[Path]
 end
 
---[[
-Clears the static instances. Only
-intended for use at the end of tests.
---]]
-function NexusVRCharacterModel:ClearInstances()
-    for _,Ins in pairs(NexusVRCharacterModel.SingletonInstances) do
-        if Ins.Destroy then
-            Ins:Destroy()
-        end
-    end
-    NexusVRCharacterModel.SingletonInstances = {}
-end
-
 
 
 NexusVRCharacterModel.Api = NexusVRCharacterModel:GetResource("Api")(NexusVRCharacterModel)

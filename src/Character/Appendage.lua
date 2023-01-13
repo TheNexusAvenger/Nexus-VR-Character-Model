@@ -5,21 +5,19 @@ Stores information about an appendage, such as
 an arm or a leg.
 --]]
 
-local NexusVRCharacterModel = require(script.Parent.Parent)
-local Limb = NexusVRCharacterModel:GetResource("Character.Limb")
+local Limb = require(script.Parent:WaitForChild("Limb"))
 
-local Appendage = Limb:Extend()
-Appendage:SetClassName("Appendage")
+local Appendage = {}
+Appendage.__index = Appendage
+setmetatable(Appendage, Limb)
 
 
 
 --[[
 Creates an appendage.
 --]]
-function Appendage:__new(UpperLimb: BasePart, LowerLimb: BasePart, LimbEnd: BasePart, StartAttachment: string, LimbJointAttachment: string, LimbEndAttachment: string, LimbHoldAttachment: string, PreventDisconnection: boolean?): nil
-    Limb.__new(self)
-
-    --Store the parts and attachment names.
+function Appendage.new(UpperLimb: BasePart, LowerLimb: BasePart, LimbEnd: BasePart, StartAttachment: string, LimbJointAttachment: string, LimbEndAttachment: string, LimbHoldAttachment: string, PreventDisconnection: boolean?): any
+    local self = Limb.new()
     self.UpperLimb = UpperLimb
     self.LowerLimb = LowerLimb
     self.LimbEnd = LimbEnd
@@ -28,6 +26,7 @@ function Appendage:__new(UpperLimb: BasePart, LowerLimb: BasePart, LimbEnd: Base
     self.LimbEndAttachment = LimbEndAttachment
     self.LimbHoldAttachment = LimbHoldAttachment
     self.PreventDisconnection = PreventDisconnection or false
+    return setmetatable(self, Appendage)
 end
 
 --[[
@@ -35,7 +34,7 @@ Attempts to solve a joint. This uses
 the "naive" approach for inverse kinematics.
 --]]
 function Appendage:SolveJoint(OriginCFrame: CFrame, TargetPosition: Vector3, Length1: number, Length2: number): (CFrame, number, number)
-    local LocalizedPosition = OriginCFrame:pointToObjectSpace(TargetPosition)
+    local LocalizedPosition = OriginCFrame:PointToObjectSpace(TargetPosition)
     local LocalizedUnit = LocalizedPosition.unit
     local Hypotenuse = LocalizedPosition.Magnitude
 

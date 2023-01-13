@@ -3,14 +3,19 @@ TheNexusAvenger
 
 Base class for a limb.
 --]]
+--!strict
 
-local NexusVRCharacterModel = require(script.Parent.Parent)
-local NexusObject = NexusVRCharacterModel:GetResource("NexusInstance.NexusObject")
-
-local Limb = NexusObject:Extend()
-Limb:SetClassName("Limb")
+local Limb = {}
+Limb.__index = Limb
 
 
+
+--[[
+Creates a limb object.
+--]]
+function Limb.new(): any
+    return setmetatable({}, Limb)
+end
 
 --[[
 Returns the CFrame of an attachment.
@@ -19,7 +24,7 @@ does not exist.
 --]]
 function Limb:GetAttachmentCFrame(Part: BasePart, AttachmentName: string): CFrame
     local Attachment = Part:FindFirstChild(AttachmentName)
-    return Attachment and Attachment.CFrame or CFrame.new()
+    return Attachment and (Attachment :: Attachment).CFrame or CFrame.new()
 end
 
 
