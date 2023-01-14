@@ -10,19 +10,6 @@ local UserInputService = game:GetService("UserInputService")
 
 
 
---[[
-Creates a shim for interacted with a limited API for a module.
---]]
-local function CreateShim(Source: {[string]: any}, FunctionNames: {string}): {[string]: any}
-    local Shim = {}
-    for _, FunctionName in FunctionNames do
-        Shim[FunctionName] = Source[FunctionName]
-    end
-    return Shim
-end
-
-
-
 return function()
     local NexusVRCharacterModel = script.Parent
     local NexusEvent = require(NexusVRCharacterModel:WaitForChild("NexusInstance"):WaitForChild("Event"):WaitForChild("NexusEvent"))
@@ -85,10 +72,10 @@ return function()
             --Build the initial shims for the APIs.
             local CameraService = require(NexusVRCharacterModel:WaitForChild("State"):WaitForChild("CameraService")).GetInstance()
             local ControlService = require(NexusVRCharacterModel:WaitForChild("State"):WaitForChild("ControlService")).GetInstance()
-            API:Register("Camera", CreateShim(CameraService, {"SetActiveCamera",}))
-            API:Register("Controller", CreateShim(ControlService, {"SetActiveController",}))
-            API:Register("Input", CreateShim(require(NexusVRCharacterModel:WaitForChild("State"):WaitForChild("VRInputService")).GetInstance(), {"Recenter", "SetEyeLevel", "Recentered", "EyeLevelSet",}))
-            API:Register("Settings", CreateShim(require(NexusVRCharacterModel:WaitForChild("State"):WaitForChild("Settings")).GetInstance(), {"GetSetting", "SetSetting", "GetSettingsChangedSignal"}))
+            API:Register("Camera", setmetatable({}, {__index=CameraService}))
+            API:Register("Controller", setmetatable({}, {__index=ControlService}))
+            API:Register("Input", setmetatable({}, {__index=require(NexusVRCharacterModel:WaitForChild("State"):WaitForChild("VRInputService")).GetInstance()}))
+            API:Register("Settings", setmetatable({}, {__index=require(NexusVRCharacterModel:WaitForChild("State"):WaitForChild("Settings")).GetInstance()}))
 
             --Add the additional API adapters for the shims.
             API.Camera.GetActiveCamera = function()
