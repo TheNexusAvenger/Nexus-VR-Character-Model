@@ -14,6 +14,7 @@ local Players = game:GetService("Players")
 local UserInputService = game:GetService("UserInputService")
 
 local NexusVRCharacterModel = script.Parent.Parent.Parent
+local NexusVRCharacterModelApi = require(NexusVRCharacterModel).Api
 local BaseController = require(script.Parent:WaitForChild("BaseController"))
 local VRInputService = require(NexusVRCharacterModel:WaitForChild("State"):WaitForChild("VRInputService")).GetInstance()
 
@@ -73,8 +74,8 @@ function SmoothLocomotionController:UpdateCharacter(): ()
 
     --Determine the direction to move the player.
     local ThumbstickPosition = VRInputService:GetThumbstickPosition(Enum.KeyCode.Thumbstick1)
-    local LeftHandInputActive = (not NexusVRCharacterModel.Api.Controller or NexusVRCharacterModel.Api.Controller:IsControllerInputEnabled(Enum.UserCFrame.LeftHand))
-    local RightHandInputActive = (not NexusVRCharacterModel.Api.Controller or NexusVRCharacterModel.Api.Controller:IsControllerInputEnabled(Enum.UserCFrame.RightHand))
+    local LeftHandInputActive = (not NexusVRCharacterModelApi.Controller or NexusVRCharacterModelApi.Controller:IsControllerInputEnabled(Enum.UserCFrame.LeftHand))
+    local RightHandInputActive = (not NexusVRCharacterModelApi.Controller or NexusVRCharacterModelApi.Controller:IsControllerInputEnabled(Enum.UserCFrame.RightHand))
     if ThumbstickPosition.Magnitude < THUMBSTICK_DEADZONE_RADIUS or not LeftHandInputActive then
         ThumbstickPosition = Vector3.zero
     end
