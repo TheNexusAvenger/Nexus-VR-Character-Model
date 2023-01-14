@@ -17,6 +17,7 @@ export type CameraService = {
     new: () -> (CameraService),
     GetInstance: () -> (CameraService),
 
+    ActiveCamera: string,
     RegisterCamera: (self: CameraService, Name: string, Camera: CameraInterface) -> (),
     SetActiveCamera: (self: CameraService, Name: string) -> (),
     UpdateCamera: (self: CameraService, HeadsetCFrameWorld: CFrame) -> (),

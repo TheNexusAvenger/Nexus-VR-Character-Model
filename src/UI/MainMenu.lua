@@ -3,6 +3,7 @@ TheNexusAvenger
 
 Main menu for Nexus VR Character Model.
 --]]
+--!strict
 
 local MENU_OPEN_TIME_REQUIREMENT = 1
 local MENU_OPEN_TIME = 0.25
@@ -15,63 +16,56 @@ local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 local TweenService = game:GetService("TweenService")
 
-local NexusVRCharacterModel = require(script.Parent.Parent)
-local Settings = NexusVRCharacterModel:GetInstance("State.Settings")
-local VRInputService = NexusVRCharacterModel:GetInstance("State.VRInputService")
-local ApiBaseView = NexusVRCharacterModel:GetResource("UI.View.ApiBaseView")
-local ChatView = NexusVRCharacterModel:GetResource("UI.View.ChatView")
-local SettingsView = NexusVRCharacterModel:GetResource("UI.View.SettingsView")
-local TextButtonFactory = NexusVRCharacterModel:GetResource("NexusButton.Factory.TextButtonFactory").CreateDefault(Color3.fromRGB(0, 170, 255))
+local NexusVRCharacterModel = script.Parent.Parent
+local Settings = require(NexusVRCharacterModel:WaitForChild("State"):WaitForChild("Settings")).GetInstance()
+local VRInputService = require(NexusVRCharacterModel:WaitForChild("State"):WaitForChild("VRInputService")).GetInstance()
+local ApiBaseView = require(NexusVRCharacterModel:WaitForChild("UI"):WaitForChild("View"):WaitForChild("ApiBaseView"))
+local ChatView = require(NexusVRCharacterModel:WaitForChild("UI"):WaitForChild("View"):WaitForChild("ChatView"))
+local SettingsView = require(NexusVRCharacterModel:WaitForChild("UI"):WaitForChild("View"):WaitForChild("SettingsView"))
+local TextButtonFactory = require(NexusVRCharacterModel:WaitForChild("NexusButton"):WaitForChild("Factory"):WaitForChild("TextButtonFactory")).CreateDefault(Color3.fromRGB(0, 170, 255))
 TextButtonFactory:SetDefault("Theme", "RoundedCorners")
-local NexusVRCore = require(ReplicatedStorage:WaitForChild("NexusVRCore"))
+local NexusVRCore = require(ReplicatedStorage:WaitForChild("NexusVRCore")) :: any
 local ScreenGui = NexusVRCore:GetResource("Container.ScreenGui")
 
-local MainMenu = ScreenGui:Extend()
-MainMenu:SetClassName("MainMenu")
+local MainMenu = {}
+MainMenu.__index = MainMenu
 
 
 
 --[[
 Creates the main menu.
 --]]
-function MainMenu:__new()
-    ScreenGui.__new(self)
+function MainMenu.new(): any
+    local self = {}
+    setmetatable(self, MainMenu)
 
     --Set up the ScreenGui.
-    self.ResetOnSpawn = false
-    self.Enabled = false
-    self.CanvasSize = Vector2.new(500, 600)
-    self.FieldOfView = 0
-    self.Easing = 0.25
-
-    --Disable replication to the wrapped instance.
-    self:DisableChangeReplication("ViewAdornFrame")
-    self:DisableChangeReplication("LeftButton")
-    self:DisableChangeReplication("RightButton")
-    self:DisableChangeReplication("ViewTextLabel")
-    self:DisableChangeReplication("CurrentView")
-    self:DisableChangeReplication("Views")
-    self:DisableChangeReplication("LeftHandHintVisible")
-    self:DisableChangeReplication("RightHandHintVisible")
+    local MainMenuScreenGui = ScreenGui.new()
+    MainMenuScreenGui.ResetOnSpawn = false
+    MainMenuScreenGui.Enabled = false
+    MainMenuScreenGui.CanvasSize = Vector2.new(500, 600)
+    MainMenuScreenGui.FieldOfView = 0
+    MainMenuScreenGui.Easing = 0.25
+    self.ScreenGui = MainMenuScreenGui
 
     --Create the parent frame, display text, and toggle buttons.
     local ViewAdornFrame = Instance.new("Frame")
     ViewAdornFrame.BackgroundTransparency = 1
     ViewAdornFrame.Size = UDim2.new(0, 500, 0, 500)
-    ViewAdornFrame.Parent = self:GetContainer()
+    ViewAdornFrame.Parent = MainMenuScreenGui:GetContainer()
     self.ViewAdornFrame = ViewAdornFrame
 
     local LeftButton,LeftText = TextButtonFactory:Create()
     LeftButton.Size = UDim2.new(0, 80, 0, 80)
     LeftButton.Position = UDim2.new(0, 10, 0, 510)
-    LeftButton.Parent = self:GetContainer()
+    LeftButton.Parent = MainMenuScreenGui:GetContainer()
     LeftText.Text = "<"
     self.LeftButton = LeftButton
 
     local RightButton,RightText = TextButtonFactory:Create()
     RightButton.Size = UDim2.new(0, 80, 0, 80)
     RightButton.Position = UDim2.new(0, 410, 0, 510)
-    RightButton.Parent = self:GetContainer()
+    RightButton.Parent = MainMenuScreenGui:GetContainer()
     RightText.Text = ">"
     self.RightButton = RightButton
 
@@ -84,14 +78,14 @@ function MainMenu:__new()
     ViewTextLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
     ViewTextLabel.TextStrokeColor3 = Color3.fromRGB(0, 0, 0)
     ViewTextLabel.TextStrokeTransparency = 0
-    ViewTextLabel.Parent = self:GetContainer()
+    ViewTextLabel.Parent = MainMenuScreenGui:GetContainer()
     self.ViewTextLabel = ViewTextLabel
 
     --Set up the default views.
     self.CurrentView = 1
     self.Views = {}
-    SettingsView.new(self:CreateView("Settings"))
-    ChatView.new(self:CreateView("Chat"))
+    (SettingsView :: any).new(self:CreateView("Settings"));
+    (ChatView :: any).new(self:CreateView("Chat"))
     self:UpdateVisibleView()
 
     --Connect changing views.
@@ -117,14 +111,15 @@ function MainMenu:__new()
     end)
 
     --Parent the menu.
-    self.Parent = Players.LocalPlayer:WaitForChild("PlayerGui")
+    ScreenGui.Parent = Players.LocalPlayer:WaitForChild("PlayerGui")
+    return self
 end
 
 --[[
 Sets up opening based on the controllers
 being rotated upwards.
 --]]
-function MainMenu:SetUpOpening(): nil
+function MainMenu:SetUpOpening(): ()
     --Create the animation parts.
     local LeftAdornPart = Instance.new("Part")
     LeftAdornPart.Transparency = 1
@@ -320,7 +315,7 @@ function MainMenu:SetUpOpening(): nil
             if BothHandsUp then
                 BothControllersUpStartTime = BothControllersUpStartTime or tick()
             else
-                BothControllersUpStartTime = nil
+                BothControllersUpStartTime = nil :: any
                 MenuToggleReached = false
             end
 
@@ -398,7 +393,7 @@ end
 --[[
 Toggles the menu being open.
 --]]
-function MainMenu:Toggle()
+function MainMenu:Toggle(): ()
     --Determine the start and end values.
     local StartFieldOfView, EndFieldOfView = (self.Enabled and math.rad(40) or 0), (self.Enabled and 0 or math.rad(40))
 
@@ -425,7 +420,7 @@ end
 --[[
 Registers a view.
 --]]
-function MainMenu:RegisterView(ViewName: string, ViewInstance: any): nil
+function MainMenu:RegisterView(ViewName: string, ViewInstance: any): ()
     warn("MainMenu::RegisterView is deprecated and may be removed in the future. Use MainMenu::CreateView instead.")
 
     --Set up the view instance.
@@ -440,10 +435,10 @@ end
 --[[
 Creates a menu view.
 --]]
-function MainMenu:CreateView(InitialViewName: string): table
+function MainMenu:CreateView(InitialViewName: string): any
     --Create and store the view.
     local View = ApiBaseView.new(InitialViewName)
-    View.Frame.Parent = self.ViewAdornFrame:GetWrappedInstance()
+    View.Frame.Parent = (self :: any).ViewAdornFrame:GetWrappedInstance()
     table.insert(self.Views, View)
 
     --Connect the events.
@@ -468,7 +463,7 @@ end
 --[[
 Updates the visible view.
 --]]
-function MainMenu:UpdateVisibleView(): nil
+function MainMenu:UpdateVisibleView(): ()
     --Update the button visibility.
     self.LeftButton.Visible = (#self.Views > 1)
     self.RightButton.Visible = (#self.Views > 1)

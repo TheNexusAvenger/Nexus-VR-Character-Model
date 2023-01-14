@@ -5,14 +5,15 @@ View for the chat.
 Just moves the chat window. Does not
 add any additional functionality.
 --]]
+--!strict
 
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 local UserInputService = game:GetService("UserInputService")
 
-local NexusVRCharacterModel = require(script.Parent.Parent.Parent)
-local NexusInstance = NexusVRCharacterModel:GetResource("NexusInstance.NexusInstance")
-local TextButtonFactory = NexusVRCharacterModel:GetResource("NexusButton.Factory.TextButtonFactory").CreateDefault(Color3.fromRGB(0, 170, 255))
+local NexusVRCharacterModel = script.Parent.Parent.Parent
+local NexusInstance = require(NexusVRCharacterModel:WaitForChild("NexusInstance"):WaitForChild("NexusInstance"))
+local TextButtonFactory = require(NexusVRCharacterModel:WaitForChild("NexusButton"):WaitForChild("Factory"):WaitForChild("TextButtonFactory")).CreateDefault(Color3.fromRGB(0, 170, 255))
 TextButtonFactory:SetDefault("Theme", "RoundedCorners")
 
 local ChatView = NexusInstance:Extend()
@@ -23,7 +24,7 @@ ChatView:SetClassName("ChatView")
 --[[
 Creates the chat view.
 --]]
-function ChatView:__new(View: table): nil
+function ChatView:__new(View: any): ()
     NexusInstance.__new(self)
 
     task.spawn(function()
@@ -42,9 +43,9 @@ function ChatView:__new(View: table): nil
 
         --Load the chat.
         --Taken from the main script.
-        local Chat = require(Players.LocalPlayer:WaitForChild("PlayerScripts"):WaitForChild("ChatScript"):WaitForChild("ChatMain"))
+        local Chat = require(Players.LocalPlayer:WaitForChild("PlayerScripts"):WaitForChild("ChatScript"):WaitForChild("ChatMain")) :: any
         local ClientChatModules = game:GetService("Chat"):WaitForChild("ClientChatModules")
-        local ChatSettings = require(ClientChatModules:WaitForChild("ChatSettings"))
+        local ChatSettings = require(ClientChatModules:WaitForChild("ChatSettings")) :: any
         if not Players.LocalPlayer:WaitForChild("PlayerGui"):FindFirstChild("Chat") then
             local containerTable = {}
             containerTable.ChatWindow = {}
@@ -61,13 +62,13 @@ function ChatView:__new(View: table): nil
                 event.Name = name
                 containerTable.ChatWindow[name] = event
 
-                event.Event:connect(function(...) Chat[name](Chat, ...) end)
+                event.Event:Connect(function(...) Chat[name](Chat, ...) end)
             end
 
             local function ConnectFunction(name)
                 local func = Instance.new("BindableFunction")
                 func.Name = name
-                containerTable.ChatWindow[name] = func
+                containerTable.ChatWindow[name] = func :: any
 
                 func.OnInvoke = function(...) return Chat[name](Chat, ...) end
             end
@@ -77,7 +78,7 @@ function ChatView:__new(View: table): nil
                 event.Name = name
                 containerTable.ChatWindow[name] = event
 
-                Chat[name]:connect(function(...) event:Fire(...) end)
+                Chat[name]:Connect(function(...) event:Fire(...) end)
             end
 
             local function ConnectSignal(name)
@@ -85,7 +86,7 @@ function ChatView:__new(View: table): nil
                 event.Name = name
                 containerTable.ChatWindow[name] = event
 
-                event.Event:connect(function(...) Chat[name]:fire(...) end)
+                event.Event:Connect(function(...) Chat[name]:fire(...) end)
             end
 
             local function ConnectSetCore(name)
@@ -93,7 +94,7 @@ function ChatView:__new(View: table): nil
                 event.Name = name
                 containerTable.SetCore[name] = event
 
-                event.Event:connect(function(...) Chat[name.."Event"]:fire(...) end)
+                event.Event:Connect(function(...) Chat[name.."Event"]:fire(...) end)
             end
 
             local function ConnectGetCore(name)

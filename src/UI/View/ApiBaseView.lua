@@ -3,20 +3,31 @@ TheNexusAvenger
 
 Base view for the menu intended to be used with the API.
 --]]
+--!strict
 
-local NexusVRCharacterModel = require(script.Parent.Parent.Parent)
-local NexusInstance = NexusVRCharacterModel:GetResource("NexusInstance.NexusInstance")
-local NexusEvent = NexusVRCharacterModel:GetResource("NexusInstance.Event.NexusEvent")
+local NexusVRCharacterModel = script.Parent.Parent.Parent
+local NexusInstance = require(NexusVRCharacterModel:WaitForChild("NexusInstance"):WaitForChild("NexusInstance"))
+local NexusEvent = require(NexusVRCharacterModel:WaitForChild("NexusInstance"):WaitForChild("Event"):WaitForChild("NexusEvent"))
 
 local ApiBaseView = NexusInstance:Extend()
 ApiBaseView:SetClassName("ApiBaseView")
+
+export type ApiBaseView = {
+    new: (InitialName: string) -> ApiBaseView,
+    Extend: (self: ApiBaseView) -> ApiBaseView,
+
+    Name: string,
+    Visible: boolean,
+    Destroyed: NexusEvent.NexusEvent<>,
+    GetContainer: (self: ApiBaseView) -> (Frame),
+} & NexusInstance.NexusInstance
 
 
 
 --[[
 Creates the view.
 --]]
-function ApiBaseView:__new(InitialName: string): nil
+function ApiBaseView:__new(InitialName: string): ()
     NexusInstance.__new(self)
     self.Name = InitialName
     self.Destroyed = NexusEvent.new()
@@ -45,7 +56,7 @@ end
 --[[
 Destroys the view.
 --]]
-function ApiBaseView:Destroy(): nil
+function ApiBaseView:Destroy(): ()
     ApiBaseView.Destroy(self)
     self.Destroyed:Fire()
     self.Destroyed:Disconnect()
@@ -53,4 +64,4 @@ end
 
 
 
-return ApiBaseView
+return (ApiBaseView :: any) :: ApiBaseView

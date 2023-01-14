@@ -18,6 +18,8 @@ export type DefaultCursorService = {
     new: () -> (DefaultCursorService),
     GetInstance: () -> (DefaultCursorService),
 
+    CursorOptionsList: {string},
+    CurrentCursorState: string,
     SetCursorState: (self: DefaultCursorService, OptionName: string) -> (),
 }
 

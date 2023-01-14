@@ -3,15 +3,17 @@ TheNexusAvenger
 
 View for the user settings.
 --]]
+--!strict
 
-local NexusVRCharacterModel = require(script.Parent.Parent.Parent)
-local NexusInstance = NexusVRCharacterModel:GetResource("NexusInstance.NexusInstance")
-local CameraService = NexusVRCharacterModel:GetInstance("State.CameraService")
-local ControlService = NexusVRCharacterModel:GetInstance("State.ControlService")
-local DefaultCursorService = NexusVRCharacterModel:GetInstance("State.DefaultCursorService")
-local Settings = NexusVRCharacterModel:GetInstance("State.Settings")
-local VRInputService = NexusVRCharacterModel:GetInstance("State.VRInputService")
-local TextButtonFactory = NexusVRCharacterModel:GetResource("NexusButton.Factory.TextButtonFactory").CreateDefault(Color3.fromRGB(0, 170, 255))
+local NexusVRCharacterModel = script.Parent.Parent.Parent
+local NexusInstance = require(NexusVRCharacterModel:WaitForChild("NexusInstance"):WaitForChild("NexusInstance"))
+local CameraService = require(NexusVRCharacterModel:WaitForChild("State"):WaitForChild("CameraService")).GetInstance()
+local ControlService = require(NexusVRCharacterModel:WaitForChild("State"):WaitForChild("ControlService")).GetInstance()
+local DefaultCursorService = require(NexusVRCharacterModel:WaitForChild("State"):WaitForChild("DefaultCursorService")).GetInstance()
+local Settings = require(NexusVRCharacterModel:WaitForChild("State"):WaitForChild("Settings")).GetInstance()
+local VRInputService = require(NexusVRCharacterModel:WaitForChild("State"):WaitForChild("VRInputService")).GetInstance()
+
+local TextButtonFactory = require(NexusVRCharacterModel:WaitForChild("NexusButton"):WaitForChild("Factory"):WaitForChild("TextButtonFactory")).CreateDefault(Color3.fromRGB(0, 170, 255))
 TextButtonFactory:SetDefault("Theme", "RoundedCorners")
 
 local SettingsView = NexusInstance:Extend()
@@ -22,7 +24,7 @@ SettingsView:SetClassName("SettingsView")
 --[[
 Creates the settings view.
 --]]
-function SettingsView:__new(View: table): nil
+function SettingsView:__new(View: any): ()
     NexusInstance.__new(self)
 
     --Create the header.
@@ -109,7 +111,7 @@ end
 --[[
 Popuulates a setting frame.
 --]]
-function SettingsView:PopulateSettingsFrame(ContainerFrame: string, HeaderName: string, GetOptionsSettings: () -> ({string}), GetValueFunction: () -> (string), SetValueFunction: (string) -> ()?): nil
+function SettingsView:PopulateSettingsFrame(ContainerFrame: Frame, HeaderName: string, GetOptionsSettings: () -> ({string}), GetValueFunction: () -> (string), SetValueFunction: (string) -> ()?): ()
     --Converrt the GetOptionsSettings callback if it is a string.
     local OptionsSetting = nil
     if typeof(GetOptionsSettings) == "string" then
@@ -161,7 +163,7 @@ function SettingsView:PopulateSettingsFrame(ContainerFrame: string, HeaderName: 
     --[[
     Updates the settings.
     --]]
-    local function UpdateSettings(Increment)
+    local function UpdateSettings(Increment: number?): ()
         --Get the current value id.
         local InitialValueName = GetValueFunction()
         local CurrentValue = 1
@@ -193,7 +195,7 @@ function SettingsView:PopulateSettingsFrame(ContainerFrame: string, HeaderName: 
 
         --Set the new value.
         if Increment and Increment ~= 0 and Options[CurrentValue] then
-            SetValueFunction(Options[CurrentValue])
+            (SetValueFunction :: (string) -> ())(Options[CurrentValue])
         end
     end
 

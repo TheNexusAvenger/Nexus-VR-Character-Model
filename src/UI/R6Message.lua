@@ -3,6 +3,7 @@ TheNexusAvenger
 
 Displays a message if R6 is used.
 --]]
+--!strict
 
 local MESSAGE_OPEN_TIME = 0.25
 
@@ -12,29 +13,31 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 
-local NexusVRCharacterModel = require(script.Parent.Parent)
-local TextButtonFactory = NexusVRCharacterModel:GetResource("NexusButton.Factory.TextButtonFactory").CreateDefault(Color3.fromRGB(0, 170, 255))
+local NexusVRCharacterModel = script.Parent.Parent
+local TextButtonFactory = require(NexusVRCharacterModel:WaitForChild("NexusButton"):WaitForChild("Factory"):WaitForChild("TextButtonFactory")).CreateDefault(Color3.fromRGB(0, 170, 255))
 TextButtonFactory:SetDefault("Theme", "RoundedCorners")
-local NexusVRCore = require(ReplicatedStorage:WaitForChild("NexusVRCore"))
+local NexusVRCore = require(ReplicatedStorage:WaitForChild("NexusVRCore")) :: any
 local ScreenGui = NexusVRCore:GetResource("Container.ScreenGui")
 
-local R6Message = ScreenGui:Extend()
-R6Message:SetClassName("R6Message")
+local R6Message = {}
+R6Message.__index = R6Message
 
 
 
 --[[
 Creates the R6 message.
 --]]
-function R6Message:__new(): nil
-    ScreenGui.__new(self)
+function R6Message.new(): any
+    local self = {}
+    setmetatable(self, R6Message)
 
     --Set up the ScreenGui.
-    self.ResetOnSpawn = false
-    self.Enabled = false
-    self.CanvasSize = Vector2.new(500, 500)
-    self.FieldOfView = 0
-    self.Easing = 0.25
+    local ScreenGui = ScreenGui.new()
+    ScreenGui.ResetOnSpawn = false
+    ScreenGui.Enabled = false
+    ScreenGui.CanvasSize = Vector2.new(500, 500)
+    ScreenGui.FieldOfView = 0
+    ScreenGui.Easing = 0.25
 
     --Create the logo and message.
     local Logo = Instance.new("ImageLabel")
@@ -42,7 +45,7 @@ function R6Message:__new(): nil
     Logo.Size = UDim2.new(0.4, 0, 0.4, 0)
     Logo.Position = UDim2.new(0.3, 0, -0.1, 0)
     Logo.Image = "http://www.roblox.com/asset/?id=1499731139"
-    Logo.Parent = self:GetContainer()
+    Logo.Parent = ScreenGui:GetContainer()
 
     local UpperText = Instance.new("TextLabel")
     UpperText.BackgroundTransparency = 1
@@ -54,7 +57,7 @@ function R6Message:__new(): nil
     UpperText.TextColor3 = Color3.fromRGB(255, 255, 255)
     UpperText.TextStrokeColor3 = Color3.fromRGB(0, 0, 0)
     UpperText.TextStrokeTransparency = 0
-    UpperText.Parent = self:GetContainer()
+    UpperText.Parent = ScreenGui:GetContainer()
 
     local LowerText = Instance.new("TextLabel")
     LowerText.BackgroundTransparency = 1
@@ -66,28 +69,29 @@ function R6Message:__new(): nil
     LowerText.TextColor3 = Color3.fromRGB(255, 255, 255)
     LowerText.TextStrokeColor3 = Color3.fromRGB(0, 0, 0)
     LowerText.TextStrokeTransparency = 0
-    LowerText.Parent = self:GetContainer()
+    LowerText.Parent = ScreenGui:GetContainer()
 
     --Create and connect the close button.
     local CloseButton,CloseText = TextButtonFactory:Create()
     CloseButton.Size = UDim2.new(0.3, 0, 0.1, 0)
     CloseButton.Position = UDim2.new(0.35, 0, 0.7, 0)
-    CloseButton.Parent = self:GetContainer()
+    CloseButton.Parent = ScreenGui:GetContainer()
     CloseText.Text = "Ok"
 
     CloseButton.MouseButton1Click:Connect(function()
         self:SetOpen(false)
-        self:Destroy()
+        ScreenGui:Destroy()
     end)
 
     --Parent the message.
-    self.Parent = Players.LocalPlayer:WaitForChild("PlayerGui")
+    ScreenGui.Parent = Players.LocalPlayer:WaitForChild("PlayerGui")
+    return self
 end
 
 --[[
 Sets the window open or closed.
 --]]
-function R6Message:SetOpen(Open: boolean): nil
+function R6Message:SetOpen(Open: boolean): ()
     --Determine the start and end values.
     local StartFieldOfView, EndFieldOfView = (Open and 0 or math.rad(40)), (Open and math.rad(40) or 0)
 
@@ -114,7 +118,7 @@ end
 --[[
 Opens the message.
 --]]
-function R6Message:Open(): nil
+function R6Message:Open(): ()
     self:SetOpen(true)
 end
 

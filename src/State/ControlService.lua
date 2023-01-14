@@ -18,6 +18,7 @@ export type ControlService = {
     new: () -> (ControlService),
     GetInstance: () -> (ControlService),
 
+    ActiveController: string,
     RegisterController: (self: ControlService, Name: string, Controller: ControllerInterface) -> (),
     SetActiveController: (self: ControlService, Name: string) -> (),
     UpdateCharacter: (self: ControlService) -> (),
