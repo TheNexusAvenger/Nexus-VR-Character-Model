@@ -7,6 +7,3 @@
 [submodule "module/Nexus-Button"]
 	path = module/Nexus-Button
 	url = https://github.com/TheNexusAvenger/Nexus-Button
-[submodule "module/Nexus-Project"]
-	path = module/Nexus-Project
-	url = https://github.com/TheNexusAvenger/Nexus-Project

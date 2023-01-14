@@ -7,9 +7,6 @@
             "NexusInstance": {
                 "$path": "./module/Nexus-Instance/"
             },
-            "NexusProject": {
-                "$path": "./module/Nexus-Project/"
-            },
             "NexusVRCore": {
                 "$path": "./module/Nexus-VR-Core/"
             },

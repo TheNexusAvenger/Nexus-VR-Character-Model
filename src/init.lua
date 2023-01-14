@@ -17,11 +17,10 @@ local Players = game:GetService("Players")
 local HttpService = game:GetService("HttpService")
 local StarterPlayer = game:GetService("StarterPlayer")
 
-local NexusProject = require(script:WaitForChild("NexusProject"))
 local Settings = require(script:WaitForChild("State"):WaitForChild("Settings")).GetInstance()
 local RateLimiter = require(script:WaitForChild("State"):WaitForChild("RateLimiter"))
 
-local NexusVRCharacterModel = NexusProject.new(script)
+local NexusVRCharacterModel = {}
 
 
 
