@@ -3,6 +3,7 @@ TheNexusAvenger
 
 Loads Nexus VR Character Model.
 --]]
+--!strict
 
 --Client should send replication at 30hz.
 --A buffer is added in case this rate is exceeded
@@ -17,9 +18,10 @@ local HttpService = game:GetService("HttpService")
 local StarterPlayer = game:GetService("StarterPlayer")
 
 local NexusProject = require(script:WaitForChild("NexusProject"))
+local Settings = require(script:WaitForChild("State"):WaitForChild("Settings")).GetInstance()
+local RateLimiter = require(script:WaitForChild("State"):WaitForChild("RateLimiter"))
 
 local NexusVRCharacterModel = NexusProject.new(script)
-NexusVRCharacterModel.SingletonInstances = {}
 
 
 
@@ -27,7 +29,7 @@ NexusVRCharacterModel.SingletonInstances = {}
 Sets the configuration to use. Intended to be
 run once by the server.
 --]]
-function NexusVRCharacterModel:SetConfiguration(Configuration)
+function NexusVRCharacterModel:SetConfiguration(Configuration: any): ()
     --Create the value.
     local ConfigurationValue = script:FindFirstChild("Configuration")
     if not ConfigurationValue then
@@ -38,13 +40,13 @@ function NexusVRCharacterModel:SetConfiguration(Configuration)
 
     --Store the configuration.
     ConfigurationValue.Value = HttpService:JSONEncode(Configuration)
-    NexusVRCharacterModel:GetInstance("State.Settings"):SetDefaults(Configuration)
+    Settings:SetDefaults(Configuration)
 end
 
 --[[
 Loads Nexus VR Character Model.
 --]]
-function NexusVRCharacterModel:Load()
+function NexusVRCharacterModel:Load(): ()
     --Return if a version is already loaded.
     if ReplicatedStorage:FindFirstChild("NexusVRCharacterModel") then
         return
@@ -53,10 +55,10 @@ function NexusVRCharacterModel:Load()
     --Rename and move the script to ReplicatedStorage.
     script.Name = "NexusVRCharacterModel"
     script:WaitForChild("NexusVRCore").Parent = ReplicatedStorage
-    script.Parent = ReplicatedStorage
+    script.Parent = ReplicatedStorage;
 
     --Output any warnings.
-    require(ReplicatedStorage:WaitForChild("NexusVRCharacterModel"):WaitForChild("Util"):WaitForChild("Warnings"))()
+    (require(ReplicatedStorage:WaitForChild("NexusVRCharacterModel"):WaitForChild("Util"):WaitForChild("Warnings")) :: any)()
 
     --Set up the client scripts.
     local NexusVRCharacterModelClientLoader = script:WaitForChild("NexusVRCharacterModelClientLoader")
@@ -75,8 +77,7 @@ function NexusVRCharacterModel:Load()
 
     --Set up replication.
     local ReadyPlayers = {}
-    local RateLimter = NexusVRCharacterModel:GetResource("State.RateLimiter")
-    local UpdateRateLimiter = RateLimter.new(REPLICATION_RATE_LIMIT)
+    local UpdateRateLimiter = RateLimiter.new(REPLICATION_RATE_LIMIT)
 
     local UpdateInputsEvent = Instance.new("RemoteEvent")
     UpdateInputsEvent.Name = "UpdateInputs"
@@ -96,7 +97,7 @@ function NexusVRCharacterModel:Load()
         if UpdateRateLimiter:RateLimitReached(Player) then return end
 
         --Replicate the CFrames to the other players.
-        for _,OtherPlayer in pairs(Players:GetPlayers()) do
+        for _,OtherPlayer in Players:GetPlayers() do
             if Player ~= OtherPlayer and ReadyPlayers[OtherPlayer] then
                 UpdateInputsEvent:FireClient(OtherPlayer,Player,HeadCFrame,LeftHandCFrame,RightHandCFrame)
             end
@@ -112,28 +113,13 @@ function NexusVRCharacterModel:Load()
     end)
 
     --Load Nexus VR Backpack.
-    local Settings = NexusVRCharacterModel:GetInstance("State.Settings")
     if Settings:GetSetting("Extra.NexusVRBackpackEnabled") ~= false then
-        require(10728805649)()
+        (require(10728805649) :: any)()
     end
 end
 
---[[
-Returns a static instance of a class.
-Intended for objects that can only have
-1 instance.
---]]
-function NexusVRCharacterModel:GetInstance(Path)
-    --Create the singleton instance if non exists.
-    if not NexusVRCharacterModel.SingletonInstances[Path] then
-        NexusVRCharacterModel.SingletonInstances[Path] = NexusVRCharacterModel:GetResource(Path).new()
-    end
-
-    --Return the singleton instance.
-    return NexusVRCharacterModel.SingletonInstances[Path]
-end
 
 
 
-NexusVRCharacterModel.Api = NexusVRCharacterModel:GetResource("Api")()
+NexusVRCharacterModel.Api = (require(script:WaitForChild("Api")) :: any)()
 return NexusVRCharacterModel

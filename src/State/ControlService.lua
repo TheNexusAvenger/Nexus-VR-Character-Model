@@ -5,10 +5,10 @@ Manages controlling the local characters.
 --]]
 --!strict
 
-local NexusVRCharacterModel = require(script.Parent.Parent)
-local BaseController = NexusVRCharacterModel:GetResource("Character.Controller.BaseController")
-local TeleportController = NexusVRCharacterModel:GetResource("Character.Controller.TeleportController")
-local SmoothLocomotionController = NexusVRCharacterModel:GetResource("Character.Controller.SmoothLocomotionController")
+local NexusVRCharacterModel = script.Parent.Parent
+local BaseController = require(NexusVRCharacterModel:WaitForChild("Character"):WaitForChild("Controller"):WaitForChild("BaseController"))
+local TeleportController = require(NexusVRCharacterModel:WaitForChild("Character"):WaitForChild("Controller"):WaitForChild("TeleportController"))
+local SmoothLocomotionController = require(NexusVRCharacterModel:WaitForChild("Character"):WaitForChild("Controller"):WaitForChild("SmoothLocomotionController"))
 
 local ControlService = {}
 ControlService.__index = ControlService
