@@ -32,12 +32,13 @@ function R6Message.new(): any
     setmetatable(self, R6Message)
 
     --Set up the ScreenGui.
-    local ScreenGui = ScreenGui.new()
-    ScreenGui.ResetOnSpawn = false
-    ScreenGui.Enabled = false
-    ScreenGui.CanvasSize = Vector2.new(500, 500)
-    ScreenGui.FieldOfView = 0
-    ScreenGui.Easing = 0.25
+    local MessageScreenGui = ScreenGui.new()
+    MessageScreenGui.ResetOnSpawn = false
+    MessageScreenGui.Enabled = false
+    MessageScreenGui.CanvasSize = Vector2.new(500, 500)
+    MessageScreenGui.FieldOfView = 0
+    MessageScreenGui.Easing = 0.25
+    self.ScreenGui = MessageScreenGui
 
     --Create the logo and message.
     local Logo = Instance.new("ImageLabel")
@@ -45,7 +46,7 @@ function R6Message.new(): any
     Logo.Size = UDim2.new(0.4, 0, 0.4, 0)
     Logo.Position = UDim2.new(0.3, 0, -0.1, 0)
     Logo.Image = "http://www.roblox.com/asset/?id=1499731139"
-    Logo.Parent = ScreenGui:GetContainer()
+    Logo.Parent = MessageScreenGui:GetContainer()
 
     local UpperText = Instance.new("TextLabel")
     UpperText.BackgroundTransparency = 1
@@ -57,7 +58,7 @@ function R6Message.new(): any
     UpperText.TextColor3 = Color3.fromRGB(255, 255, 255)
     UpperText.TextStrokeColor3 = Color3.fromRGB(0, 0, 0)
     UpperText.TextStrokeTransparency = 0
-    UpperText.Parent = ScreenGui:GetContainer()
+    UpperText.Parent = MessageScreenGui:GetContainer()
 
     local LowerText = Instance.new("TextLabel")
     LowerText.BackgroundTransparency = 1
@@ -69,22 +70,22 @@ function R6Message.new(): any
     LowerText.TextColor3 = Color3.fromRGB(255, 255, 255)
     LowerText.TextStrokeColor3 = Color3.fromRGB(0, 0, 0)
     LowerText.TextStrokeTransparency = 0
-    LowerText.Parent = ScreenGui:GetContainer()
+    LowerText.Parent = MessageScreenGui:GetContainer()
 
     --Create and connect the close button.
-    local CloseButton,CloseText = TextButtonFactory:Create()
+    local CloseButton, CloseText = TextButtonFactory:Create()
     CloseButton.Size = UDim2.new(0.3, 0, 0.1, 0)
     CloseButton.Position = UDim2.new(0.35, 0, 0.7, 0)
-    CloseButton.Parent = ScreenGui:GetContainer()
+    CloseButton.Parent = MessageScreenGui:GetContainer()
     CloseText.Text = "Ok"
 
     CloseButton.MouseButton1Down:Connect(function()
         self:SetOpen(false)
-        ScreenGui:Destroy()
+        MessageScreenGui:Destroy()
     end)
 
     --Parent the message.
-    ScreenGui.Parent = Players.LocalPlayer:WaitForChild("PlayerGui")
+    MessageScreenGui.Parent = Players.LocalPlayer:WaitForChild("PlayerGui")
     return self
 end
 
@@ -92,12 +93,13 @@ end
 Sets the window open or closed.
 --]]
 function R6Message:SetOpen(Open: boolean): ()
+    warn(Open)
     --Determine the start and end values.
     local StartFieldOfView, EndFieldOfView = (Open and 0 or math.rad(40)), (Open and math.rad(40) or 0)
 
     --Show the message if it isn't visible.
     if Open then
-        self.Enabled = true
+        self.ScreenGui.Enabled = true
     end
 
     --Tween the field of view.
@@ -105,13 +107,13 @@ function R6Message:SetOpen(Open: boolean): ()
     while tick() - StartTime < MESSAGE_OPEN_TIME do
         local Delta = (tick() - StartTime) / MESSAGE_OPEN_TIME
         Delta = (math.sin((Delta - 0.5) * math.pi) / 2) + 0.5
-        self.FieldOfView = StartFieldOfView + ((EndFieldOfView - StartFieldOfView) * Delta)
+        self.ScreenGui.FieldOfView = StartFieldOfView + ((EndFieldOfView - StartFieldOfView) * Delta)
         RunService.RenderStepped:Wait()
     end
 
     --Hide thhe message if it is closed.
     if EndFieldOfView == 0 then
-        self.Enabled = false
+        self.ScreenGui.Enabled = false
     end
 end
 
