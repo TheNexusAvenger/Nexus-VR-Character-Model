@@ -13,13 +13,13 @@ local RunService = game:GetService("RunService")
 local UserInputService = game:GetService("UserInputService")
 
 local NexusVRCharacterModel = ReplicatedStorage:WaitForChild("NexusVRCharacterModel") :: ModuleScript
-local CameraService = (require(ReplicatedStorage:WaitForChild("State"):WaitForChild("CameraService")) :: any).GetInstance()
-local CharacterService = (require(ReplicatedStorage:WaitForChild("State"):WaitForChild("CharacterService")) :: any).GetInstance()
-local ControlService = (require(ReplicatedStorage:WaitForChild("State"):WaitForChild("ControlService")) :: any).GetInstance()
-local DefaultCursorService = (require(ReplicatedStorage:WaitForChild("State"):WaitForChild("DefaultCursorService")) :: any).GetInstance()
-local Settings = (require(ReplicatedStorage:WaitForChild("State"):WaitForChild("Settings")) :: any).GetInstance()
-local UpdateInputs = ReplicatedStorage:WaitForChild("UpdateInputs") :: RemoteEvent
-local ReplicationReady = ReplicatedStorage:WaitForChild("ReplicationReady") :: RemoteEvent
+local CameraService = (require(NexusVRCharacterModel:WaitForChild("State"):WaitForChild("CameraService")) :: any).GetInstance()
+local CharacterService = (require(NexusVRCharacterModel:WaitForChild("State"):WaitForChild("CharacterService")) :: any).GetInstance()
+local ControlService = (require(NexusVRCharacterModel:WaitForChild("State"):WaitForChild("ControlService")) :: any).GetInstance()
+local DefaultCursorService = (require(NexusVRCharacterModel:WaitForChild("State"):WaitForChild("DefaultCursorService")) :: any).GetInstance()
+local Settings = (require(NexusVRCharacterModel:WaitForChild("State"):WaitForChild("Settings")) :: any).GetInstance()
+local UpdateInputs = NexusVRCharacterModel:WaitForChild("UpdateInputs") :: RemoteEvent
+local ReplicationReady = NexusVRCharacterModel:WaitForChild("ReplicationReady") :: RemoteEvent
 
 
 

@@ -14,7 +14,7 @@ local Torso = require(NexusVRCharacterModel:WaitForChild("Character"):WaitForChi
 local Appendage = require(NexusVRCharacterModel:WaitForChild("Character"):WaitForChild("Appendage"))
 local FootPlanter = require(NexusVRCharacterModel:WaitForChild("Character"):WaitForChild("FootPlanter"))
 local Settings = require(NexusVRCharacterModel:WaitForChild("State"):WaitForChild("Settings")).GetInstance()
-local UpdateInputs = require(NexusVRCharacterModel:WaitForChild("UpdateInputs")) :: RemoteEvent
+local UpdateInputs = NexusVRCharacterModel:WaitForChild("UpdateInputs") :: RemoteEvent
 
 local Character = {}
 Character.__index = Character

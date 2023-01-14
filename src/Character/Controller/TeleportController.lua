@@ -14,6 +14,7 @@ local Workspace = game:GetService("Workspace")
 local UserInputService = game:GetService("UserInputService")
 
 local NexusVRCharacterModel = script.Parent.Parent.Parent
+local NexusVRCharacterModelApi = require(NexusVRCharacterModel).Api
 local BaseController = require(script.Parent:WaitForChild("BaseController"))
 local ArcWithBeacon = require(script.Parent:WaitForChild("Visual"):WaitForChild("ArcWithBeacon"))
 local VRInputService = require(NexusVRCharacterModel:WaitForChild("State"):WaitForChild("VRInputService")).GetInstance()
@@ -106,7 +107,7 @@ function TeleportController:UpdateCharacter(): ()
         end
 
         --Update and fetch the current state.
-        local InputActive = (not NexusVRCharacterModel.Api.Controller or NexusVRCharacterModel.Api.Controller:IsControllerInputEnabled(ArcData.UserCFrame))
+        local InputActive = (not NexusVRCharacterModelApi.Controller or NexusVRCharacterModelApi.Controller:IsControllerInputEnabled(ArcData.UserCFrame))
         local DirectionState, RadiusState, StateChange = self:GetJoystickState(ArcData)
         if not InputActive then
             ArcData.Arc:Hide()

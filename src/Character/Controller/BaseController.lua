@@ -24,7 +24,7 @@ local Settings = require(NexusVRCharacterModel:WaitForChild("State"):WaitForChil
 local VRInputService = require(NexusVRCharacterModel:WaitForChild("State"):WaitForChild("VRInputService")).GetInstance()
 
 local BaseController = {}
-BaseController.__index = {}
+BaseController.__index = BaseController
 
 
 

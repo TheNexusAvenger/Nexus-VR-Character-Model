@@ -56,14 +56,14 @@ function MainMenu.new(): any
     ViewAdornFrame.Parent = MainMenuScreenGui:GetContainer()
     self.ViewAdornFrame = ViewAdornFrame
 
-    local LeftButton,LeftText = TextButtonFactory:Create()
+    local LeftButton, LeftText = TextButtonFactory:Create()
     LeftButton.Size = UDim2.new(0, 80, 0, 80)
     LeftButton.Position = UDim2.new(0, 10, 0, 510)
     LeftButton.Parent = MainMenuScreenGui:GetContainer()
     LeftText.Text = "<"
     self.LeftButton = LeftButton
 
-    local RightButton,RightText = TextButtonFactory:Create()
+    local RightButton, RightText = TextButtonFactory:Create()
     RightButton.Size = UDim2.new(0, 80, 0, 80)
     RightButton.Position = UDim2.new(0, 410, 0, 510)
     RightButton.Parent = MainMenuScreenGui:GetContainer()
@@ -112,7 +112,7 @@ function MainMenu.new(): any
     end)
 
     --Parent the menu.
-    ScreenGui.Parent = Players.LocalPlayer:WaitForChild("PlayerGui")
+    MainMenuScreenGui.Parent = Players.LocalPlayer:WaitForChild("PlayerGui")
     return self
 end
 
@@ -380,7 +380,7 @@ function MainMenu:SetUpOpening(): ()
             end
 
             --Update the hints.
-            local LeftHandHintVisible, RightHandHintVisible = self.Enabled and not LeftHandUp, self.Enabled and not RightHandUp
+            local LeftHandHintVisible, RightHandHintVisible = self.ScreenGui.Enabled and not LeftHandUp, self.ScreenGui.Enabled and not RightHandUp
             if self.LeftHandHintVisible ~= LeftHandHintVisible then
                 self.LeftHandHintVisible = LeftHandHintVisible
                 UpdateHintParts(LeftHandHintVisible, LeftMenuToggleHintAdornPart, LeftMenuToggleHintFrontArrow, LeftMenuToggleHintBackArrow, LeftMenuToggleHintFrontText, LeftMenuToggleHintBackText)
@@ -406,11 +406,11 @@ Toggles the menu being open.
 --]]
 function MainMenu:Toggle(): ()
     --Determine the start and end values.
-    local StartFieldOfView, EndFieldOfView = (self.Enabled and math.rad(40) or 0), (self.Enabled and 0 or math.rad(40))
+    local StartFieldOfView, EndFieldOfView = (self.ScreenGui.Enabled and math.rad(40) or 0), (self.ScreenGui.Enabled and 0 or math.rad(40))
 
     --Show the menu if it isn't visible.
-    if not self.Enabled then
-        self.Enabled = true
+    if not self.ScreenGui.Enabled then
+        self.ScreenGui.Enabled = true
     end
 
     --Tween the field of view.
@@ -418,13 +418,13 @@ function MainMenu:Toggle(): ()
     while tick() - StartTime < MENU_OPEN_TIME do
         local Delta = (tick() - StartTime) / MENU_OPEN_TIME
         Delta = (math.sin((Delta - 0.5) * math.pi) / 2) + 0.5
-        self.FieldOfView = StartFieldOfView + ((EndFieldOfView - StartFieldOfView) * Delta)
+        self.ScreenGui.FieldOfView = StartFieldOfView + ((EndFieldOfView - StartFieldOfView) * Delta)
         RunService.RenderStepped:Wait()
     end
 
     --Hide thhe menu if it is closed.
     if EndFieldOfView == 0 then
-        self.Enabled = false
+        self.ScreenGui.Enabled = false
     end
 end
 
@@ -449,7 +449,7 @@ Creates a menu view.
 function MainMenu:CreateView(InitialViewName: string): any
     --Create and store the view.
     local View = ApiBaseView.new(InitialViewName)
-    View.Frame.Parent = (self :: any).ViewAdornFrame:GetWrappedInstance()
+    View.Frame.Parent = (self :: any).ViewAdornFrame
     table.insert(self.Views, View)
 
     --Connect the events.
