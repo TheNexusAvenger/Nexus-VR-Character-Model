@@ -90,7 +90,11 @@ function MainMenu.new(): any
     self:UpdateVisibleView()
 
     --Connect changing views.
-    LeftButton.MouseButton1Click:Connect(function()
+    local DB = true
+    LeftButton.MouseButton1Down:Connect(function()
+        if not DB then return end
+        DB = false
+
         --De-increment the current view.
         self.CurrentView = self.CurrentView - 1
         if self.CurrentView == 0 then
@@ -99,8 +103,13 @@ function MainMenu.new(): any
 
         --Update the views.
         self:UpdateVisibleView()
+        task.wait()
+        DB = true
     end)
-    RightButton.MouseButton1Click:Connect(function()
+    RightButton.MouseButton1Down:Connect(function()
+        if not DB then return end
+        DB = false
+
         --Increment the current view.
         self.CurrentView = self.CurrentView + 1
         if self.CurrentView > #self.Views then
@@ -109,6 +118,8 @@ function MainMenu.new(): any
 
         --Update the views.
         self:UpdateVisibleView()
+        task.wait()
+        DB = true
     end)
 
     --Parent the menu.

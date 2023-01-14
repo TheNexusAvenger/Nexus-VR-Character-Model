@@ -38,7 +38,7 @@ function ChatView:__new(View: any): ()
         LoadChatButton.SizeConstraint = Enum.SizeConstraint.RelativeYY
         LoadChatButton.Parent = Container
         LoadChatText.Text = "Load Chat"
-        LoadChatButton.MouseButton1Click:Wait()
+        LoadChatButton.MouseButton1Down:Wait()
         LoadChatButton:Destroy()
 
         --Load the chat.

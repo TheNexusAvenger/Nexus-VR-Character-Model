@@ -92,7 +92,7 @@ function SettingsView:__new(View: any): ()
     RecenterButton.Parent = Container
     RecenterText.Text = "Recenter"
 
-    RecenterButton.MouseButton1Click:Connect(function()
+    RecenterButton.MouseButton1Down:Connect(function()
         VRInputService:Recenter()
     end)
 
@@ -103,7 +103,7 @@ function SettingsView:__new(View: any): ()
     SetEyeLevelButton.Parent = Container
     SetEyeLevelText.Text = " Set Eye Level "
 
-    SetEyeLevelButton.MouseButton1Click:Connect(function()
+    SetEyeLevelButton.MouseButton1Down:Connect(function()
         VRInputService:SetEyeLevel()
     end)
 end
@@ -200,14 +200,23 @@ function SettingsView:PopulateSettingsFrame(ContainerFrame: Frame, HeaderName: s
     end
 
     --Connect the events.
+    local DB = true
     if OptionsSetting then
         Settings:GetSettingsChangedSignal(OptionsSetting):Connect(UpdateSettings)
     end
-    LeftButton.MouseButton1Click:Connect(function()
+    LeftButton.MouseButton1Down:Connect(function()
+        if not DB then return end
+        DB = false
         UpdateSettings(-1)
+        task.wait()
+        DB = true
     end)
-    RightButton.MouseButton1Click:Connect(function()
+    RightButton.MouseButton1Down:Connect(function()
+        if not DB then return end
+        DB = false
         UpdateSettings(1)
+        task.wait()
+        DB = true
     end)
 
     --Update the initial settings.

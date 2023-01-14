@@ -78,7 +78,7 @@ function R6Message.new(): any
     CloseButton.Parent = ScreenGui:GetContainer()
     CloseText.Text = "Ok"
 
-    CloseButton.MouseButton1Click:Connect(function()
+    CloseButton.MouseButton1Down:Connect(function()
         self:SetOpen(false)
         ScreenGui:Destroy()
     end)
