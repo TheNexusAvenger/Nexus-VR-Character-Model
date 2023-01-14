@@ -7,3 +7,6 @@
 [submodule "module/Nexus-Button"]
 	path = module/Nexus-Button
 	url = https://github.com/TheNexusAvenger/Nexus-Button
+[submodule "module/Nexus-VR-Core-2"]
+	path = module/Nexus-VR-Core-2
+	url = https://github.com/TheNexusAvenger/Nexus-VR-Core.git

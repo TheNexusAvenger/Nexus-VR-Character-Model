@@ -16,7 +16,7 @@ local RunService = game:GetService("RunService")
 local NexusVRCharacterModel = script.Parent.Parent
 local TextButtonFactory = require(NexusVRCharacterModel:WaitForChild("NexusButton"):WaitForChild("Factory"):WaitForChild("TextButtonFactory")).CreateDefault(Color3.fromRGB(0, 170, 255))
 TextButtonFactory:SetDefault("Theme", "RoundedCorners")
-local NexusVRCore = require(ReplicatedStorage:WaitForChild("NexusVRCore")) :: any
+local NexusVRCore = require(NexusVRCharacterModel:WaitForChild("NexusVRCoreV2")) :: any --TODO: Use main release after legacy Nexus VR Core removed = ReplicatedStorage:WaitForChild("NexusVRCore").
 local ScreenGui = NexusVRCore:GetResource("Container.ScreenGui")
 
 local R6Message = {}

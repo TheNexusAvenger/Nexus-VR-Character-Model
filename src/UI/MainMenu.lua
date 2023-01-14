@@ -24,7 +24,7 @@ local ChatView = require(NexusVRCharacterModel:WaitForChild("UI"):WaitForChild("
 local SettingsView = require(NexusVRCharacterModel:WaitForChild("UI"):WaitForChild("View"):WaitForChild("SettingsView"))
 local TextButtonFactory = require(NexusVRCharacterModel:WaitForChild("NexusButton"):WaitForChild("Factory"):WaitForChild("TextButtonFactory")).CreateDefault(Color3.fromRGB(0, 170, 255))
 TextButtonFactory:SetDefault("Theme", "RoundedCorners")
-local NexusVRCore = require(ReplicatedStorage:WaitForChild("NexusVRCore")) :: any
+local NexusVRCore = require(NexusVRCharacterModel:WaitForChild("NexusVRCoreV2")) :: any --TODO: Use main release after legacy Nexus VR Core removed = ReplicatedStorage:WaitForChild("NexusVRCore").
 local ScreenGui = NexusVRCore:GetResource("Container.ScreenGui")
 
 local MainMenu = {}
@@ -148,6 +148,7 @@ function MainMenu:SetUpOpening(): ()
     LeftAdornPart.Size = Vector3.new()
     LeftAdornPart.Anchored = true
     LeftAdornPart.CanCollide = false
+    LeftAdornPart.CanQuery = false
     LeftAdornPart.Parent = Workspace.CurrentCamera
 
     local LeftAdorn = Instance.new("BoxHandleAdornment")
@@ -162,6 +163,7 @@ function MainMenu:SetUpOpening(): ()
     RightAdornPart.Size = Vector3.new()
     RightAdornPart.Anchored = true
     RightAdornPart.CanCollide = false
+    RightAdornPart.CanQuery = false
     RightAdornPart.Parent = Workspace.CurrentCamera
 
     local RightAdorn = Instance.new("BoxHandleAdornment")
@@ -176,6 +178,7 @@ function MainMenu:SetUpOpening(): ()
     LeftMenuToggleHintAdornPart.Size = Vector3.new(1,1,0)
     LeftMenuToggleHintAdornPart.Anchored = true
     LeftMenuToggleHintAdornPart.CanCollide = false
+    LeftMenuToggleHintAdornPart.CanQuery = false
     LeftMenuToggleHintAdornPart.Parent = Workspace.CurrentCamera
 
     local RightMenuToggleHintAdornPart = Instance.new("Part")
@@ -183,6 +186,7 @@ function MainMenu:SetUpOpening(): ()
     RightMenuToggleHintAdornPart.Size = Vector3.new(1,1,0)
     RightMenuToggleHintAdornPart.Anchored = true
     RightMenuToggleHintAdornPart.CanCollide = false
+    RightMenuToggleHintAdornPart.CanQuery = false
     RightMenuToggleHintAdornPart.Parent = Workspace.CurrentCamera
 
     local LeftMenuToggleHintGuiFront = Instance.new("SurfaceGui")
