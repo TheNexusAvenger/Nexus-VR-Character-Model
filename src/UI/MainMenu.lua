@@ -29,6 +29,7 @@ local ScreenGui = NexusVRCore:GetResource("Container.ScreenGui")
 
 local MainMenu = {}
 MainMenu.__index = MainMenu
+local StaticInstance = nil
 
 
 
@@ -113,6 +114,16 @@ function MainMenu.new(): any
     --Parent the menu.
     ScreenGui.Parent = Players.LocalPlayer:WaitForChild("PlayerGui")
     return self
+end
+
+--[[
+Returns a singleton instance of the character service.
+--]]
+function MainMenu.GetInstance(): any
+    if not StaticInstance then
+        StaticInstance = MainMenu.new()
+    end
+    return StaticInstance
 end
 
 --[[

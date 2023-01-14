@@ -3,6 +3,7 @@ TheNexusAvenger
 
 Main module for creating the usable API.
 --]]
+--!strict
 
 local RunService = game:GetService("RunService")
 local UserInputService = game:GetService("UserInputService")
@@ -22,16 +23,17 @@ end
 
 
 
-return function(NexusVRCharacterModel)
-    local NexusEvent = NexusVRCharacterModel:GetResource("NexusInstance.Event.NexusEvent")
-    local API = {}
+return function()
+    local NexusVRCharacterModel = script.Parent
+    local NexusEvent = require(NexusVRCharacterModel:WaitForChild("NexusInstance"):WaitForChild("Event"):WaitForChild("NexusEvent"))
+    local API = {} :: any
     API.Registered = NexusEvent.new()
 
     --[[
     Stores an API that can be referenced. If the API is already stored,
     an error will be thrown.
     --]]
-    function API:Register(ApiName: string, Api: any): nil
+    function API:Register(ApiName: string, Api: any): ()
         if self[ApiName] ~= nil then
             error("API already registered: "..tostring(ApiName))
         end
@@ -60,7 +62,7 @@ return function(NexusVRCharacterModel)
     asynchronously. This is intended for setting up an API
     call without blocking for WaitFor.
     --]]
-    function API:OnRegistered(ApiName: string, RegisteredCallback: (any) -> ()): nil
+    function API:OnRegistered(ApiName: string, RegisteredCallback: (any) -> ()): ()
         --Run the callback immediately if the API is loaded.
         if self[ApiName] then
             task.spawn(function()
@@ -81,12 +83,12 @@ return function(NexusVRCharacterModel)
     if RunService:IsClient() then
         task.defer(function()
             --Build the initial shims for the APIs.
-            local CameraService = NexusVRCharacterModel:GetInstance("State.CameraService")
-            local ControlService = NexusVRCharacterModel:GetInstance("State.ControlService")
+            local CameraService = require(NexusVRCharacterModel:WaitForChild("State"):WaitForChild("CameraService")).GetInstance()
+            local ControlService = require(NexusVRCharacterModel:WaitForChild("State"):WaitForChild("ControlService")).GetInstance()
             API:Register("Camera", CreateShim(CameraService, {"SetActiveCamera",}))
             API:Register("Controller", CreateShim(ControlService, {"SetActiveController",}))
-            API:Register("Input", CreateShim(NexusVRCharacterModel:GetInstance("State.VRInputService"), {"Recenter", "SetEyeLevel", "Recentered", "EyeLevelSet",}))
-            API:Register("Settings", CreateShim(NexusVRCharacterModel:GetInstance("State.Settings"), {"GetSetting", "SetSetting", "GetSettingsChangedSignal"}))
+            API:Register("Input", CreateShim(require(NexusVRCharacterModel:WaitForChild("State"):WaitForChild("VRInputService")).GetInstance(), {"Recenter", "SetEyeLevel", "Recentered", "EyeLevelSet",}))
+            API:Register("Settings", CreateShim(require(NexusVRCharacterModel:WaitForChild("State"):WaitForChild("Settings")).GetInstance(), {"GetSetting", "SetSetting", "GetSettingsChangedSignal"}))
 
             --Add the additional API adapters for the shims.
             API.Camera.GetActiveCamera = function()
@@ -98,16 +100,16 @@ return function(NexusVRCharacterModel)
 
             --Add the custom APIs for the shims.
             local ActiveControllers = {}
-            API.Controller.SetControllerInputEnabled = function(_, Hand: Enum.UserCFrame, Enabled: boolean): nil
+            API.Controller.SetControllerInputEnabled = function(_, Hand: Enum.UserCFrame, Enabled: boolean): ()
                 if Hand ~= Enum.UserCFrame.LeftHand and Hand ~= Enum.UserCFrame.RightHand then
                     error("The following UserCFrame is invalid and can't be disabled: "..tostring(Hand))
                 end
                 ActiveControllers[Hand] = (Enabled ~= false)
             end
-            API.Controller.EnableControllerInput = function(self, Hand: Enum.UserCFrame): nil
+            API.Controller.EnableControllerInput = function(self, Hand: Enum.UserCFrame): ()
                 self:SetControllerInputEnabled(Hand, true)
             end
-            API.Controller.DisableControllerInput = function(self, Hand: Enum.UserCFrame): nil
+            API.Controller.DisableControllerInput = function(self, Hand: Enum.UserCFrame): ()
                 self:SetControllerInputEnabled(Hand, false)
             end
             API.Controller.IsControllerInputEnabled = function(_, Hand: Enum.UserCFrame): boolean
@@ -120,12 +122,12 @@ return function(NexusVRCharacterModel)
             --Create the Menu API.
             --The Menu API does not work outside of VR.
             --Release 454 and later has/had a bug that made VREnabled false on start. This mitigates that now and in the future if VR loads dynamically.
-            local MenuAPI = {}
-            local function GetMainMenu()
+            local MenuAPI = {} :: any
+            local function GetMainMenu(): any
                 if not MenuAPI.Enabled then
                     error("Menu API is not enabled for non-VR players. Check Api.Menu.Enabled before calling.")
                 end
-                return NexusVRCharacterModel:GetInstance("UI.MainMenu")
+                return require(NexusVRCharacterModel:WaitForChild("UI"):WaitForChild("MainMenu")).GetInstance()
             end
             if UserInputService.VREnabled then
                 MenuAPI.Enabled = true

@@ -80,7 +80,7 @@ ControlService:SetActiveController(Settings:GetSetting("Movement.DefaultMovement
 CameraService:SetActiveCamera(Settings:GetSetting("Camera.DefaultCameraOption"))
 
 --Load the menu.
-local MainMenu = (require(NexusVRCharacterModel:WaitForChild("UI"):WaitForChild("MainMenu")) :: any).new()
+local MainMenu = (require(NexusVRCharacterModel:WaitForChild("UI"):WaitForChild("MainMenu")) :: any).GetInstance()
 MainMenu:SetUpOpening()
 
 --Load the backpack.
