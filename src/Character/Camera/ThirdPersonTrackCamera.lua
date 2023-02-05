@@ -5,18 +5,12 @@ Third person camera that moves with the player.
 --]]
 --!strict
 
---Workaround for Roblox's CoreGuis relying on HeadLocked.
---https://devforum.roblox.com/t/coregui-vr-components-rely-on-headlocked-being-true/100460
-local USE_HEAD_LOCKED_WORKAROUND = true
-
 local THIRD_PERSON_ZOOM = 10
 
 
 
 local Workspace = game:GetService("Workspace")
 local Players = game:GetService("Players")
-local VRService = game:GetService("VRService")
-
 
 local ThirdPersonTrackCamera = {}
 ThirdPersonTrackCamera.__index = ThirdPersonTrackCamera
@@ -75,14 +69,7 @@ function ThirdPersonTrackCamera:UpdateCamera(HeadsetCFrameWorld: CFrame): ()
     --Update the camaera.
     Workspace.CurrentCamera.CameraType = Enum.CameraType.Scriptable
     Workspace.CurrentCamera.HeadLocked = false
-    if USE_HEAD_LOCKED_WORKAROUND then
-        local HeadCFrame = VRService:GetUserCFrame(Enum.UserCFrame.Head)
-        Workspace.CurrentCamera.HeadLocked = true
-        Workspace.CurrentCamera.CFrame = TargetCFrame * (CFrame.new(HeadCFrame.Position * (Workspace.CurrentCamera.HeadScale - 1)) * HeadCFrame):Inverse()
-    else
-        Workspace.CurrentCamera.HeadLocked = false
-        Workspace.CurrentCamera.CFrame = TargetCFrame
-    end
+    Workspace.CurrentCamera.CFrame = TargetCFrame
 end
 
 
