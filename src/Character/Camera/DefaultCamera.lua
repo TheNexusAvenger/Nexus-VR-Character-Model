@@ -5,10 +5,6 @@ Default camera that follows the character.
 --]]
 --!strict
 
---Workaround for Roblox's CoreGuis relying on HeadLocked.
---https://devforum.roblox.com/t/coregui-vr-components-rely-on-headlocked-being-true/100460
-local USE_HEAD_LOCKED_WORKAROUND = false
-
 local HIDDEN_ACCESSORIES = {
     [Enum.AccessoryType.Hat] = true;
     [Enum.AccessoryType.Hair] = true;
@@ -19,7 +15,6 @@ local HIDDEN_ACCESSORIES = {
 
 local Workspace = game:GetService("Workspace")
 local Players = game:GetService("Players")
-local VRService = game:GetService("VRService")
 
 local NexusVRCharacterModel = script.Parent.Parent.Parent
 local Settings = require(NexusVRCharacterModel:WaitForChild("State"):WaitForChild("Settings")).GetInstance()
@@ -148,14 +143,8 @@ Updates the camera.
 --]]
 function DefaultCamera:UpdateCamera(HeadsetCFrameWorld: CFrame): ()
     Workspace.CurrentCamera.CameraType = Enum.CameraType.Scriptable
-    if USE_HEAD_LOCKED_WORKAROUND then
-        local HeadCFrame = VRService:GetUserCFrame(Enum.UserCFrame.Head)
-        Workspace.CurrentCamera.HeadLocked = true
-        Workspace.CurrentCamera.CFrame = HeadsetCFrameWorld * (CFrame.new(HeadCFrame.Position * (Workspace.CurrentCamera.HeadScale - 1)) * HeadCFrame):Inverse()
-    else
-        Workspace.CurrentCamera.HeadLocked = false
-        Workspace.CurrentCamera.CFrame = HeadsetCFrameWorld
-    end
+    Workspace.CurrentCamera.HeadLocked = false
+    Workspace.CurrentCamera.CFrame = HeadsetCFrameWorld
 end
 
 
