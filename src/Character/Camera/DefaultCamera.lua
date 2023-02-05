@@ -7,7 +7,7 @@ Default camera that follows the character.
 
 --Workaround for Roblox's CoreGuis relying on HeadLocked.
 --https://devforum.roblox.com/t/coregui-vr-components-rely-on-headlocked-being-true/100460
-local USE_HEAD_LOCKED_WORKAROUND = true
+local USE_HEAD_LOCKED_WORKAROUND = false
 
 local HIDDEN_ACCESSORIES = {
     [Enum.AccessoryType.Hat] = true;
