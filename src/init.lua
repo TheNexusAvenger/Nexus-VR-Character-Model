@@ -53,13 +53,7 @@ function NexusVRCharacterModel:Load(): ()
 
     --Rename and move the script to ReplicatedStorage.
     script.Name = "NexusVRCharacterModel"
-    if Settings:GetSetting("Extra.TEMPORARY_UseNexusVRCore") then
-        local NexusVRCore = script:WaitForChild("NexusVRCoreV2"):Clone()
-        NexusVRCore.Name = "NexusVRCore"
-        NexusVRCore.Parent = ReplicatedStorage
-    else
-        script:WaitForChild("NexusVRCore").Parent = ReplicatedStorage
-    end
+    script:WaitForChild("NexusVRCore").Parent = ReplicatedStorage
     script.Parent = ReplicatedStorage;
 
     --Output any warnings.

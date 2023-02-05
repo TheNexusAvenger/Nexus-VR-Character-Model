@@ -24,7 +24,7 @@ local ChatView = require(NexusVRCharacterModel:WaitForChild("UI"):WaitForChild("
 local SettingsView = require(NexusVRCharacterModel:WaitForChild("UI"):WaitForChild("View"):WaitForChild("SettingsView"))
 local TextButtonFactory = require(NexusVRCharacterModel:WaitForChild("NexusButton"):WaitForChild("Factory"):WaitForChild("TextButtonFactory")).CreateDefault(Color3.fromRGB(0, 170, 255))
 TextButtonFactory:SetDefault("Theme", "RoundedCorners")
-local NexusVRCore = require(NexusVRCharacterModel:WaitForChild("NexusVRCoreV2")) :: any --TODO: Use main release after legacy Nexus VR Core removed = ReplicatedStorage:WaitForChild("NexusVRCore").
+local NexusVRCore = require(ReplicatedStorage:WaitForChild("NexusVRCore")) :: any
 local ScreenGui = NexusVRCore:GetResource("Container.ScreenGui")
 
 local MainMenu = {}

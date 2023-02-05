@@ -10,9 +10,6 @@
             "NexusVRCore": {
                 "$path": "./module/Nexus-VR-Core/"
             },
-            "NexusVRCoreV2": {
-                "$path": "./module/Nexus-VR-Core-2/"
-            },
             "NexusButton": {
                 "$path": "./module/Nexus-Button/"
             }
