@@ -5,6 +5,7 @@ Default camera that follows the character.
 --]]
 --!strict
 
+local BUMP_DEFAULT_TRANSPARENCY_WORKAROUND = true
 local HIDDEN_ACCESSORIES = {
     [Enum.AccessoryType.Hat] = true;
     [Enum.AccessoryType.Hair] = true;
@@ -75,6 +76,13 @@ function DefaultCamera:Enable(): ()
     if Players.LocalPlayer.Character then
         --Connect children being added.
         local Transparency = Settings:GetSetting("Appearance.LocalCharacterTransparency")
+        if BUMP_DEFAULT_TRANSPARENCY_WORKAROUND then
+            if Transparency == 0.5 then
+                Transparency = 0.501
+            elseif Transparency < 0.5 then
+                warn("Values of <0.5 with Appearance.LocalCharacterTransparency are currently known to cause black screen issues. This will hopefully be resolved by Roblox in a future update: https://devforum.roblox.com/t/vr-screen-becomes-black-due-to-non-transparent-character/2215099")
+            end
+        end
         table.insert(self.TransparencyEvents, Players.LocalPlayer.Character.DescendantAdded:Connect(function(Part)
             if Part:IsA("BasePart") then
                 if DefaultCamera.ShouldHidePart(Part) then
