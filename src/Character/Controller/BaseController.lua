@@ -120,7 +120,7 @@ the height multiplier of the character.
 --]]
 function BaseController:ScaleInput(InputCFrame: CFrame): CFrame
     --Return the original CFrame if there is no character.
-    if not self.Character then
+    if not self.Character or not InputCFrame then
         return InputCFrame
     end
 
