@@ -85,30 +85,32 @@ function DefaultCamera:Enable(): ()
         end
         table.insert(self.TransparencyEvents, Players.LocalPlayer.Character.DescendantAdded:Connect(function(Part)
             if Part:IsA("BasePart") then
+                local PartTransparency = Transparency
                 if DefaultCamera.ShouldHidePart(Part) then
-                    Part.LocalTransparencyModifier = 1
+                    PartTransparency = 1
                 elseif DefaultCamera.IsInTool(Part) then
-                    Part.LocalTransparencyModifier = 0
-                else
-                    Part.LocalTransparencyModifier = Transparency
-                    table.insert(self.TransparencyEvents, Part:GetPropertyChangedSignal("LocalTransparencyModifier"):Connect(function()
-                        Part.LocalTransparencyModifier = Transparency
-                    end))
+                    PartTransparency = 0
                 end
+
+                Part.LocalTransparencyModifier = PartTransparency
+                table.insert(self.TransparencyEvents, Part:GetPropertyChangedSignal("LocalTransparencyModifier"):Connect(function()
+                    Part.LocalTransparencyModifier = PartTransparency
+                end))
             end
         end))
         for _, Part in Players.LocalPlayer.Character:GetDescendants() do
             if Part:IsA("BasePart") then
+                local PartTransparency = Transparency
                 if DefaultCamera.ShouldHidePart(Part) then
-                    Part.LocalTransparencyModifier = 1
+                    PartTransparency = 1
                 elseif DefaultCamera.IsInTool(Part) then
-                    Part.LocalTransparencyModifier = 0
-                else
-                    Part.LocalTransparencyModifier = Transparency
-                    table.insert(self.TransparencyEvents, Part:GetPropertyChangedSignal("LocalTransparencyModifier"):Connect(function()
-                        Part.LocalTransparencyModifier = Transparency
-                    end))
+                    PartTransparency = 0
                 end
+                
+                Part.LocalTransparencyModifier = PartTransparency
+                table.insert(self.TransparencyEvents, Part:GetPropertyChangedSignal("LocalTransparencyModifier"):Connect(function()
+                    Part.LocalTransparencyModifier = PartTransparency
+                end))
             end
         end
     end
