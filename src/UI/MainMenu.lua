@@ -143,6 +143,11 @@ being rotated upwards.
 --]]
 function MainMenu:SetUpOpening(): ()
     --Create the animation parts.
+    local InitialMenuToggleGestureActive = Settings:GetSetting("Menu.MenuToggleGestureActive")
+    if InitialMenuToggleGestureActive == nil then
+        InitialMenuToggleGestureActive = true
+    end
+
     local LeftAdornPart = Instance.new("Part")
     LeftAdornPart.Transparency = 1
     LeftAdornPart.Size = Vector3.new()
@@ -194,6 +199,7 @@ function MainMenu:SetUpOpening(): ()
     LeftMenuToggleHintGuiFront.Face = Enum.NormalId.Front
     LeftMenuToggleHintGuiFront.CanvasSize = Vector2.new(500,500)
     LeftMenuToggleHintGuiFront.LightInfluence = 0
+    LeftMenuToggleHintGuiFront.Enabled = InitialMenuToggleGestureActive
     LeftMenuToggleHintGuiFront.AlwaysOnTop = true
     LeftMenuToggleHintGuiFront.Adornee = LeftMenuToggleHintAdornPart
     LeftMenuToggleHintGuiFront.Parent = LeftMenuToggleHintAdornPart
@@ -223,6 +229,7 @@ function MainMenu:SetUpOpening(): ()
     LeftMenuToggleHintGuiBack.Face = Enum.NormalId.Back
     LeftMenuToggleHintGuiBack.CanvasSize = Vector2.new(500,500)
     LeftMenuToggleHintGuiBack.LightInfluence = 0
+    LeftMenuToggleHintGuiBack.Enabled = InitialMenuToggleGestureActive
     LeftMenuToggleHintGuiBack.AlwaysOnTop = true
     LeftMenuToggleHintGuiBack.Adornee = LeftMenuToggleHintAdornPart
     LeftMenuToggleHintGuiBack.Parent = LeftMenuToggleHintAdornPart
@@ -251,6 +258,7 @@ function MainMenu:SetUpOpening(): ()
     RightMenuToggleHintGuiFront.Face = Enum.NormalId.Front
     RightMenuToggleHintGuiFront.CanvasSize = Vector2.new(500,500)
     RightMenuToggleHintGuiFront.LightInfluence = 0
+    RightMenuToggleHintGuiFront.Enabled = InitialMenuToggleGestureActive
     RightMenuToggleHintGuiFront.AlwaysOnTop = true
     RightMenuToggleHintGuiFront.Adornee = RightMenuToggleHintAdornPart
     RightMenuToggleHintGuiFront.Parent = RightMenuToggleHintAdornPart
@@ -279,6 +287,7 @@ function MainMenu:SetUpOpening(): ()
     RightMenuToggleHintGuiBack.Face = Enum.NormalId.Back
     RightMenuToggleHintGuiBack.CanvasSize = Vector2.new(500,500)
     RightMenuToggleHintGuiBack.LightInfluence = 0
+    RightMenuToggleHintGuiBack.Enabled = InitialMenuToggleGestureActive
     RightMenuToggleHintGuiBack.AlwaysOnTop = true
     RightMenuToggleHintGuiBack.Adornee = RightMenuToggleHintAdornPart
     RightMenuToggleHintGuiBack.Parent = RightMenuToggleHintAdornPart
