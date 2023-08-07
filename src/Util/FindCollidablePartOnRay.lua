@@ -34,7 +34,7 @@ local function FindCollidablePartOnRay(StartPosition: Vector3, Direction: Vector
 
     --Create the parameters.
     local RaycastParameters = RaycastParams.new()
-    RaycastParameters.FilterType = Enum.RaycastFilterType.Blacklist
+    RaycastParameters.FilterType = Enum.RaycastFilterType.Exclude
     RaycastParameters.FilterDescendantsInstances = NewIgnoreList
     RaycastParameters.IgnoreWater = true
     if CollisionGroup then
