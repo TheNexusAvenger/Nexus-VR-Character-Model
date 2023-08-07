@@ -129,7 +129,7 @@ return function()
                 return GetMainMenu():CreateView(...)
             end
             MenuAPI.IsOpen = function()
-                return GetMainMenu().Enabled
+                return GetMainMenu().ScreenGui.Enabled
             end
             MenuAPI.Open = function(self)
                 if self:IsOpen() then return end
