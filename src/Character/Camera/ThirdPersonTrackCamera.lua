@@ -9,11 +9,14 @@ local THIRD_PERSON_ZOOM = 10
 
 
 
-local Workspace = game:GetService("Workspace")
 local Players = game:GetService("Players")
+
+local NexusVRCharacterModel = script.Parent.Parent.Parent
+local CommonCamera = require(NexusVRCharacterModel:WaitForChild("Character"):WaitForChild("Camera"):WaitForChild("CommonCamera"))
 
 local ThirdPersonTrackCamera = {}
 ThirdPersonTrackCamera.__index = ThirdPersonTrackCamera
+setmetatable(ThirdPersonTrackCamera, CommonCamera)
 
 
 
@@ -21,7 +24,7 @@ ThirdPersonTrackCamera.__index = ThirdPersonTrackCamera
 Creates a third-person camera object.
 --]]
 function ThirdPersonTrackCamera.new(): any
-    return setmetatable({}, ThirdPersonTrackCamera)
+    return setmetatable(CommonCamera.new(), ThirdPersonTrackCamera)
 end
 
 --[[
@@ -67,9 +70,7 @@ function ThirdPersonTrackCamera:UpdateCamera(HeadsetCFrameWorld: CFrame): ()
     local TargetCFrame = self.BaseCFrame * CFrame.new(0, 0, -THIRD_PERSON_ZOOM * Scale) * CFrame.Angles(0, math.pi, 0) * HeadsetRelative
 
     --Update the camaera.
-    Workspace.CurrentCamera.CameraType = Enum.CameraType.Scriptable
-    Workspace.CurrentCamera.HeadLocked = false
-    Workspace.CurrentCamera.CFrame = TargetCFrame
+    CommonCamera.UpdateCamera(self, TargetCFrame)
 end
 
 

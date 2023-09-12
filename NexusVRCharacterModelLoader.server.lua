@@ -35,6 +35,10 @@ local Configuration = {
 
         --Default camera option.
         DefaultCameraOption = "Default",
+
+        --If true, Workspace.CurrentCamera.HeadLocked will be locked to false.
+        --A Roblox engineer requested keeping HeadLocked on (DisableHeadLocked = false). To keep backwards compatibility, this defaults to true.
+        DisableHeadLocked = false,
     },
     Movement = {
         --Movement methods that can be enabled by the user.

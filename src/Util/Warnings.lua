@@ -30,14 +30,21 @@ return function(): ()
             Message = "The configuration entry Extra.NexusVRBackpackEnabled is missing (defaults to true).",
             Condition = function()
                return Configuration.Extra == nil or Configuration.Extra.NexusVRBackpackEnabled == nil
-            end
+            end,
         },
         {
             Key = "MissingAllowClientToOutputLoadedMessage",
             Message = "The configuration entry Extra.AllowClientToOutputLoadedMessage is missing (defaults to true).",
             Condition = function()
                return Configuration.Output == nil or Configuration.Output.AllowClientToOutputLoadedMessage == nil
-            end
+            end,
+        },
+        {
+            Key = "MissingDisableHeadLocked",
+            Message = "The configuration entry Camera.DisableHeadLocked is missing (defaults to true).",
+            Condition = function()
+               return Configuration.Camera == nil or Configuration.Camera.DisableHeadLocked == nil
+            end,
         },
     }
 

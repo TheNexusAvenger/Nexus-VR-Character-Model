@@ -14,14 +14,15 @@ local HIDDEN_ACCESSORIES = {
     [Enum.AccessoryType.Eyelash] = true;
 }
 
-local Workspace = game:GetService("Workspace")
 local Players = game:GetService("Players")
 
 local NexusVRCharacterModel = script.Parent.Parent.Parent
+local CommonCamera = require(NexusVRCharacterModel:WaitForChild("Character"):WaitForChild("Camera"):WaitForChild("CommonCamera"))
 local Settings = require(NexusVRCharacterModel:WaitForChild("State"):WaitForChild("Settings")).GetInstance()
 
 local DefaultCamera = {}
 DefaultCamera.__index = DefaultCamera
+setmetatable(DefaultCamera, CommonCamera)
 
 
 
@@ -65,7 +66,7 @@ end
 Creates a default camera object.
 --]]
 function DefaultCamera.new(): any
-    return setmetatable({}, DefaultCamera)
+    return setmetatable(CommonCamera.new(), DefaultCamera)
 end
 
 --[[
@@ -146,15 +147,6 @@ function DefaultCamera:Disable(): ()
             end
         end
     end
-end
-
---[[
-Updates the camera.
---]]
-function DefaultCamera:UpdateCamera(HeadsetCFrameWorld: CFrame): ()
-    Workspace.CurrentCamera.CameraType = Enum.CameraType.Scriptable
-    Workspace.CurrentCamera.HeadLocked = false
-    Workspace.CurrentCamera.CFrame = HeadsetCFrameWorld
 end
 
 
