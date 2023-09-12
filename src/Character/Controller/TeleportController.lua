@@ -188,10 +188,10 @@ function TeleportController:UpdateCharacter(): ()
                         if WasSitting then
                             task.spawn(function()
                                 while self.Character.Humanoid.SeatPart do task.wait() end
-                                HumanoidRootPart.CFrame = CFrame.new(ArcData.LastHitPosition) * CFrame.new(0, 4.5 * self.Character.ScaleValues.BodyHeightScale.Value, 0) * (CFrame.new(-HumanoidRootPart.Position) * HumanoidRootPart.CFrame)
+                                HumanoidRootPart.CFrame = CFrame.new(ArcData.LastHitPosition) * CFrame.new(0, 4.5 * self.Character:GetHumanoidScale("BodyHeightScale"), 0) * (CFrame.new(-HumanoidRootPart.Position) * HumanoidRootPart.CFrame)
                             end)
                         else
-                            HumanoidRootPart.CFrame = CFrame.new(ArcData.LastHitPosition) * CFrame.new(0, 4.5 * self.Character.ScaleValues.BodyHeightScale.Value, 0) * (CFrame.new(-HumanoidRootPart.Position) * HumanoidRootPart.CFrame)
+                            HumanoidRootPart.CFrame = CFrame.new(ArcData.LastHitPosition) * CFrame.new(0, 4.5 * self.Character:GetHumanoidScale("BodyHeightScale"), 0) * (CFrame.new(-HumanoidRootPart.Position) * HumanoidRootPart.CFrame)
                         end
                     end
                 end

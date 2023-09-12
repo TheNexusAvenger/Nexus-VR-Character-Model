@@ -125,7 +125,7 @@ function BaseController:ScaleInput(InputCFrame: CFrame): CFrame
     end
 
     --Return the modified CFrame.
-    return CFrame.new(InputCFrame.Position * (self.Character.ScaleValues.BodyHeightScale.Value - 1)) * InputCFrame
+    return CFrame.new(InputCFrame.Position * (self.Character:GetHumanoidScale("BodyHeightScale") - 1)) * InputCFrame
 end
 
 --[[

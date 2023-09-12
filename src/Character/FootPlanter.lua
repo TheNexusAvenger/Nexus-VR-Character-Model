@@ -143,8 +143,9 @@ function FootPlanter:CreateSolver(CenterPart,ScaleValue)
 	
 	local LastScale = 1
 	local function UpdateScaling()
-		local Multiplier = ScaleValue.Value / LastScale
-		LastScale = ScaleValue.Value
+		local CurrentScaleValue = (ScaleValue and ScaleValue.Value or 1)
+		local Multiplier = CurrentScaleValue / LastScale
+		LastScale = CurrentScaleValue
 
 		LEG_GAP = LEG_GAP * Multiplier
 		STRIDE_FORWARD = STRIDE_FORWARD * Multiplier
@@ -174,11 +175,13 @@ function FootPlanter:CreateSolver(CenterPart,ScaleValue)
 			Takeoff = lastCF*CFnew(-LEG_GAP/2, 0, 0).p;
 		}]]
 	end
-	ScaleValue.Changed:Connect(function()
-		if mRightLeg then
-			UpdateScaling()
-		end
-	end)
+	if ScaleValue then
+		ScaleValue.Changed:Connect(function()
+			if mRightLeg then
+				UpdateScaling()
+			end
+		end)
+	end
 
 
 	local mAirborneFraction = 0

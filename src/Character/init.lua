@@ -22,6 +22,7 @@ Character.__index = Character
 export type Character = {
     new: (CharacterModel: Model) -> Character,
 
+    GetHumanoidScale: (self: Character, ScaleName: string) -> (number),
     UpdateFromInputs: (self: Character, HeadControllerCFrame: CFrame, LeftHandControllerCFrame: CFrame, RightHandControllerCFrame: CFrame) -> (),
 }
 
@@ -155,12 +156,6 @@ function Character.new(CharacterModel: Model): Character
             LeftFootAttachment = self.Parts.LeftFoot:FindFirstChild("LeftFootAttachment"),
         },
     }
-    self.ScaleValues = {
-        BodyDepthScale = self.Humanoid:WaitForChild("BodyDepthScale"),
-        BodyWidthScale = self.Humanoid:WaitForChild("BodyWidthScale"),
-        BodyHeightScale = self.Humanoid:WaitForChild("BodyHeightScale"),
-        HeadScale = self.Humanoid:WaitForChild("HeadScale"),
-    }
 
     --Add the missing attachments that not all rigs have.
     if not self.Attachments.RightFoot.RightFootAttachment then
@@ -197,7 +192,7 @@ function Character.new(CharacterModel: Model): Character
     self.LeftLeg.InvertBendDirection = true
     self.RightLeg = Appendage.new(CharacterModel:WaitForChild("RightUpperLeg") :: BasePart, CharacterModel:WaitForChild("RightLowerLeg") :: BasePart, CharacterModel:WaitForChild("RightFoot") :: BasePart, "RightHipRigAttachment", "RightKneeRigAttachment", "RightAnkleRigAttachment", "RightFootAttachment", true)
     self.RightLeg.InvertBendDirection = true
-    self.FootPlanter = FootPlanter:CreateSolver(CharacterModel:WaitForChild("LowerTorso"), self.ScaleValues.BodyHeightScale)
+    self.FootPlanter = FootPlanter:CreateSolver(CharacterModel:WaitForChild("LowerTorso"), self.Humanoid:FindFirstChild("BodyHeightScale"))
 
     --Stop the character animations.
     local Animator = self.Humanoid:FindFirstChild("Animator") :: Animator
@@ -251,6 +246,17 @@ function Character.new(CharacterModel: Model): Character
     end
     
     return (self :: any) :: Character
+end
+
+--[[
+Returns the scale value of the humanoid, or the default value.
+--]]
+function Character:GetHumanoidScale(ScaleName: string): number
+    local Value = self.Humanoid:FindFirstChild(ScaleName) :: NumberValue
+    if Value then
+        return Value.Value
+    end
+    return (ScaleName == "BodyTypeScale" and 0 or 1)
 end
 
 --[[
