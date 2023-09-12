@@ -40,6 +40,10 @@ local Configuration = {
         --If true, Workspace.CurrentCamera.HeadLocked will be locked to false.
         --A Roblox engineer requested keeping HeadLocked on (DisableHeadLocked = false). To keep backwards compatibility, this defaults to true.
         DisableHeadLocked = false,
+
+        --Disables FadeOutViewOnCollision (black screen when in parts).
+        --This is provided as a workaround for games where this is a problem. Only enable if players are complaining.
+        DisableFadeOutViewOnCollision = false,
     },
     Movement = {
         --Movement methods that can be enabled by the user.

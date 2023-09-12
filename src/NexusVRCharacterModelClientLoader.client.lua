@@ -11,6 +11,7 @@ local StarterGui = game:GetService("StarterGui")
 local HttpService = game:GetService("HttpService")
 local RunService = game:GetService("RunService")
 local UserInputService = game:GetService("UserInputService")
+local VRService = game:GetService("VRService")
 
 local NexusVRCharacterModel = ReplicatedStorage:WaitForChild("NexusVRCharacterModel") :: ModuleScript
 local CameraService = (require(NexusVRCharacterModel:WaitForChild("State"):WaitForChild("CameraService")) :: any).GetInstance()
@@ -95,3 +96,8 @@ end
 RunService:BindToRenderStep("NexusVRCharacterModelUpdate", Enum.RenderPriority.Camera.Value - 1, function()
     ControlService:UpdateCharacter()
 end)
+
+--Disable FadeOutViewOnCollision.
+if Settings:GetSetting("DisableFadeOutViewOnCollision") == true then
+    VRService.FadeOutViewOnCollision = false
+end
