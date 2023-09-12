@@ -9,6 +9,7 @@ add any additional functionality.
 
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
+local TextChatService = game:GetService("TextChatService")
 local UserInputService = game:GetService("UserInputService")
 
 local NexusVRCharacterModel = script.Parent.Parent.Parent
@@ -28,9 +29,27 @@ function ChatView:__new(View: any): ()
     NexusInstance.__new(self)
 
     task.spawn(function()
+        --Display a message if the TextChatService is in use.
+        --In general, the chat view is deprecated. When running normally, the chat works as normal in VR.
+        local Container = View:GetContainer()
+        if TextChatService.ChatVersion ~= Enum.ChatVersion.LegacyChatService then
+            local MessageText = Instance.new("TextLabel")
+            MessageText.BackgroundTransparency = 1
+            MessageText.AnchorPoint = Vector2.new(0.5, 0.5)
+            MessageText.Size = UDim2.new(0.8, 0, 0.2, 0)
+            MessageText.Position = UDim2.new(0.5, 0, 0.5, 0)
+            MessageText.Font = Enum.Font.SourceSansBold
+            MessageText.Text = "The chat view is deprecated. This game's chat is not supported."
+            MessageText.TextScaled = true
+            MessageText.TextColor3 = Color3.fromRGB(255, 255, 255)
+            MessageText.TextStrokeColor3 = Color3.fromRGB(0, 0, 0)
+            MessageText.TextStrokeTransparency = 0
+            MessageText.Parent = Container
+            return
+        end
+
         --Wait for a request to load the chat.
         --Starting release 544, the chat is loaded automatically.
-        local Container = View:GetContainer()
         local LoadChatButton, LoadChatText = TextButtonFactory:Create()
         LoadChatButton.AnchorPoint = Vector2.new(0.5, 0.5)
         LoadChatButton.Size = UDim2.new(0.6, 0, 0.1, 0)
