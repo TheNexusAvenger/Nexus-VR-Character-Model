@@ -69,8 +69,8 @@ function ThirdPersonTrackCamera:UpdateCamera(HeadsetCFrameWorld: CFrame): ()
     local HeadsetRelative = self.BaseCFrame:Inverse() * HeadsetCFrameWorld
     local TargetCFrame = self.BaseCFrame * CFrame.new(0, 0, -THIRD_PERSON_ZOOM * Scale) * CFrame.Angles(0, math.pi, 0) * HeadsetRelative
 
-    --Update the camaera.
-    CommonCamera.UpdateCamera(self, TargetCFrame)
+    --Update the camera.
+    self:SetCFrame(TargetCFrame)
 end
 
 

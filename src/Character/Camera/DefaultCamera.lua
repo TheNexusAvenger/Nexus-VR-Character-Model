@@ -149,6 +149,13 @@ function DefaultCamera:Disable(): ()
     end
 end
 
+--[[
+Updates the camera.
+--]]
+function DefaultCamera:UpdateCamera(HeadsetCFrameWorld: CFrame): ()
+    self:SetCFrame(HeadsetCFrameWorld)
+end
+
 
 
 return DefaultCamera

@@ -6,6 +6,7 @@ Manages the local camera.
 --!strict
 
 local NexusVRCharacterModel = script.Parent.Parent
+local CommonCamera = require(NexusVRCharacterModel:WaitForChild("Character"):WaitForChild("Camera"):WaitForChild("CommonCamera"))
 local DefaultCamera = require(NexusVRCharacterModel:WaitForChild("Character"):WaitForChild("Camera"):WaitForChild("DefaultCamera"))
 local ThirdPersonTrackCamera = require(NexusVRCharacterModel:WaitForChild("Character"):WaitForChild("Camera"):WaitForChild("ThirdPersonTrackCamera"))
 
@@ -44,6 +45,7 @@ function CameraService.new(): CameraService
     --Register the default controllers.
     self:RegisterCamera("Default", DefaultCamera.new())
     self:RegisterCamera("ThirdPersonTrack", ThirdPersonTrackCamera.new())
+    self:RegisterCamera("Disabled", CommonCamera.new())
 
     --Return the object.
     return (self :: any) :: CameraService

@@ -31,6 +31,7 @@ local Configuration = {
         EnabledCameraOptions = {
             "Default",
             "ThirdPersonTrack",
+            --"Disabled", --Behavior depends on Workspace.CurrentCamera.HeadLocked! When false, the camera will not move. When true, the camera will move with the headset.
         },
 
         --Default camera option.

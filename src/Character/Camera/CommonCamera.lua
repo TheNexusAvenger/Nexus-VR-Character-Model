@@ -41,6 +41,13 @@ end
 Updates the camera.
 --]]
 function CommonCamera:UpdateCamera(HeadsetCFrameWorld: CFrame): ()
+
+end
+
+--[[
+Sets the camera CFrame.
+--]]
+function CommonCamera:SetCFrame(HeadsetCFrameWorld: CFrame): ()
     --Lock HeadLocked to false.
     --The default behavior is to do it for backwards compatibility with 2.6.0 and earlier.
     local Camera = Workspace.CurrentCamera
