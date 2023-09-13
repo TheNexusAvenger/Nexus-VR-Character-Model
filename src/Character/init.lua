@@ -201,50 +201,40 @@ function Character.new(CharacterModel: Model): Character
     --Stop the character animations.
     local Animator = self.Humanoid:FindFirstChild("Animator") :: Animator
     if Animator then
-        if Players.LocalPlayer and Players.LocalPlayer.Character == CharacterModel then
-            --Remove the animation script and store the mood animations.
-            local AnimateScript = CharacterModel:WaitForChild("Animate")
-            local MoodValue = AnimateScript:FindFirstChild("mood") :: Instance
-            if MoodValue then
-                for _, Animation in MoodValue:GetChildren() do
-                    if not Animation:IsA("Animation") then continue end
-                    self.MoodAnimationIds[NormalizeAssetId((Animation :: Animation).AnimationId)] = true
-                end
+        --Remove the animation script and store the mood animations.
+        local AnimateScript = CharacterModel:WaitForChild("Animate")
+        local MoodValue = AnimateScript:FindFirstChild("mood") :: Instance
+        if MoodValue then
+            for _, Animation in MoodValue:GetChildren() do
+                if not Animation:IsA("Animation") then continue end
+                self.MoodAnimationIds[NormalizeAssetId((Animation :: Animation).AnimationId)] = true
             end
-            AnimateScript:Destroy()
-
-            --Stop the animations.
-            for _, Track in Animator:GetPlayingAnimationTracks() do
-                if self:IsAnimationTrackAllowed(Track) then continue end
-                Track:AdjustWeight(0, 0)
-                Track:Stop(0)
-            end
-            Animator.AnimationPlayed:Connect(function(Track)
-                if self:IsAnimationTrackAllowed(Track) then return end
-                Track:AdjustWeight(0, 0)
-                Track:Stop(0)
-            end)
-        else
-            Animator:Destroy()
         end
+
+        --Stop the animations.
+        for _, Track in Animator:GetPlayingAnimationTracks() do
+            if self:IsAnimationTrackAllowed(Track) then continue end
+            Track:AdjustWeight(0, 0)
+            Track:Stop(0)
+        end
+        Animator.AnimationPlayed:Connect(function(Track)
+            if self:IsAnimationTrackAllowed(Track) then return end
+            Track:AdjustWeight(0, 0)
+            Track:Stop(0)
+        end)
     end
     self.Humanoid.ChildAdded:Connect(function(NewAnimator)
-        if NewAnimator:IsA("Animator") then
-            if Players.LocalPlayer and Players.LocalPlayer.Character == CharacterModel then
-                for _, Track in NewAnimator:GetPlayingAnimationTracks() do
-                    if self:IsAnimationTrackAllowed(Track) then continue end
-                    Track:AdjustWeight(0, 0)
-                    Track:Stop(0)
-                end
-                NewAnimator.AnimationPlayed:Connect(function(Track)
-                    if self:IsAnimationTrackAllowed(Track) then return end
-                    Track:AdjustWeight(0, 0)
-                    Track:Stop(0)
-                end)
-            else
-                NewAnimator:Destroy()
-            end
+        if not NewAnimator:IsA("Animator") then return end
+        for _, Track in NewAnimator:GetPlayingAnimationTracks() do
+            if self:IsAnimationTrackAllowed(Track) then continue end
+            Track:AdjustWeight(0, 0)
+            Track:Stop(0)
         end
+        NewAnimator.AnimationPlayed:Connect(function(Track)
+            if self:IsAnimationTrackAllowed(Track) then return end
+            Track:AdjustWeight(0, 0)
+            Track:Stop(0)
+        end)
     end)
 
     --Set up replication at 30hz.
