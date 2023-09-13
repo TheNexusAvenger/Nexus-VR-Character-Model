@@ -5,7 +5,7 @@ Stores information about an appendage, such as
 an arm or a leg.
 --]]
 
-local Limb = require(script.Parent:WaitForChild("Limb"))
+local Limb = require(script.Parent.Parent:WaitForChild("NexusAppendage"):WaitForChild("Limb"))
 
 local Appendage = {}
 Appendage.__index = Appendage

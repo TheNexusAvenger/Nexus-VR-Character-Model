@@ -6,20 +6,28 @@ Stores information about the head of a character.
 --!strict
 
 local NexusVRCharacterModel = script.Parent.Parent
-local Limb = require(script.Parent:WaitForChild("Limb"))
+local Limb = require(script.Parent.Parent:WaitForChild("NexusAppendage"):WaitForChild("Limb"))
 local Settings = require(NexusVRCharacterModel:WaitForChild("State"):WaitForChild("Settings")).GetInstance()
 
 local Head = {}
 Head.__index = Head
 setmetatable(Head, Limb)
 
+export type Head = {
+    Head: BasePart,
+    new: (HeadPart: BasePart) -> (Head),
+    GetEyesOffset: (self: Head) -> (CFrame),
+    GetHeadCFrame: (self: Head, VRHeadCFrame: CFrame) -> (CFrame),
+    GetNeckCFrame: (self: Head, VRHeadCFrame: CFrame, TargetAngle: number?) -> (CFrame),
+} & Limb.Limb
+
 
 
 --[[
 Creates a head.
 --]]
-function Head.new(HeadPart: BasePart): any
-    local self = Limb.new()
+function Head.new(HeadPart: BasePart): Head
+    local self = Limb.new() :: Head
     self.Head = HeadPart
     return setmetatable(self, Head)
 end

@@ -6,20 +6,28 @@ Stores information about the torso of a character.
 --!strict
 
 local NexusVRCharacterModel = script.Parent.Parent
-local Limb = require(script.Parent:WaitForChild("Limb"))
+local Limb = require(script.Parent.Parent:WaitForChild("NexusAppendage"):WaitForChild("Limb"))
 local Settings = require(NexusVRCharacterModel:WaitForChild("State"):WaitForChild("Settings")).GetInstance()
 
 local Torso = {}
 Torso.__index = Torso
 setmetatable(Torso, Limb)
 
+export type Torso = {
+    LowerTorso: BasePart,
+    UpperTorso: BasePart,
+    new: (LowerTorso: BasePart, UpperTorso: BasePart) -> Torso,
+    GetTorsoCFrames: (self: Torso, NeckCFrame: CFrame) -> (CFrame, CFrame),
+    GetAppendageJointCFrames: (self: Torso, LowerTorsoCFrame: CFrame, UpperTorsoCFrame: CFrame) -> ({CFrame}),
+} & Limb.Limb
+
 
 
 --[[
 Creates a torso.
 --]]
-function Torso.new(LowerTorso: BasePart, UpperTorso: BasePart): any
-    local self = Limb.new()
+function Torso.new(LowerTorso: BasePart, UpperTorso: BasePart): Torso
+    local self = Limb.new() :: Torso
     self.LowerTorso = LowerTorso
     self.UpperTorso = UpperTorso
     return setmetatable(self, Torso)
