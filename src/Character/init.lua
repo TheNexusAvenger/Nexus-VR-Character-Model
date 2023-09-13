@@ -16,7 +16,6 @@ local Torso = require(NexusVRCharacterModel:WaitForChild("Character"):WaitForChi
 local Appendage = require(NexusVRCharacterModel:WaitForChild("Character"):WaitForChild("Appendage"))
 local FootPlanter = require(NexusVRCharacterModel:WaitForChild("Character"):WaitForChild("FootPlanter"))
 local Settings = require(NexusVRCharacterModel:WaitForChild("State"):WaitForChild("Settings")).GetInstance()
-local NormalizeAssetId = require(NexusVRCharacterModel:WaitForChild("Util"):WaitForChild("NormalizeAssetId"))
 local UpdateInputs = NexusVRCharacterModel:WaitForChild("UpdateInputs") :: RemoteEvent
 
 local Character = {}
@@ -202,45 +201,6 @@ function Character.new(CharacterModel: Model): Character
     self.RightLeg.InvertBendDirection = true
     self.FootPlanter = FootPlanter:CreateSolver(CharacterModel:WaitForChild("LowerTorso"), self.Humanoid:FindFirstChild("BodyHeightScale"))
 
-    --Stop the character animations.
-    local Animator = self.Humanoid:FindFirstChild("Animator") :: Animator
-    if Animator then
-        --Remove the animation script and store the mood animations.
-        local AnimateScript = CharacterModel:WaitForChild("Animate")
-        local MoodValue = AnimateScript:FindFirstChild("mood") :: Instance
-        if MoodValue then
-            for _, Animation in MoodValue:GetChildren() do
-                if not Animation:IsA("Animation") then continue end
-                self.MoodAnimationIds[NormalizeAssetId((Animation :: Animation).AnimationId)] = true
-            end
-        end
-
-        --Stop the animations.
-        for _, Track in Animator:GetPlayingAnimationTracks() do
-            if self:IsAnimationTrackAllowed(Track) then continue end
-            Track:AdjustWeight(0, 0)
-            Track:Stop(0)
-        end
-        Animator.AnimationPlayed:Connect(function(Track)
-            if self:IsAnimationTrackAllowed(Track) then return end
-            Track:AdjustWeight(0, 0)
-            Track:Stop(0)
-        end)
-    end
-    self.Humanoid.ChildAdded:Connect(function(NewAnimator)
-        if not NewAnimator:IsA("Animator") then return end
-        for _, Track in NewAnimator:GetPlayingAnimationTracks() do
-            if self:IsAnimationTrackAllowed(Track) then continue end
-            Track:AdjustWeight(0, 0)
-            Track:Stop(0)
-        end
-        NewAnimator.AnimationPlayed:Connect(function(Track)
-            if self:IsAnimationTrackAllowed(Track) then return end
-            Track:AdjustWeight(0, 0)
-            Track:Stop(0)
-        end)
-    end)
-
     --Set up replication at 30hz.
     if Players.LocalPlayer and Players.LocalPlayer.Character == CharacterModel then
         task.spawn(function()
@@ -269,15 +229,6 @@ function Character:GetHumanoidScale(ScaleName: string): number
         return Value.Value
     end
     return (ScaleName == "BodyTypeScale" and 0 or 1)
-end
-
---[[
-Returns if an animation track is allowed to be played.
---]]
-function Character:IsAnimationTrackAllowed(Track: AnimationTrack): boolean
-    if not Track.Animation then return false end
-    if self.MoodAnimationIds[NormalizeAssetId((Track.Animation :: Animation).AnimationId)] then return true end
-    return false
 end
 
 --[[
