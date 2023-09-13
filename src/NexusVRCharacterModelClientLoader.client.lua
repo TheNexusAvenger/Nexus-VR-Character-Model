@@ -36,6 +36,12 @@ UpdateInputs.OnClientEvent:Connect(function(Player, HeadCFrame, LeftHandCFrame, 
 end)
 ReplicationReady:FireServer()
 
+--Connect updating all the character Motor6Ds.
+--Must be done after Stepped to override Animators.
+RunService.Stepped:Connect(function()
+    CharacterService:RefreshAllCharacters()
+end)
+
 --Allow checking if Nexus VR Character Model is loaded without being in VR.
 local LoadedPrintStatementPrinted = false
 UserInputService.InputBegan:Connect(function(Input)
@@ -95,11 +101,6 @@ end
 --Start updating the VR character.
 RunService:BindToRenderStep("NexusVRCharacterModelUpdate", Enum.RenderPriority.Camera.Value - 1, function()
     ControlService:UpdateCharacter()
-end)
-RunService.Stepped:Connect(function()
-    local Character = CharacterService:GetCharacter(Players.LocalPlayer)
-    if not Character then return end
-    Character:RefreshCharacter()
 end)
 
 --Disable FadeOutViewOnCollision.

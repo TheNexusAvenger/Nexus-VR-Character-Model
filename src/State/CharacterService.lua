@@ -19,6 +19,7 @@ export type CharacterService = {
     GetInstance: () -> (CharacterService),
 
     GetCharacter: (self: CharacterService, Player: Player) -> (Character.Character?),
+    RefreshAllCharacters: (self: CharacterService) -> (),
 }
 
 
@@ -71,6 +72,15 @@ function CharacterService:GetCharacter(Player: Player): Character.Character?
 
     --Return the stored character.
     return self.Characters[Player].VRCharacter
+end
+
+--[[
+Refreshes all the characters.
+--]]
+function CharacterService:RefreshAllCharacters(): ()
+    for _, Character in self.Characters do
+        Character.VRCharacter:RefreshCharacter()
+    end
 end
 
 
