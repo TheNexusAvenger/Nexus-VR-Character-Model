@@ -58,7 +58,7 @@ Returns the VR character for a player.
 --]]
 function CharacterService:GetCharacter(Player: Player): Character.Character?
     --Return if the character is nil.
-    if not Player.Character then
+    if not Player.Character or not Player.Character:FindFirstChild("Head") then
         return nil
     end
 
