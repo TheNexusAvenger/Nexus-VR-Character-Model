@@ -5,6 +5,8 @@ Manipulates a character model.
 --]]
 --!strict
 
+local SMOOTHING_DURATION_SECONDS = 1 / 30
+
 local Players = game:GetService("Players")
 local TweenService = game:GetService("TweenService")
 
@@ -158,8 +160,10 @@ function Character.new(CharacterModel: Model): Character
             LeftFootAttachment = self.Parts.LeftFoot:FindFirstChild("LeftFootAttachment"),
         },
     }
-    self.CurrentMotor6DTransforms = {}
     self.MoodAnimationIds = {}
+    self.CurrentMotor6DTransforms = {}
+    self.LastMotor6DTransforms = {}
+    self.LastRefreshTime = tick()
 
     --Add the missing attachments that not all rigs have.
     if not self.Attachments.RightFoot.RightFootAttachment then
@@ -308,10 +312,10 @@ set instantly or tweened depending on how
 it is configured.
 --]]
 function Character:SetCFrameProperty(Object: Instance, PropertyName: string, PropertyValue: any): ()
-    if self.TweenComponents then
+    if self.TweenComponents and PropertyName ~= "Transform" then
         TweenService:Create(
             Object,
-            TweenInfo.new(0.1, Enum.EasingStyle.Quad, Enum.EasingDirection.Out),
+            TweenInfo.new(SMOOTHING_DURATION_SECONDS, Enum.EasingStyle.Quad, Enum.EasingDirection.Out),
             {
                 [PropertyName] = PropertyValue,
             }
@@ -336,8 +340,21 @@ Refreshes the Motor6D Transforms.
 Intended to be run for the local character after Stepped to override the animations.
 --]]
 function Character:RefreshCharacter(): ()
-    for Motor6D, Transform in self.CurrentMotor6DTransforms do
-        Motor6D.Transform = Transform
+    if self.TweenComponents then
+        local CurrentRefreshTime = tick()
+        local SmoothRatio = math.min((CurrentRefreshTime - self.LastRefreshTime) / SMOOTHING_DURATION_SECONDS, 1)
+        for Motor6D, Transform in self.CurrentMotor6DTransforms do
+            local LastTransform = self.LastMotor6DTransforms[Motor6D]
+            if LastTransform then
+                Motor6D.Transform = LastTransform:Lerp(Transform, SmoothRatio)
+            else
+                Motor6D.Transform = Transform
+            end
+        end
+    else
+        for Motor6D, Transform in self.CurrentMotor6DTransforms do
+            Motor6D.Transform = Transform
+        end
     end
 end
 
@@ -358,6 +375,12 @@ function Character:UpdateFromInputs(HeadControllerCFrame: CFrame, LeftHandContro
         self:UpdateFromInputsSeated(HeadControllerCFrame, LeftHandControllerCFrame, RightHandControllerCFrame)
         return
     end
+
+    --Store the current Motor6D transforms.
+    for Motor6D, _ in self.CurrentMotor6DTransforms do
+        self.LastMotor6DTransforms[Motor6D] = Motor6D.Transform
+    end
+    self.LastRefreshTime = tick()
 
     --Get the CFrames.
     local HeadCFrame = self.Head:GetHeadCFrame(HeadControllerCFrame)
