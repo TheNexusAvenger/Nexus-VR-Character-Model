@@ -7,7 +7,6 @@ Manipulates a character model.
 
 local SMOOTHING_DURATION_SECONDS = 1 / 30
 
-local Workspace = game:GetService("Workspace")
 local Players = game:GetService("Players")
 local TweenService = game:GetService("TweenService")
 
