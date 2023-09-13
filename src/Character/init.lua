@@ -23,6 +23,7 @@ export type Character = {
     new: (CharacterModel: Model) -> Character,
 
     GetHumanoidScale: (self: Character, ScaleName: string) -> (number),
+    RefreshCharacter: (self: Character) -> (),
     UpdateFromInputs: (self: Character, HeadControllerCFrame: CFrame, LeftHandControllerCFrame: CFrame, RightHandControllerCFrame: CFrame) -> (),
 }
 
@@ -156,6 +157,7 @@ function Character.new(CharacterModel: Model): Character
             LeftFootAttachment = self.Parts.LeftFoot:FindFirstChild("LeftFootAttachment"),
         },
     }
+    self.CurrentMotor6DTransforms = {}
 
     --Add the missing attachments that not all rigs have.
     if not self.Attachments.RightFoot.RightFootAttachment then
@@ -302,6 +304,9 @@ function Character:SetCFrameProperty(Object: Instance, PropertyName: string, Pro
     else
         (Object :: any)[PropertyName] = PropertyValue
     end
+    if PropertyName == "Transform" then
+        self.CurrentMotor6DTransforms[Object] = PropertyValue
+    end
 end
 
 --[[
@@ -309,6 +314,16 @@ Sets the transform of a motor.
 --]]
 function Character:SetTransform(MotorName: string, AttachmentName: string, StartLimbName: string, EndLimbName: string, StartCFrame: CFrame, EndCFrame: CFrame): ()
     self:SetCFrameProperty(self.Motors[MotorName], "Transform", (StartCFrame * self.Attachments[StartLimbName][AttachmentName].CFrame):Inverse() * (EndCFrame * self.Attachments[EndLimbName][AttachmentName].CFrame))
+end
+
+--[[
+Refreshes the Motor6D Transforms.
+Intended to be run for the local character after Stepped to override the animations.
+--]]
+function Character:RefreshCharacter(): ()
+    for Motor6D, Transform in self.CurrentMotor6DTransforms do
+        Motor6D.Transform = Transform
+    end
 end
 
 --[[

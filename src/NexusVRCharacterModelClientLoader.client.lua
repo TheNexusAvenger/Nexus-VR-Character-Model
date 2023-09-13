@@ -96,6 +96,11 @@ end
 RunService:BindToRenderStep("NexusVRCharacterModelUpdate", Enum.RenderPriority.Camera.Value - 1, function()
     ControlService:UpdateCharacter()
 end)
+RunService.Stepped:Connect(function()
+    local Character = CharacterService:GetCharacter(Players.LocalPlayer)
+    if not Character then return end
+    Character:RefreshCharacter()
+end)
 
 --Disable FadeOutViewOnCollision.
 if Settings:GetSetting("DisableFadeOutViewOnCollision") == true then
