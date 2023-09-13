@@ -217,7 +217,6 @@ function BaseController:UpdateCharacter(): ()
     if CharacterChanged then
         self:Enable()
     end
-    self.Character.TweenComponents = false
 
     --Get the VR inputs.
     local VRInputs = VRInputService:GetVRInputs()

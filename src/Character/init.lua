@@ -7,13 +7,15 @@ Manipulates a character model.
 
 local SMOOTHING_DURATION_SECONDS = 1 / 30
 
+local Workspace = game:GetService("Workspace")
 local Players = game:GetService("Players")
 local TweenService = game:GetService("TweenService")
 
 local NexusVRCharacterModel = script.Parent
 local Head = require(NexusVRCharacterModel:WaitForChild("Character"):WaitForChild("Head"))
 local Torso = require(NexusVRCharacterModel:WaitForChild("Character"):WaitForChild("Torso"))
-local Appendage = require(NexusVRCharacterModel:WaitForChild("Character"):WaitForChild("Appendage"))
+local AppendageLegacy = require(NexusVRCharacterModel:WaitForChild("Character"):WaitForChild("Appendage"))
+local Appendage = require(NexusVRCharacterModel:WaitForChild("NexusAppendage"):WaitForChild("Appendage"))
 local FootPlanter = require(NexusVRCharacterModel:WaitForChild("Character"):WaitForChild("FootPlanter"))
 local Settings = require(NexusVRCharacterModel:WaitForChild("State"):WaitForChild("Settings")).GetInstance()
 local UpdateInputs = NexusVRCharacterModel:WaitForChild("UpdateInputs") :: RemoteEvent
@@ -37,7 +39,8 @@ Creates a character.
 function Character.new(CharacterModel: Model): Character
     local self = {
         CharacterModel = CharacterModel,
-        TweenComponents = true,
+        TweenComponents = (CharacterModel ~= Players.LocalPlayer.Character),
+        UseIKControl = Settings:GetSetting("Extra.TEMPORARY_UseIKControl"),
     }
     setmetatable(self, Character)
 
@@ -193,12 +196,19 @@ function Character.new(CharacterModel: Model): Character
     --Store the limbs.
     self.Head = Head.new(self.Parts.Head :: BasePart)
     self.Torso = Torso.new(self.Parts.LowerTorso :: BasePart, self.Parts.UpperTorso :: BasePart)
-    self.LeftArm = Appendage.new(CharacterModel:WaitForChild("LeftUpperArm") :: BasePart, CharacterModel:WaitForChild("LeftLowerArm") :: BasePart, CharacterModel:WaitForChild("LeftHand") :: BasePart, "LeftShoulderRigAttachment", "LeftElbowRigAttachment", "LeftWristRigAttachment", "LeftGripAttachment", PreventArmDisconnection)
-    self.RightArm = Appendage.new(CharacterModel:WaitForChild("RightUpperArm") :: BasePart, CharacterModel:WaitForChild("RightLowerArm") :: BasePart, CharacterModel:WaitForChild("RightHand") :: BasePart, "RightShoulderRigAttachment", "RightElbowRigAttachment", "RightWristRigAttachment", "RightGripAttachment", PreventArmDisconnection)
-    self.LeftLeg = Appendage.new(CharacterModel:WaitForChild("LeftUpperLeg") :: BasePart, CharacterModel:WaitForChild("LeftLowerLeg") :: BasePart, CharacterModel:WaitForChild("LeftFoot") :: BasePart, "LeftHipRigAttachment", "LeftKneeRigAttachment", "LeftAnkleRigAttachment", "LeftFootAttachment", true)
-    self.LeftLeg.InvertBendDirection = true
-    self.RightLeg = Appendage.new(CharacterModel:WaitForChild("RightUpperLeg") :: BasePart, CharacterModel:WaitForChild("RightLowerLeg") :: BasePart, CharacterModel:WaitForChild("RightFoot") :: BasePart, "RightHipRigAttachment", "RightKneeRigAttachment", "RightAnkleRigAttachment", "RightFootAttachment", true)
-    self.RightLeg.InvertBendDirection = true
+    if self.UseIKControl then
+        self.LeftArm = Appendage.FromPreset("LeftArm", CharacterModel, not PreventArmDisconnection, self.TweenComponents and 0.1 or 0)
+        self.RightArm = Appendage.FromPreset("RightArm", CharacterModel, not PreventArmDisconnection, self.TweenComponents and 0.1 or 0)
+        self.LeftLeg = Appendage.FromPreset("LeftLeg", CharacterModel, false, self.TweenComponents and 0.1 or 0)
+        self.RightLeg = Appendage.FromPreset("RightLeg", CharacterModel, false, self.TweenComponents and 0.1 or 0)
+    else
+        self.LeftArm = AppendageLegacy.new(CharacterModel:WaitForChild("LeftUpperArm") :: BasePart, CharacterModel:WaitForChild("LeftLowerArm") :: BasePart, CharacterModel:WaitForChild("LeftHand") :: BasePart, "LeftShoulderRigAttachment", "LeftElbowRigAttachment", "LeftWristRigAttachment", "LeftGripAttachment", PreventArmDisconnection)
+        self.RightArm = AppendageLegacy.new(CharacterModel:WaitForChild("RightUpperArm") :: BasePart, CharacterModel:WaitForChild("RightLowerArm") :: BasePart, CharacterModel:WaitForChild("RightHand") :: BasePart, "RightShoulderRigAttachment", "RightElbowRigAttachment", "RightWristRigAttachment", "RightGripAttachment", PreventArmDisconnection)
+        self.LeftLeg = AppendageLegacy.new(CharacterModel:WaitForChild("LeftUpperLeg") :: BasePart, CharacterModel:WaitForChild("LeftLowerLeg") :: BasePart, CharacterModel:WaitForChild("LeftFoot") :: BasePart, "LeftHipRigAttachment", "LeftKneeRigAttachment", "LeftAnkleRigAttachment", "LeftFootAttachment", true)
+        self.LeftLeg.InvertBendDirection = true
+        self.RightLeg = AppendageLegacy.new(CharacterModel:WaitForChild("RightUpperLeg") :: BasePart, CharacterModel:WaitForChild("RightLowerLeg") :: BasePart, CharacterModel:WaitForChild("RightFoot") :: BasePart, "RightHipRigAttachment", "RightKneeRigAttachment", "RightAnkleRigAttachment", "RightFootAttachment", true)
+        self.RightLeg.InvertBendDirection = true
+    end
     self.FootPlanter = FootPlanter:CreateSolver(CharacterModel:WaitForChild("LowerTorso"), self.Humanoid:FindFirstChild("BodyHeightScale"))
 
     --Set up replication at 30hz.
@@ -338,36 +348,45 @@ function Character:UpdateFromInputs(HeadControllerCFrame: CFrame, LeftHandContro
     local NeckCFrame = self.Head:GetNeckCFrame(HeadControllerCFrame)
 	local LowerTorsoCFrame: CFrame, UpperTorsoCFrame = self.Torso:GetTorsoCFrames(NeckCFrame)
 	local JointCFrames = self.Torso:GetAppendageJointCFrames(LowerTorsoCFrame, UpperTorsoCFrame)
-	local LeftUpperArmCFrame, LeftLowerArmCFrame, LeftHandCFrame = self.LeftArm:GetAppendageCFrames(JointCFrames["LeftShoulder"], LeftHandControllerCFrame)
-	local RightUpperArmCFrame, RightLowerArmCFrame, RightHandCFrame = self.RightArm:GetAppendageCFrames(JointCFrames["RightShoulder"], RightHandControllerCFrame)
 
     --Set the character CFrames.
     --HumanoidRootParts must always face up. This makes the math more complicated.
     --Setting the CFrame directly to something not facing directly up will result in the physics
     --attempting to correct that within the next frame, causing the character to appear to move.
     local LeftFoot: CFrame, RightFoot: CFrame = self.FootPlanter:GetFeetCFrames()
-    local LeftUpperLegCFrame, LeftLowerLegCFrame, LeftFootCFrame = self.LeftLeg:GetAppendageCFrames(JointCFrames["LeftHip"], LeftFoot * CFrame.Angles(0, math.pi, 0))
-    local RightUpperLegCFrame, RightLowerLegCFrame, RightFootCFrame = self.RightLeg:GetAppendageCFrames(JointCFrames["RightHip"], RightFoot * CFrame.Angles(0, math.pi, 0))
     local TargetHumanoidRootPartCFrame = LowerTorsoCFrame * self.Attachments.LowerTorso.RootRigAttachment.CFrame * self.Attachments.HumanoidRootPart.RootRigAttachment.CFrame:Inverse()
     local ActualHumanoidRootPartCFrame: CFrame = self.Parts.HumanoidRootPart.CFrame
     local HumanoidRootPartHeightDifference = ActualHumanoidRootPartCFrame.Y - TargetHumanoidRootPartCFrame.Y
     local NewTargetHumanoidRootPartCFrame = CFrame.new(TargetHumanoidRootPartCFrame.Position) * CFrame.Angles(0, math.atan2(TargetHumanoidRootPartCFrame.LookVector.X, TargetHumanoidRootPartCFrame.LookVector.Z) + math.pi, 0)
     self:SetCFrameProperty(self.Parts.HumanoidRootPart, "CFrame", CFrame.new(0, HumanoidRootPartHeightDifference, 0) * NewTargetHumanoidRootPartCFrame)
     self:SetCFrameProperty(self.Motors.Root, "Transform", CFrame.new(0, -HumanoidRootPartHeightDifference, 0) * (NewTargetHumanoidRootPartCFrame * self.Attachments.HumanoidRootPart.RootRigAttachment.CFrame):Inverse() * LowerTorsoCFrame * self.Attachments.LowerTorso.RootRigAttachment.CFrame)
-    self:SetTransform("RightHip", "RightHipRigAttachment", "LowerTorso", "RightUpperLeg", LowerTorsoCFrame, RightUpperLegCFrame)
-    self:SetTransform("RightKnee", "RightKneeRigAttachment", "RightUpperLeg", "RightLowerLeg", RightUpperLegCFrame, RightLowerLegCFrame)
-    self:SetTransform("RightAnkle", "RightAnkleRigAttachment", "RightLowerLeg", "RightFoot", RightLowerLegCFrame, RightFootCFrame)
-    self:SetTransform("LeftHip", "LeftHipRigAttachment", "LowerTorso", "LeftUpperLeg", LowerTorsoCFrame, LeftUpperLegCFrame)
-    self:SetTransform("LeftKnee", "LeftKneeRigAttachment", "LeftUpperLeg", "LeftLowerLeg", LeftUpperLegCFrame, LeftLowerLegCFrame)
-    self:SetTransform("LeftAnkle", "LeftAnkleRigAttachment", "LeftLowerLeg", "LeftFoot", LeftLowerLegCFrame, LeftFootCFrame)
     self:SetTransform("Neck", "NeckRigAttachment", "UpperTorso", "Head", UpperTorsoCFrame, HeadCFrame)
     self:SetTransform("Waist", "WaistRigAttachment", "LowerTorso", "UpperTorso", LowerTorsoCFrame, UpperTorsoCFrame)
-    self:SetTransform("RightShoulder", "RightShoulderRigAttachment", "UpperTorso", "RightUpperArm", UpperTorsoCFrame, RightUpperArmCFrame)
-    self:SetTransform("RightElbow", "RightElbowRigAttachment", "RightUpperArm", "RightLowerArm", RightUpperArmCFrame, RightLowerArmCFrame)
-    self:SetTransform("RightWrist", "RightWristRigAttachment", "RightLowerArm", "RightHand", RightLowerArmCFrame, RightHandCFrame)
-    self:SetTransform("LeftShoulder", "LeftShoulderRigAttachment", "UpperTorso", "LeftUpperArm", UpperTorsoCFrame, LeftUpperArmCFrame)
-    self:SetTransform("LeftElbow", "LeftElbowRigAttachment", "LeftUpperArm", "LeftLowerArm", LeftUpperArmCFrame, LeftLowerArmCFrame)
-    self:SetTransform("LeftWrist", "LeftWristRigAttachment", "LeftLowerArm", "LeftHand", LeftLowerArmCFrame, LeftHandCFrame)
+    if self.UseIKControl then
+        self.LeftArm:MoveToWorld(LeftHandControllerCFrame)
+        self.RightArm:MoveToWorld(RightHandControllerCFrame)
+        self.LeftLeg:MoveToWorld(LeftFoot * CFrame.Angles(0, math.pi, 0))
+        self.RightLeg:MoveToWorld(RightFoot * CFrame.Angles(0, math.pi, 0))
+        self.LeftLeg:Enable()
+        self.RightLeg:Enable()
+    else
+        local LeftUpperArmCFrame, LeftLowerArmCFrame, LeftHandCFrame = self.LeftArm:GetAppendageCFrames(JointCFrames["LeftShoulder"], LeftHandControllerCFrame)
+        local RightUpperArmCFrame, RightLowerArmCFrame, RightHandCFrame = self.RightArm:GetAppendageCFrames(JointCFrames["RightShoulder"], RightHandControllerCFrame)
+        local LeftUpperLegCFrame, LeftLowerLegCFrame, LeftFootCFrame = self.LeftLeg:GetAppendageCFrames(JointCFrames["LeftHip"], LeftFoot * CFrame.Angles(0, math.pi, 0))
+        local RightUpperLegCFrame, RightLowerLegCFrame, RightFootCFrame = self.RightLeg:GetAppendageCFrames(JointCFrames["RightHip"], RightFoot * CFrame.Angles(0, math.pi, 0))
+        self:SetTransform("RightHip", "RightHipRigAttachment", "LowerTorso", "RightUpperLeg", LowerTorsoCFrame, RightUpperLegCFrame)
+        self:SetTransform("RightKnee", "RightKneeRigAttachment", "RightUpperLeg", "RightLowerLeg", RightUpperLegCFrame, RightLowerLegCFrame)
+        self:SetTransform("RightAnkle", "RightAnkleRigAttachment", "RightLowerLeg", "RightFoot", RightLowerLegCFrame, RightFootCFrame)
+        self:SetTransform("LeftHip", "LeftHipRigAttachment", "LowerTorso", "LeftUpperLeg", LowerTorsoCFrame, LeftUpperLegCFrame)
+        self:SetTransform("LeftKnee", "LeftKneeRigAttachment", "LeftUpperLeg", "LeftLowerLeg", LeftUpperLegCFrame, LeftLowerLegCFrame)
+        self:SetTransform("LeftAnkle", "LeftAnkleRigAttachment", "LeftLowerLeg", "LeftFoot", LeftLowerLegCFrame, LeftFootCFrame)
+        self:SetTransform("RightShoulder", "RightShoulderRigAttachment", "UpperTorso", "RightUpperArm", UpperTorsoCFrame, RightUpperArmCFrame)
+        self:SetTransform("RightElbow", "RightElbowRigAttachment", "RightUpperArm", "RightLowerArm", RightUpperArmCFrame, RightLowerArmCFrame)
+        self:SetTransform("RightWrist", "RightWristRigAttachment", "RightLowerArm", "RightHand", RightLowerArmCFrame, RightHandCFrame)
+        self:SetTransform("LeftShoulder", "LeftShoulderRigAttachment", "UpperTorso", "LeftUpperArm", UpperTorsoCFrame, LeftUpperArmCFrame)
+        self:SetTransform("LeftElbow", "LeftElbowRigAttachment", "LeftUpperArm", "LeftLowerArm", LeftUpperArmCFrame, LeftLowerArmCFrame)
+        self:SetTransform("LeftWrist", "LeftWristRigAttachment", "LeftLowerArm", "LeftHand", LeftLowerArmCFrame, LeftHandCFrame)
+    end
 
     --Replicate the changes to the server.
     if Players.LocalPlayer and Players.LocalPlayer.Character == self.CharacterModel then
@@ -391,8 +410,6 @@ function Character:UpdateFromInputsSeated(HeadControllerCFrame: CFrame, LeftHand
     local NeckCFrame = self.Head:GetNeckCFrame(HeadControllerCFrame,0)
 	local LowerTorsoCFrame, UpperTorsoCFrame = self.Torso:GetTorsoCFrames(NeckCFrame)
 	local JointCFrames = self.Torso:GetAppendageJointCFrames(LowerTorsoCFrame,UpperTorsoCFrame)
-	local LeftUpperArmCFrame, LeftLowerArmCFrame, LeftHandCFrame = self.LeftArm:GetAppendageCFrames(JointCFrames["LeftShoulder"], LeftHandControllerCFrame)
-	local RightUpperArmCFrame, RightLowerArmCFrame, RightHandCFrame = self.RightArm:GetAppendageCFrames(JointCFrames["RightShoulder"], RightHandControllerCFrame)
     local EyesOffset = self.Head:GetEyesOffset()
     local HeightOffset = CFrame.new(0, (CFrame.new(0, EyesOffset.Y, 0) * (HeadControllerCFrame * EyesOffset:Inverse())).Y, 0)
 
@@ -400,12 +417,22 @@ function Character:UpdateFromInputsSeated(HeadControllerCFrame: CFrame, LeftHand
     self:SetCFrameProperty(self.Motors.Root, "Transform", HeightOffset * CFrame.new(0, -LowerTorsoCFrame.Y, 0) * LowerTorsoCFrame)
     self:SetTransform("Neck", "NeckRigAttachment", "UpperTorso", "Head", UpperTorsoCFrame, HeadCFrame)
     self:SetTransform("Waist", "WaistRigAttachment", "LowerTorso", "UpperTorso", LowerTorsoCFrame, UpperTorsoCFrame)
-    self:SetTransform("RightShoulder", "RightShoulderRigAttachment", "UpperTorso", "RightUpperArm", UpperTorsoCFrame, RightUpperArmCFrame)
-    self:SetTransform("RightElbow", "RightElbowRigAttachment", "RightUpperArm", "RightLowerArm", RightUpperArmCFrame, RightLowerArmCFrame)
-    self:SetTransform("RightWrist", "RightWristRigAttachment", "RightLowerArm", "RightHand", RightLowerArmCFrame, RightHandCFrame)
-    self:SetTransform("LeftShoulder", "LeftShoulderRigAttachment", "UpperTorso", "LeftUpperArm", UpperTorsoCFrame, LeftUpperArmCFrame)
-    self:SetTransform("LeftElbow", "LeftElbowRigAttachment", "LeftUpperArm", "LeftLowerArm", LeftUpperArmCFrame, LeftLowerArmCFrame)
-    self:SetTransform("LeftWrist", "LeftWristRigAttachment", "LeftLowerArm", "LeftHand", LeftLowerArmCFrame, LeftHandCFrame)
+    if self.UseIKControl then
+        local HeadWorldSpaceCFrame = (self.Parts.Head.CFrame :: CFrame) * EyesOffset
+        self.LeftArm:MoveToWorld(HeadWorldSpaceCFrame * HeadControllerCFrame:Inverse() * LeftHandControllerCFrame)
+        self.RightArm:MoveToWorld(HeadWorldSpaceCFrame * HeadControllerCFrame:Inverse() * RightHandControllerCFrame)
+        self.LeftLeg:Disable()
+        self.RightLeg:Disable()
+    else
+        local LeftUpperArmCFrame, LeftLowerArmCFrame, LeftHandCFrame = self.LeftArm:GetAppendageCFrames(JointCFrames["LeftShoulder"], LeftHandControllerCFrame)
+        local RightUpperArmCFrame, RightLowerArmCFrame, RightHandCFrame = self.RightArm:GetAppendageCFrames(JointCFrames["RightShoulder"], RightHandControllerCFrame)
+        self:SetTransform("RightShoulder", "RightShoulderRigAttachment", "UpperTorso", "RightUpperArm", UpperTorsoCFrame, RightUpperArmCFrame)
+        self:SetTransform("RightElbow", "RightElbowRigAttachment", "RightUpperArm", "RightLowerArm", RightUpperArmCFrame, RightLowerArmCFrame)
+        self:SetTransform("RightWrist", "RightWristRigAttachment", "RightLowerArm", "RightHand", RightLowerArmCFrame, RightHandCFrame)
+        self:SetTransform("LeftShoulder", "LeftShoulderRigAttachment", "UpperTorso", "LeftUpperArm", UpperTorsoCFrame, LeftUpperArmCFrame)
+        self:SetTransform("LeftElbow", "LeftElbowRigAttachment", "LeftUpperArm", "LeftLowerArm", LeftUpperArmCFrame, LeftLowerArmCFrame)
+        self:SetTransform("LeftWrist", "LeftWristRigAttachment", "LeftLowerArm", "LeftHand", LeftLowerArmCFrame, LeftHandCFrame)
+    end
 
     --Set the legs to be sitting.
     self.Motors.RightHip.Transform = CFrame.Angles(math.pi / 2, 0, math.rad(5))
