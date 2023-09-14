@@ -69,42 +69,59 @@ return function()
     --Done in a task to resolve recurisve requiring.
     if RunService:IsClient() then
         task.defer(function()
-            --Build the initial shims for the APIs.
+            --Create the camera API.
             local CameraService = require(NexusVRCharacterModel:WaitForChild("State"):WaitForChild("CameraService")).GetInstance()
-            local ControlService = require(NexusVRCharacterModel:WaitForChild("State"):WaitForChild("ControlService")).GetInstance()
-            API:Register("Camera", setmetatable({}, {__index=CameraService}))
-            API:Register("Controller", setmetatable({}, {__index=ControlService}))
-            API:Register("Input", setmetatable({}, {__index=require(NexusVRCharacterModel:WaitForChild("State"):WaitForChild("VRInputService")).GetInstance()}))
-            API:Register("Settings", setmetatable({}, {__index=require(NexusVRCharacterModel:WaitForChild("State"):WaitForChild("Settings")).GetInstance()}))
-
-            --Add the additional API adapters for the shims.
-            API.Camera.GetActiveCamera = function()
+            local CameraAPI = {}
+            function CameraAPI:SetActiveCamera(Name: string): ()
+                CameraService:SetActiveCamera(Name)
+            end
+            function CameraAPI:GetActiveCamera(): string
                 return CameraService.ActiveCamera
             end
-            API.Controller.GetActiveController = function()
+            API:Register("Camera", CameraAPI)
+
+            --Create the controller API.
+            local ActiveControllers = {}
+            local ControlService = require(NexusVRCharacterModel:WaitForChild("State"):WaitForChild("ControlService")).GetInstance()
+            local ControllerAPI = {}
+            function ControllerAPI:SetActiveController(Name: string): ()
+                ControlService:SetActiveController(Name)
+            end
+            function ControllerAPI:GetActiveController(): (string)
                 return ControlService.ActiveController
             end
-
-            --Add the custom APIs for the shims.
-            local ActiveControllers = {}
-            API.Controller.SetControllerInputEnabled = function(_, Hand: Enum.UserCFrame, Enabled: boolean): ()
+            function ControllerAPI:SetControllerInputEnabled(Hand: Enum.UserCFrame, Enabled: boolean): ()
                 if Hand ~= Enum.UserCFrame.LeftHand and Hand ~= Enum.UserCFrame.RightHand then
                     error("The following UserCFrame is invalid and can't be disabled: "..tostring(Hand))
                 end
                 ActiveControllers[Hand] = (Enabled ~= false)
             end
-            API.Controller.EnableControllerInput = function(self, Hand: Enum.UserCFrame): ()
+            function ControllerAPI:EnableControllerInput(Hand: Enum.UserCFrame): ()
                 self:SetControllerInputEnabled(Hand, true)
             end
-            API.Controller.DisableControllerInput = function(self, Hand: Enum.UserCFrame): ()
+            function ControllerAPI:DisableControllerInput(Hand: Enum.UserCFrame): ()
                 self:SetControllerInputEnabled(Hand, false)
             end
-            API.Controller.IsControllerInputEnabled = function(_, Hand: Enum.UserCFrame): boolean
+            function ControllerAPI:IsControllerInputEnabled(Hand: Enum.UserCFrame): boolean
                 if Hand ~= Enum.UserCFrame.LeftHand and Hand ~= Enum.UserCFrame.RightHand then
                     error("The following UserCFrame is invalid and can't be disabled: "..tostring(Hand))
                 end
                 return ActiveControllers[Hand] ~= false
             end
+            API:Register("Controller", ControllerAPI)
+
+            --Create the input API.
+            local VRInputService = require(NexusVRCharacterModel:WaitForChild("State"):WaitForChild("VRInputService")).GetInstance()
+            local InputAPI = {}
+            InputAPI.Recentered = VRInputService.Recentered
+            InputAPI.EyeLevelSet = VRInputService.EyeLevelSet
+            function InputAPI:Recenter(): ()
+                VRInputService:Recenter()
+            end
+            function InputAPI:SetEyeLevel(): ()
+                VRInputService:SetEyeLevel()
+            end
+            API:Register("Input", InputAPI)
 
             --Create the Menu API.
             --The Menu API does not work outside of VR.
@@ -140,6 +157,20 @@ return function()
                 GetMainMenu():Toggle()
             end
             API:Register("Menu", MenuAPI)
+
+            --Create the settings API.
+            local SettingsService = require(NexusVRCharacterModel:WaitForChild("State"):WaitForChild("Settings")).GetInstance()
+            local SettingsAPI = {}
+            function SettingsAPI:GetSetting(Setting: string): any
+                return SettingsService:GetSetting(Setting)
+            end
+            function SettingsAPI:SetSetting(Setting: string, Value: any): ()
+                SettingsService:SetSetting(Setting, Value)
+            end
+            function SettingsAPI:GetSettingsChangedSignal(Setting: string)
+                return SettingsService:GetSettingsChangedSignal(Setting)
+            end
+            API:Register("Settings", SettingsAPI)
         end)
     end
 
