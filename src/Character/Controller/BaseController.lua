@@ -262,8 +262,11 @@ function BaseController:UpdateCharacter(): ()
         --Set the absolute positions of the character.
         self.Character:UpdateFromInputsSeated(VRHeadCFrame, VRHeadCFrame * HeadToLeftHandCFrame,VRHeadCFrame * HeadToRightHandCFrame)
     end
-    self.LastHeadCFrame = VRHeadCFrame
-
+    --If we're HeadLocked, we have to update this BEFORE updating the camera.
+    if Workspace.CurrentCamera.HeadLocked then
+        self.LastHeadCFrame = VRHeadCFrame
+    end
+    
     --Update the camera.
     if self.Character.Parts.HumanoidRootPart:IsDescendantOf(Workspace) and self.Character.Humanoid.Health > 0 then
         --Update the camera based on the character.
@@ -277,9 +280,11 @@ function BaseController:UpdateCharacter(): ()
         --Update the camera based on the last CFrame if the motors can't update (not in Workspace).
         local CurrentCameraCFrame = Workspace.CurrentCamera.CFrame
         local LastHeadCFrame = self.LastHeadCFrame or CFrame.new()
-        local HeadCFrame = self:ScaleInput(VRInputService:GetVRInputs()[Enum.UserCFrame.Head])
-        Workspace.CurrentCamera.CFrame = CurrentCameraCFrame * LastHeadCFrame:Inverse() * HeadCFrame
-        self.LastHeadCFrame = HeadCFrame
+        Workspace.CurrentCamera.CFrame = CurrentCameraCFrame * LastHeadCFrame:Inverse() * VRHeadCFrame
+    end
+    --If we're not HeadLocked, we have to update AFTER. This prevents the camera from getting stuck on death.
+    if not Workspace.CurrentCamera.HeadLocked then
+        self.LastHeadCFrame = VRHeadCFrame
     end
 end
 
