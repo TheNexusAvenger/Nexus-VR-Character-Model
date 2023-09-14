@@ -106,6 +106,20 @@ function SettingsView:__new(View: any): ()
     SetEyeLevelButton.MouseButton1Down:Connect(function()
         VRInputService:SetEyeLevel()
     end)
+
+    --Create the version information.
+    local VersionText = Instance.new("TextLabel")
+    VersionText.BackgroundTransparency = 1
+    VersionText.AnchorPoint = Vector2.new(0.5, 1)
+    VersionText.Size = UDim2.new(0.8, 0, 0.04, 0)
+    VersionText.Position = UDim2.new(0.5, 0, 1, 0)
+    VersionText.Font = Enum.Font.SourceSansBold
+    VersionText.Text = "Version "..tostring(Settings:GetSetting("Version.Tag")).." ("..tostring(Settings:GetSetting("Version.Commit"))..")"
+    VersionText.TextScaled = true
+    VersionText.TextColor3 = Color3.fromRGB(255, 255, 255)
+    VersionText.TextStrokeColor3 = Color3.fromRGB(0, 0, 0)
+    VersionText.TextStrokeTransparency = 0
+    VersionText.Parent = Container
 end
 
 --[[
