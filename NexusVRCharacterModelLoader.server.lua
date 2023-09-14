@@ -97,7 +97,7 @@ local Configuration = {
         --In Team Create, it may not set correctly. Make sure to close and re-open
         --Roblox Studio to verify to verify it was set. Once this property defaults to Enabled
         --or is removed, this setting will go away.
-        TEMPORARY_UseIKControl = true,
+        TEMPORARY_UseIKControl = false,
     },
 }
 
