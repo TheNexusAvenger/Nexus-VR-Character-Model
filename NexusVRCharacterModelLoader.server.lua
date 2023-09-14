@@ -87,6 +87,11 @@ local Configuration = {
         --the default Roblox backpack.
         NexusVRBackpackEnabled = true,
 
+        --If true, version information will be hidden on the client.
+        --Version information may be detectable based on behavior, or by exploiters decompiling
+        --the client code.
+        HideVersion = false,
+
         --If true, Nexus-Appendage with IKControl will be used.
         --Workspace.IKControlConstraintSupport MUST be set to Enabled for proper results.
         --In Team Create, it may not set correctly. Make sure to close and re-open

@@ -5,6 +5,10 @@ Loads Nexus VR Character Model.
 --]]
 --!strict
 
+--Version information should be set right before distribution (not committed).
+local VERSION_TAG = "dev"
+local VERSION_COMMIT = "00000000"
+
 --Client should send replication at 30hz.
 --A buffer is added in case this rate is exceeded
 --briefly, such as an unstable connection.
@@ -35,6 +39,21 @@ function NexusVRCharacterModel:SetConfiguration(Configuration: any): ()
         ConfigurationValue = Instance.new("StringValue")
         ConfigurationValue.Name = "Configuration"
         ConfigurationValue.Parent = script
+    end
+
+    --Add the version.
+    local HideVersion = false
+    if Configuration.Extra then
+        HideVersion = (Configuration.Extra.HideVersion == true)
+    end
+    if not Configuration.Version then
+        Configuration.Version = {}
+    end
+    if not Configuration.Version.Tag then
+        Configuration.Version.Tag = (HideVersion and "Hidden" or VERSION_TAG)
+    end
+    if not Configuration.Version.Commit then
+        Configuration.Version.Commit = (HideVersion and "Hidden" or VERSION_COMMIT)
     end
 
     --Store the configuration.

@@ -47,7 +47,7 @@ local LoadedPrintStatementPrinted = false
 UserInputService.InputBegan:Connect(function(Input)
     if not LoadedPrintStatementPrinted and Input.KeyCode == Enum.KeyCode.F9 and (UserInputService:IsKeyDown(Enum.KeyCode.LeftControl) or UserInputService:IsKeyDown(Enum.KeyCode.RightControl)) and Settings:GetSetting("Output.AllowClientToOutputLoadedMessage") ~= false then
         LoadedPrintStatementPrinted = true
-        print("Nexus VR Character Model is loaded.")
+        print("Nexus VR Character Model version "..tostring(Settings:GetSetting("Version.Tag")).." ("..tostring(Settings:GetSetting("Version.Commit"))..") is loaded.")
     end
 end)
 
