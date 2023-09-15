@@ -262,7 +262,6 @@ function BaseController:UpdateCharacter(): ()
         --Set the absolute positions of the character.
         self.Character:UpdateFromInputsSeated(VRHeadCFrame, VRHeadCFrame * HeadToLeftHandCFrame,VRHeadCFrame * HeadToRightHandCFrame)
     end
-    self.LastHeadCFrame = VRHeadCFrame
 
     --Update the camera.
     if self.Character.Parts.HumanoidRootPart:IsDescendantOf(Workspace) and self.Character.Humanoid.Health > 0 then
@@ -273,12 +272,13 @@ function BaseController:UpdateCharacter(): ()
         local UpperTorsoCFrame = LowerTorsoCFrame * self.Character.Attachments.LowerTorso.WaistRigAttachment.CFrame * self.Character.Motors.Waist.Transform * self.Character.Attachments.UpperTorso.WaistRigAttachment.CFrame:Inverse()
         local HeadCFrame = UpperTorsoCFrame * self.Character.Attachments.UpperTorso.NeckRigAttachment.CFrame * self.Character.Motors.Neck.Transform * self.Character.Attachments.Head.NeckRigAttachment.CFrame:Inverse()
         CameraService:UpdateCamera(HeadCFrame * self.Character.Head:GetEyesOffset())
-    else
+        self.LastHeadCFrame = VRHeadCFrame
+    elseif not Workspace.CurrentCamera.HeadLocked then
         --Update the camera based on the last CFrame if the motors can't update (not in Workspace).
-        local CurrentCameraCFrame = Workspace.CurrentCamera.CFrame
+        local CurrentCameraCFrame = Workspace.CurrentCamera:GetRenderCFrame()
         local LastHeadCFrame = self.LastHeadCFrame or CFrame.new()
         local HeadCFrame = self:ScaleInput(VRInputService:GetVRInputs()[Enum.UserCFrame.Head])
-        Workspace.CurrentCamera.CFrame = CurrentCameraCFrame * LastHeadCFrame:Inverse() * HeadCFrame
+        CameraService:UpdateCamera(CurrentCameraCFrame * LastHeadCFrame:Inverse() * HeadCFrame)
         self.LastHeadCFrame = HeadCFrame
     end
 end
