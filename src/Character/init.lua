@@ -434,12 +434,12 @@ function Character:UpdateFromInputsSeated(HeadControllerCFrame: CFrame, LeftHand
     end
 
     --Set the legs to be sitting.
-    self.Motors.RightHip.Transform = CFrame.Angles(math.pi / 2, 0, math.rad(5))
-    self.Motors.LeftHip.Transform = CFrame.Angles(math.pi / 2, 0, math.rad(-5))
-    self.Motors.RightKnee.Transform = CFrame.Angles(math.rad(-10), 0, 0)
-    self.Motors.LeftKnee.Transform = CFrame.Angles(math.rad(-10), 0, 0)
-    self.Motors.RightAnkle.Transform = CFrame.Angles(0, 0, 0)
-    self.Motors.LeftAnkle.Transform = CFrame.Angles(0, 0, 0)
+    self:SetCFrameProperty(self.Motors.RightHip, "Transform", CFrame.Angles(math.pi / 2, 0, math.rad(5)))
+    self:SetCFrameProperty(self.Motors.LeftHip, "Transform", CFrame.Angles(math.pi / 2, 0, math.rad(-5)))
+    self:SetCFrameProperty(self.Motors.RightKnee, "Transform", CFrame.Angles(math.rad(-10), 0, 0))
+    self:SetCFrameProperty(self.Motors.LeftKnee, "Transform", CFrame.Angles(math.rad(-10), 0, 0))
+    self:SetCFrameProperty(self.Motors.RightAnkle, "Transform", CFrame.Angles(0, 0, 0))
+    self:SetCFrameProperty(self.Motors.LeftAnkle, "Transform", CFrame.Angles(0, 0, 0))
 
     --Replicate the changes to the server.
     if Players.LocalPlayer and Players.LocalPlayer.Character == self.CharacterModel then
