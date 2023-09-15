@@ -39,7 +39,6 @@ local Configuration = {
 
         --If true, Workspace.CurrentCamera.HeadLocked will be locked to false.
         --A Roblox engineer requested keeping HeadLocked on (DisableHeadLocked = false). To keep backwards compatibility, this defaults to true.
-        --HeadLocked may need to be true if the any seats are able to roll. This can be done externally with Workspace.CurrentCamera.HeadLocked = false.
         DisableHeadLocked = false,
 
         --Disables FadeOutViewOnCollision (black screen when in parts).

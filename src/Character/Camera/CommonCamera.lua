@@ -60,6 +60,7 @@ function CommonCamera:SetCFrame(HeadsetCFrameWorld: CFrame): ()
     if Camera.HeadLocked then
         local HeadCFrame = VRService:GetUserCFrame(Enum.UserCFrame.Head)
         TargetCFrame = HeadsetCFrameWorld * (CFrame.new(HeadCFrame.Position * (Workspace.CurrentCamera.HeadScale - 1)) * HeadCFrame):Inverse()
+        Camera.VRTiltAndRollEnabled = true
     end
     Camera.CameraType = Enum.CameraType.Scriptable
     Camera.CFrame = TargetCFrame
