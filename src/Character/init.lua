@@ -433,13 +433,13 @@ function Character:UpdateFromInputsSeated(HeadControllerCFrame: CFrame, LeftHand
         self:SetTransform("LeftWrist", "LeftWristRigAttachment", "LeftLowerArm", "LeftHand", LeftLowerArmCFrame, LeftHandCFrame)
     end
 
-    --Set the legs to be sitting.
-    self:SetCFrameProperty(self.Motors.RightHip, "Transform", CFrame.Angles(math.pi / 2, 0, math.rad(5)))
-    self:SetCFrameProperty(self.Motors.LeftHip, "Transform", CFrame.Angles(math.pi / 2, 0, math.rad(-5)))
-    self:SetCFrameProperty(self.Motors.RightKnee, "Transform", CFrame.Angles(math.rad(-10), 0, 0))
-    self:SetCFrameProperty(self.Motors.LeftKnee, "Transform", CFrame.Angles(math.rad(-10), 0, 0))
-    self:SetCFrameProperty(self.Motors.RightAnkle, "Transform", CFrame.Angles(0, 0, 0))
-    self:SetCFrameProperty(self.Motors.LeftAnkle, "Transform", CFrame.Angles(0, 0, 0))
+    --Reset the leg transforms to allow for animations.
+    self.CurrentMotor6DTransforms[self.Motors.RightHip] = nil
+    self.CurrentMotor6DTransforms[self.Motors.LeftHip] = nil
+    self.CurrentMotor6DTransforms[self.Motors.RightKnee] = nil
+    self.CurrentMotor6DTransforms[self.Motors.LeftKnee] = nil
+    self.CurrentMotor6DTransforms[self.Motors.RightAnkle] = nil
+    self.CurrentMotor6DTransforms[self.Motors.LeftAnkle] = nil
 
     --Replicate the changes to the server.
     if Players.LocalPlayer and Players.LocalPlayer.Character == self.CharacterModel then
