@@ -26,20 +26,21 @@ Creates the settings view.
 --]]
 function SettingsView:__new(View: any): ()
     NexusInstance.__new(self)
+    View:AddBackground()
 
     --Create the header.
     local Container = View:GetContainer()
     local HeaderLogo = Instance.new("ImageLabel")
     HeaderLogo.BackgroundTransparency = 1
     HeaderLogo.Size = UDim2.new(0.4, 0, 0.4, 0)
-    HeaderLogo.Position = UDim2.new(0.3, 0, -0.1, 0)
+    HeaderLogo.Position = UDim2.new(0.3, 0, -0.075, 0)
     HeaderLogo.Image = "http://www.roblox.com/asset/?id=1499731139"
     HeaderLogo.Parent = Container
 
     local NameText = Instance.new("TextLabel")
     NameText.BackgroundTransparency = 1
     NameText.Size = UDim2.new(0.8, 0, 0.1, 0)
-    NameText.Position = UDim2.new(0.1, 0, 0.2, 0)
+    NameText.Position = UDim2.new(0.1, 0, 0.225, 0)
     NameText.Font = Enum.Font.SourceSansBold
     NameText.Text = "Nexus VR Character Model"
     NameText.TextScaled = true

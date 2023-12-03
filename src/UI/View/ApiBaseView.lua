@@ -5,6 +5,8 @@ Base view for the menu intended to be used with the API.
 --]]
 --!strict
 
+local GuiService = game:GetService("GuiService")
+
 local NexusVRCharacterModel = script.Parent.Parent.Parent
 local NexusInstance = require(NexusVRCharacterModel:WaitForChild("NexusInstance"):WaitForChild("NexusInstance"))
 local NexusEvent = require(NexusVRCharacterModel:WaitForChild("NexusInstance"):WaitForChild("Event"):WaitForChild("NexusEvent"))
@@ -20,6 +22,7 @@ export type ApiBaseView = {
     Visible: boolean,
     Destroyed: NexusEvent.NexusEvent<>,
     GetContainer: (self: ApiBaseView) -> (Frame),
+    AddBackground: (self: ApiBaseView) -> (),
 } & NexusInstance.NexusInstance
 
 
@@ -34,6 +37,7 @@ function ApiBaseView:__new(InitialName: string): ()
 
     self.Frame = Instance.new("Frame")
     self.Frame.Name = tostring(self.Name)
+    self.Frame.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
     self.Frame.BackgroundTransparency = 1
     self.Frame.Size = UDim2.new(1, 0, 1, 0)
     self.Frame.Visible = false
@@ -51,6 +55,22 @@ Returns the containing frame.
 --]]
 function ApiBaseView:GetContainer(): Frame
     return self.Frame
+end
+
+--[[
+Adds the background of the frame.
+--]]
+function ApiBaseView:AddBackground(): ()
+    --Add the corner.
+    local UICorner = Instance.new("UICorner")
+    UICorner.CornerRadius = UDim.new(0.05, 0)
+    UICorner.Parent = self.Frame
+
+    --Enable the transparency.
+    self.Frame.BackgroundTransparency = 0.6 * GuiService.PreferredTransparency
+    GuiService:GetPropertyChangedSignal("PreferredTransparency"):Connect(function()
+        self.Frame.BackgroundTransparency = 0.6 * GuiService.PreferredTransparency
+    end)
 end
 
 --[[

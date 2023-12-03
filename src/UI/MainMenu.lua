@@ -11,8 +11,9 @@ local MENU_OPEN_TIME = 0.25
 
 
 local Workspace = game:GetService("Workspace")
-local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Players = game:GetService("Players")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local GuiService = game:GetService("GuiService")
 local RunService = game:GetService("RunService")
 local TweenService = game:GetService("TweenService")
 
@@ -44,7 +45,7 @@ function MainMenu.new(): any
     local MainMenuScreenGui = ScreenGui.new()
     MainMenuScreenGui.ResetOnSpawn = false
     MainMenuScreenGui.Enabled = false
-    MainMenuScreenGui.CanvasSize = Vector2.new(500, 600)
+    MainMenuScreenGui.CanvasSize = Vector2.new(500, 605)
     MainMenuScreenGui.FieldOfView = 0
     MainMenuScreenGui.Easing = 0.25
     self.ScreenGui = MainMenuScreenGui
@@ -56,30 +57,46 @@ function MainMenu.new(): any
     ViewAdornFrame.Parent = MainMenuScreenGui:GetContainer()
     self.ViewAdornFrame = ViewAdornFrame
 
+    local ButtonAdornFrame = Instance.new("Frame")
+    ButtonAdornFrame.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+    ButtonAdornFrame.BackgroundTransparency = 0.6 * GuiService.PreferredTransparency
+    ButtonAdornFrame.Position = UDim2.new(0, 0, 0, 505)
+    ButtonAdornFrame.Size = UDim2.new(1, 0, 0, 100)
+    ButtonAdornFrame.Parent = ViewAdornFrame
+    GuiService:GetPropertyChangedSignal("PreferredTransparency"):Connect(function()
+        ButtonAdornFrame.BackgroundTransparency = 0.6 * GuiService.PreferredTransparency
+    end)
+
+    local UICorner = Instance.new("UICorner")
+    UICorner.CornerRadius = UDim.new(5 * 0.05, 0)
+    UICorner.Parent = ButtonAdornFrame
+
     local LeftButton, LeftText = TextButtonFactory:Create()
+    LeftButton.BorderSize = UDim.new(0.075, 0)
     LeftButton.Size = UDim2.new(0, 80, 0, 80)
-    LeftButton.Position = UDim2.new(0, 10, 0, 510)
-    LeftButton.Parent = MainMenuScreenGui:GetContainer()
+    LeftButton.Position = UDim2.new(0, 10, 0, 10)
+    LeftButton.Parent = ButtonAdornFrame
     LeftText.Text = "<"
     self.LeftButton = LeftButton
 
     local RightButton, RightText = TextButtonFactory:Create()
+    RightButton.BorderSize = UDim.new(0.075, 0)
     RightButton.Size = UDim2.new(0, 80, 0, 80)
-    RightButton.Position = UDim2.new(0, 410, 0, 510)
-    RightButton.Parent = MainMenuScreenGui:GetContainer()
+    RightButton.Position = UDim2.new(0, 410, 0, 10)
+    RightButton.Parent = ButtonAdornFrame
     RightText.Text = ">"
     self.RightButton = RightButton
 
     local ViewTextLabel = Instance.new("TextLabel")
     ViewTextLabel.BackgroundTransparency = 1
     ViewTextLabel.Size = UDim2.new(0, 300, 0, 60)
-    ViewTextLabel.Position = UDim2.new(0, 100, 0, 520)
+    ViewTextLabel.Position = UDim2.new(0, 100, 0, 20)
     ViewTextLabel.Font = Enum.Font.SourceSansBold
     ViewTextLabel.TextScaled = true
     ViewTextLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
     ViewTextLabel.TextStrokeColor3 = Color3.fromRGB(0, 0, 0)
     ViewTextLabel.TextStrokeTransparency = 0
-    ViewTextLabel.Parent = MainMenuScreenGui:GetContainer()
+    ViewTextLabel.Parent = ButtonAdornFrame
     self.ViewTextLabel = ViewTextLabel
 
     --Set up the default views.

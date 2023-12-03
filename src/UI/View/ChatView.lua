@@ -27,6 +27,7 @@ Creates the chat view.
 --]]
 function ChatView:__new(View: any): ()
     NexusInstance.__new(self)
+    View:AddBackground()
 
     task.spawn(function()
         --Display a message if the TextChatService is in use.

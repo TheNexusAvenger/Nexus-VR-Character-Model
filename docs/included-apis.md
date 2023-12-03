@@ -123,6 +123,8 @@ The `MenuView` has the following APIs:
 - `MenuView:GetContainer(): Frame` - Returns the container
   frame used for the view. The size should *not* be assumed
   to be fixed.
+- `MenuView:AddBackground(): nil` - Adds the standard
+  background to the view.
 - `MenuView:Destroy(): nil` - Destroys the view and removes
   it from the menu.
 
