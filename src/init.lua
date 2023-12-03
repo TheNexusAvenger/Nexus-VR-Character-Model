@@ -97,7 +97,7 @@ function NexusVRCharacterModel:Load(): ()
     local ReadyPlayers = {}
     local UpdateRateLimiter = RateLimiter.new(REPLICATION_RATE_LIMIT)
 
-    local UpdateInputsEvent = Instance.new("RemoteEvent")
+    local UpdateInputsEvent = Instance.new("UnreliableRemoteEvent")
     UpdateInputsEvent.Name = "UpdateInputs"
     UpdateInputsEvent.Parent = script
 
@@ -105,11 +105,12 @@ function NexusVRCharacterModel:Load(): ()
     ReplicationReadyEvent.Name = "ReplicationReady"
     ReplicationReadyEvent.Parent = script
 
-    UpdateInputsEvent.OnServerEvent:Connect(function(Player,HeadCFrame,LeftHandCFrame,RightHandCFrame)
+    UpdateInputsEvent.OnServerEvent:Connect(function(Player, HeadCFrame: CFrame, LeftHandCFrame: CFrame, RightHandCFrame: CFrame, UpdateTime: number?)
         --Ignore the input if 3 CFrames aren't given.
         if typeof(HeadCFrame) ~= "CFrame" then return end
         if typeof(LeftHandCFrame) ~= "CFrame" then return end
         if typeof(RightHandCFrame) ~= "CFrame" then return end
+        if UpdateTime and typeof(UpdateTime) ~= "number" then return end
 
         --Ignore if the rate limit was reached.
         if UpdateRateLimiter:RateLimitReached(Player) then return end
@@ -117,7 +118,7 @@ function NexusVRCharacterModel:Load(): ()
         --Replicate the CFrames to the other players.
         for _,OtherPlayer in Players:GetPlayers() do
             if Player ~= OtherPlayer and ReadyPlayers[OtherPlayer] then
-                UpdateInputsEvent:FireClient(OtherPlayer,Player,HeadCFrame,LeftHandCFrame,RightHandCFrame)
+                UpdateInputsEvent:FireClient(OtherPlayer, Player, HeadCFrame, LeftHandCFrame, RightHandCFrame, UpdateTime)
             end
         end
     end)

@@ -17,7 +17,7 @@ local AppendageLegacy = require(NexusVRCharacterModel:WaitForChild("Character"):
 local Appendage = require(NexusVRCharacterModel:WaitForChild("NexusAppendage"):WaitForChild("Appendage"))
 local FootPlanter = require(NexusVRCharacterModel:WaitForChild("Character"):WaitForChild("FootPlanter"))
 local Settings = require(NexusVRCharacterModel:WaitForChild("State"):WaitForChild("Settings")).GetInstance()
-local UpdateInputs = NexusVRCharacterModel:WaitForChild("UpdateInputs") :: RemoteEvent
+local UpdateInputs = NexusVRCharacterModel:WaitForChild("UpdateInputs") :: UnreliableRemoteEvent
 
 local Character = {}
 Character.__index = Character
@@ -215,9 +215,10 @@ function Character.new(CharacterModel: Model): Character
         task.spawn(function()
             while (self.Humanoid :: Humanoid).Health > 0 do
                 --Send the new CFrames if the CFrames changed.
-                if (self :: any).LastReplicationCFrames ~= (self :: any).ReplicationCFrames then
-                    (self :: any).LastReplicationCFrames = (self :: any).ReplicationCFrames
-                    UpdateInputs:FireServer(unpack((self :: any).ReplicationCFrames))
+                local ReplicationCFrames = (self :: any).ReplicationCFrames :: {CFrame}
+                if (self :: any).LastReplicationCFrames ~= ReplicationCFrames then
+                    (self :: any).LastReplicationCFrames = ReplicationCFrames
+                    UpdateInputs:FireServer(ReplicationCFrames[1], ReplicationCFrames[2], ReplicationCFrames[3], tick())
                 end
 
                 --Wait 1/30th of a second to send the next set of CFrames.

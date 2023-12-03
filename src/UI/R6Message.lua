@@ -93,7 +93,6 @@ end
 Sets the window open or closed.
 --]]
 function R6Message:SetOpen(Open: boolean): ()
-    warn(Open)
     --Determine the start and end values.
     local StartFieldOfView, EndFieldOfView = (Open and 0 or math.rad(40)), (Open and math.rad(40) or 0)
 
