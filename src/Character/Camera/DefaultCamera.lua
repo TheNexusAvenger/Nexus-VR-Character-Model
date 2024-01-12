@@ -42,6 +42,10 @@ function DefaultCamera.ShouldHidePart(Part: BasePart): boolean
         end
     end
 
+    if Part:FindFirstAncestorOfClass("Tool") then
+        return false
+    end
+
     if Part:FindFirstChildWhichIsA("WrapLayer") then
         return false
     end
