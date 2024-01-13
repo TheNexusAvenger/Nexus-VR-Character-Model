@@ -60,6 +60,48 @@ function Character.new(CharacterModel: Model): Character
 
     --Store the body parts.
     self.Humanoid = CharacterModel:WaitForChild("Humanoid")
+
+    --Set up the character parts.
+    self.PreventArmDisconnection = PreventArmDisconnection
+    self:SetUpVRParts()
+
+    --Set up a connection for Character Appearance changes.
+    self.AppearanceChangedConnection = nil :: RBXScriptConnection?
+    self:SetUpAppearanceChanged()
+
+    self.MoodAnimationIds = {}
+    self.CurrentMotor6DTransforms = {}
+    self.LastMotor6DTransforms = {}
+    self.LastRefreshTime = tick()
+
+    --Set up replication at 30hz.
+    if Players.LocalPlayer and Players.LocalPlayer.Character == CharacterModel then
+        task.spawn(function()
+            while (self.Humanoid :: Humanoid).Health > 0 do
+                --Send the new CFrames if the CFrames changed.
+                local ReplicationCFrames = (self :: any).ReplicationCFrames :: {CFrame}
+                if (self :: any).LastReplicationCFrames ~= ReplicationCFrames then
+                    (self :: any).LastReplicationCFrames = ReplicationCFrames
+                    UpdateInputs:FireServer(ReplicationCFrames[1], ReplicationCFrames[2], ReplicationCFrames[3], tick())
+                end
+
+                --Wait 1/30th of a second to send the next set of CFrames.
+                task.wait(1 / 30)
+            end
+        end)
+    end
+
+    return (self :: any) :: Character
+end
+
+--[[
+Set up Character Parts for VR.
+This is also used, to refresh character parts.
+--]]
+function Character:SetUpVRParts()
+    local CharacterModel = self.CharacterModel
+    local PreventArmDisconnection = self.PreventArmDisconnection
+
     self.Parts = {
         Head = CharacterModel:WaitForChild("Head"),
         UpperTorso = CharacterModel:WaitForChild("UpperTorso"),
@@ -161,10 +203,6 @@ function Character.new(CharacterModel: Model): Character
             LeftFootAttachment = self.Parts.LeftFoot:FindFirstChild("LeftFootAttachment"),
         },
     }
-    self.MoodAnimationIds = {}
-    self.CurrentMotor6DTransforms = {}
-    self.LastMotor6DTransforms = {}
-    self.LastRefreshTime = tick()
 
     --Add the missing attachments that not all rigs have.
     if not self.Attachments.RightFoot.RightFootAttachment then
@@ -209,25 +247,36 @@ function Character.new(CharacterModel: Model): Character
         self.RightLeg.InvertBendDirection = true
     end
     self.FootPlanter = FootPlanter:CreateSolver(CharacterModel:WaitForChild("LowerTorso"), self.Humanoid:FindFirstChild("BodyHeightScale"))
+end
 
-    --Set up replication at 30hz.
-    if Players.LocalPlayer and Players.LocalPlayer.Character == CharacterModel then
-        task.spawn(function()
-            while (self.Humanoid :: Humanoid).Health > 0 do
-                --Send the new CFrames if the CFrames changed.
-                local ReplicationCFrames = (self :: any).ReplicationCFrames :: {CFrame}
-                if (self :: any).LastReplicationCFrames ~= ReplicationCFrames then
-                    (self :: any).LastReplicationCFrames = ReplicationCFrames
-                    UpdateInputs:FireServer(ReplicationCFrames[1], ReplicationCFrames[2], ReplicationCFrames[3], tick())
-                end
+--[[
+This sets up a connection that fires when HumanoidDescription is added
+under a Humanoid, to listen for appearance changes to refresh the character parts.
+--]]
+function Character:SetUpAppearanceChanged()
+    local CharacterModel = self.CharacterModel
 
-                --Wait 1/30th of a second to send the next set of CFrames.
-                task.wait(1 / 30)
-            end
-        end)
+    local Humanoid = CharacterModel:WaitForChild("Humanoid") :: Humanoid
+
+    if not Humanoid then
+        warn(`[NexusVRAppearanceFix] Humanoid was not found for {CharacterModel}`)
+        return
     end
-    
-    return (self :: any) :: Character
+
+    --Reset connection if it already exists
+    if self.AppearanceChangedConnection then
+        self.AppearanceChangedConnection:Disconnect()
+        self.AppearanceChangedConnection = nil
+    end
+
+    self.AppearanceChangedConnection = Humanoid.ChildAdded:Connect(function(Child)
+        --If a new HumanoidDescription appeared, then something changed on the avatar.
+        --We should re-ensure that everything is still connected to NexusVR.
+        if Child:IsA("HumanoidDescription") then
+            --Refresh character parts
+            self:SetUpVRParts()
+        end
+    end)    
 end
 
 --[[
@@ -346,8 +395,8 @@ function Character:UpdateFromInputs(HeadControllerCFrame: CFrame, LeftHandContro
     --Get the CFrames.
     local HeadCFrame = self.Head:GetHeadCFrame(HeadControllerCFrame)
     local NeckCFrame = self.Head:GetNeckCFrame(HeadControllerCFrame)
-	local LowerTorsoCFrame: CFrame, UpperTorsoCFrame = self.Torso:GetTorsoCFrames(NeckCFrame)
-	local JointCFrames = self.Torso:GetAppendageJointCFrames(LowerTorsoCFrame, UpperTorsoCFrame)
+    local LowerTorsoCFrame: CFrame, UpperTorsoCFrame = self.Torso:GetTorsoCFrames(NeckCFrame)
+    local JointCFrames = self.Torso:GetAppendageJointCFrames(LowerTorsoCFrame, UpperTorsoCFrame)
 
     --Set the character CFrames.
     --HumanoidRootParts must always face up. This makes the math more complicated.
@@ -408,8 +457,8 @@ function Character:UpdateFromInputsSeated(HeadControllerCFrame: CFrame, LeftHand
     --Get the CFrames.
     local HeadCFrame = self.Head:GetHeadCFrame(HeadControllerCFrame)
     local NeckCFrame = self.Head:GetNeckCFrame(HeadControllerCFrame,0)
-	local LowerTorsoCFrame, UpperTorsoCFrame = self.Torso:GetTorsoCFrames(NeckCFrame)
-	local JointCFrames = self.Torso:GetAppendageJointCFrames(LowerTorsoCFrame,UpperTorsoCFrame)
+    local LowerTorsoCFrame, UpperTorsoCFrame = self.Torso:GetTorsoCFrames(NeckCFrame)
+    local JointCFrames = self.Torso:GetAppendageJointCFrames(LowerTorsoCFrame,UpperTorsoCFrame)
     local EyesOffset = self.Head:GetEyesOffset()
     local HeightOffset = CFrame.new(0, (CFrame.new(0, EyesOffset.Y, 0) * (HeadControllerCFrame * EyesOffset:Inverse())).Y, 0)
 
