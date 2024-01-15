@@ -50,19 +50,6 @@ function DefaultCamera.ShouldHidePart(Part: BasePart): boolean
 end
 
 --[[
-Returns true if the provided part is in a tool.
---]]
-function DefaultCamera.IsInTool(Part: Instance): boolean
-    while Part do
-        if Part:IsA("Tool") then
-            return true
-        end
-        Part = (Part :: any).Parent
-    end
-    return false
-end
-
---[[
 Creates a default camera object.
 --]]
 function DefaultCamera.new(): any
@@ -87,10 +74,10 @@ function DefaultCamera:Enable(): ()
         table.insert(self.TransparencyEvents, Players.LocalPlayer.Character.DescendantAdded:Connect(function(Part)
             if Part:IsA("BasePart") then
                 local PartTransparency = Transparency
-                if DefaultCamera.ShouldHidePart(Part) then
-                    PartTransparency = 1
-                elseif DefaultCamera.IsInTool(Part) then
+                if Part:FindFirstAncestorOfClass("Tool") then
                     PartTransparency = 0
+                elseif DefaultCamera.ShouldHidePart(Part) then
+                    PartTransparency = 1
                 end
 
                 Part.LocalTransparencyModifier = PartTransparency
@@ -102,10 +89,10 @@ function DefaultCamera:Enable(): ()
         for _, Part in Players.LocalPlayer.Character:GetDescendants() do
             if Part:IsA("BasePart") then
                 local PartTransparency = Transparency
-                if DefaultCamera.ShouldHidePart(Part) then
-                    PartTransparency = 1
-                elseif DefaultCamera.IsInTool(Part) then
+                if Part:FindFirstAncestorOfClass("Tool") then
                     PartTransparency = 0
+                elseif DefaultCamera.ShouldHidePart(Part) then
+                    PartTransparency = 1
                 end
                 
                 Part.LocalTransparencyModifier = PartTransparency
