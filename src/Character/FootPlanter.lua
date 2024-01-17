@@ -103,7 +103,7 @@ function FootPlanter:CreateSolver(CenterPart,ScaleValue)
 		return atan2(lookVector.X,lookVector.Z)
 	end
 	
-	local FindCollidablePartOnRay = require(script.Parent.Parent:WaitForChild("Util"):WaitForChild("FindCollidablePartOnRay"))
+	local FindCollidablePartOnRay = require(script.Parent.Parent:WaitForChild("Util"):WaitForChild("FindCollidablePartOnRay")).FindCollidablePartOnRay
 	local function FindPartOnRay(ray,ignore)
 		return FindCollidablePartOnRay(ray.Origin,ray.Direction,ignore,CenterPart)
 	end

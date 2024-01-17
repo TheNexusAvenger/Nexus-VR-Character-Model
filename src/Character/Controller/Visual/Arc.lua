@@ -16,7 +16,7 @@ local Workspace = game:GetService("Workspace")
 local Players = game:GetService("Players")
 
 local NexusVRCharacterModel = script.Parent.Parent.Parent.Parent
-local FindCollidablePartOnRay = require(NexusVRCharacterModel:WaitForChild("Util"):WaitForChild("FindCollidablePartOnRay"))
+local FindCollidablePartOnRay = require(NexusVRCharacterModel:WaitForChild("Util"):WaitForChild("FindCollidablePartOnRay")).FindCollidablePartOnRay
 
 local Arc = {}
 Arc.__index = Arc

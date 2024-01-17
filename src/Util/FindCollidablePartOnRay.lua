@@ -58,4 +58,4 @@ end
 
 
 
-return FindCollidablePartOnRay
+return { FindCollidablePartOnRay = FindCollidablePartOnRay }
