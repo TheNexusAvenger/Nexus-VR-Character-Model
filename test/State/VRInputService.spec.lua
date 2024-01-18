@@ -93,20 +93,10 @@ return function()
 
             --Assert that the stored value is returned when it changes.
             expect(TestVRInputService:GetThumbstickPosition(Enum.KeyCode.Thumbstick1)).to.equal(Vector3.new(0, 0, 0))
-            TestVRInputService.ThumbstickValues[Enum.KeyCode.Thumbstick1] = Vector3.new(0,1,0)
-            expect(TestVRInputService:GetThumbstickPosition(Enum.KeyCode.Thumbstick1)).to.equal(Vector3.new(0, 1, 0))
-            TestVRInputService.ThumbstickValues[Enum.KeyCode.Thumbstick1] = Vector3.new(0,0.5,0)
-            expect(TestVRInputService:GetThumbstickPosition(Enum.KeyCode.Thumbstick1)).to.equal(Vector3.new(0, 0.5, 0))
-
-            --Assert that the value is reset correctly.
-            for _ = 1, 3 do
-                expect(TestVRInputService:GetThumbstickPosition(Enum.KeyCode.Thumbstick1)).to.equal(Vector3.new(0, 0.5, 0))
-            end
-            expect(TestVRInputService:GetThumbstickPosition(Enum.KeyCode.Thumbstick1)).to.equal(Vector3.new(0, 0, 0))
-
-            --Assert that changing the value returns a new result.
             TestVRInputService.ThumbstickValues[Enum.KeyCode.Thumbstick1] = Vector3.new(0, 1, 0)
             expect(TestVRInputService:GetThumbstickPosition(Enum.KeyCode.Thumbstick1)).to.equal(Vector3.new(0, 1, 0))
+            TestVRInputService.ThumbstickValues[Enum.KeyCode.Thumbstick1] = Vector3.new(0, 0.5, 0)
+            expect(TestVRInputService:GetThumbstickPosition(Enum.KeyCode.Thumbstick1)).to.equal(Vector3.new(0, 0.5, 0))
         end)
     end)
 end

@@ -7,10 +7,6 @@ meaning it can be the floor, eye level, or random.
 --]]
 --!strict
 
-local THUMBSTICK_SAMPLES_TO_RESET = 5
-
-
-
 local NexusVRCharacterModel = script.Parent.Parent
 local NexusEvent = require(NexusVRCharacterModel:WaitForChild("NexusInstance"):WaitForChild("Event"):WaitForChild("NexusEvent"))
 
@@ -38,7 +34,7 @@ Creates a settings object.
 function VRInputService.new(VRService: VRService?, UserInputService: UserInputService?): VRInputService
     --Create the object.
     local self = {
-        RecenterOffset = CFrame.new(),
+        RecenterOffset = CFrame.identity,
     }
     setmetatable(self, VRInputService)
 
@@ -52,32 +48,12 @@ function VRInputService.new(VRService: VRService?, UserInputService: UserInputSe
 
     --Connect updating the thumbsticks.
     self.ThumbstickValues = {
-        [Enum.KeyCode.Thumbstick1] = Vector3.new(),
-        [Enum.KeyCode.Thumbstick2] = Vector3.new(),
+        [Enum.KeyCode.Thumbstick1] = Vector3.zero,
+        [Enum.KeyCode.Thumbstick2] = Vector3.zero,
     }
-    self.PreviousThumbstickValues = {
-        [Enum.KeyCode.Thumbstick1] = {},
-        [Enum.KeyCode.Thumbstick2] = {},
-    }
-    self.CurrentThumbstickPointers = {
-        [Enum.KeyCode.Thumbstick1] = 1,
-        [Enum.KeyCode.Thumbstick2] = 1,
-    }
-    self.InputsDown = {
-        [Enum.KeyCode.Thumbstick1] = false,
-        [Enum.KeyCode.Thumbstick2] = false,
-    }
-    self.UserInputService.InputBegan:Connect(function(Input)
-        if self.InputsDown[Input.KeyCode] ~= nil then
-            self.InputsDown[Input.KeyCode] = true
-        end
-    end)
     self.UserInputService.InputEnded:Connect(function(Input)
-        if self.InputsDown[Input.KeyCode] then
-            self.InputsDown[Input.KeyCode] = false
-        end
         if self.ThumbstickValues[Input.KeyCode] then
-            self.ThumbstickValues[Input.KeyCode] = Vector3.new()
+            self.ThumbstickValues[Input.KeyCode] = Vector3.zero
         end
     end)
     self.UserInputService.InputChanged:Connect(function(Input)
@@ -169,33 +145,7 @@ end
 Returns the current value for a thumbstick.
 --]]
 function VRInputService:GetThumbstickPosition(Thumbsick: Enum.KeyCode): Vector3
-    --Return if the value isn't supported.
-    if not self.ThumbstickValues[Thumbsick] then
-        return Vector3.zero
-    end
-
-    --Store the polled value.
-    self.PreviousThumbstickValues[Thumbsick][self.CurrentThumbstickPointers[Thumbsick]] = self.ThumbstickValues[Thumbsick]
-    self.CurrentThumbstickPointers[Thumbsick] = (self.CurrentThumbstickPointers[Thumbsick] :: number % THUMBSTICK_SAMPLES_TO_RESET) + 1
-
-    --Determine if the polled values are exactly the same.
-    --Closeness is not used as the thumbstick being held in place will register as slightly different values.
-    --This happens if the trigger is released (such as a touchpad, which may not automatically reset).
-    local ValuesSame = true
-    local InitialValue = self.PreviousThumbstickValues[Thumbsick][1]
-    for i = 2, THUMBSTICK_SAMPLES_TO_RESET do
-        if self.PreviousThumbstickValues[Thumbsick][i] ~= InitialValue then
-            ValuesSame = false
-            break
-        end
-    end
-
-    --Return either the stored value or the empty vector if the last polled samples are the same.
-    if ValuesSame and not self.InputsDown[Thumbsick] then
-        return Vector3.zero
-    else
-        return self.ThumbstickValues[Thumbsick]
-    end
+    return self.ThumbstickValues[Thumbsick] or Vector3.zero
 end
 
 
