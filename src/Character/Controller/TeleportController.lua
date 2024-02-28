@@ -5,10 +5,6 @@ Local character controller using teleporting.
 --]]
 --!strict
 
-local THUMBSTICK_MANUAL_ROTATION_ANGLE = math.rad(45)
-
-
-
 local Workspace = game:GetService("Workspace")
 local UserInputService = game:GetService("UserInputService")
 
@@ -51,7 +47,7 @@ function TeleportController:Enable(): ()
             UserCFrame = Enum.UserCFrame.RightHand,
             Arc = self.RightArc,
         },
-    }
+	}
 
     --Connect requesting jumping.
     --ButtonA does not work with IsButtonDown.
@@ -94,7 +90,8 @@ function TeleportController:UpdateCharacter(): ()
     local VRInputs = VRInputService:GetVRInputs()
     for _, InputEnum in Enum.UserCFrame:GetEnumItems() do
         VRInputs[InputEnum] = self:ScaleInput(VRInputs[InputEnum])
-    end
+	end
+	
 
     --Update the arcs.
     local SeatPart = self.Character:GetHumanoidSeatPart()
@@ -107,7 +104,7 @@ function TeleportController:UpdateCharacter(): ()
 
         --Update and fetch the current state.
         local InputActive = (not NexusVRCharacterModelApi.Controller or NexusVRCharacterModelApi.Controller:IsControllerInputEnabled(ArcData.UserCFrame))
-        local DirectionState, RadiusState, StateChange = self:GetJoystickState(ArcData)
+		local DirectionState, RadiusState, StateChange = self:GetJoystickState(ArcData)
         if not InputActive then
             ArcData.Arc:Hide()
             ArcData.WaitForRelease = false
@@ -120,19 +117,7 @@ function TeleportController:UpdateCharacter(): ()
         if DirectionState ~= "Forward" or RadiusState == "Released" then
             ArcData.Arc:Hide()
         end
-        if StateChange == "Extended" then
-            if not self.Character.Humanoid.Sit then
-                if DirectionState == "Left" then
-                    --Turn the player to the left.
-                    self:PlayBlur()
-                    HumanoidRootPart.CFrame = CFrame.new(HumanoidRootPart.Position) * CFrame.Angles(0, THUMBSTICK_MANUAL_ROTATION_ANGLE, 0) * (CFrame.new(-HumanoidRootPart.Position) * HumanoidRootPart.CFrame)
-                elseif DirectionState == "Right" then
-                    --Turn the player to the right.
-                    self:PlayBlur()
-                    HumanoidRootPart.CFrame = CFrame.new(HumanoidRootPart.Position) * CFrame.Angles(0, -THUMBSTICK_MANUAL_ROTATION_ANGLE, 0) * (CFrame.new(-HumanoidRootPart.Position) * HumanoidRootPart.CFrame)
-                end
-            end
-        elseif StateChange == "Released" then
+        if StateChange == "Released" then
             ArcData.Arc:Hide()
             if DirectionState == "Forward" then
                 --Teleport the player.

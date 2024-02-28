@@ -9,6 +9,9 @@ local THUMBSTICK_INPUT_START_RADIUS = 0.6
 local THUMBSTICK_INPUT_RELEASE_RADIUS = 0.4
 local THUMBSTICK_DEADZONE_RADIUS = 0.2
 
+local THUMBSTICK_SNAP_ROTATION_ANGLE = math.rad(45)
+local THUMBSTICK_SMOOTH_ROTATION_ANGLE = math.rad(1.5)
+
 local BLUR_TWEEN_INFO = TweenInfo.new(0.25, Enum.EasingStyle.Quad)
 
 local Workspace = game:GetService("Workspace")
@@ -60,7 +63,9 @@ end
 Enables the controller.
 --]]
 function BaseController:Enable(): ()
-    if not self.Connections then self.Connections = {} end
+	if not self.Connections then self.Connections = {} end
+	
+	self.JoystickState = { Thumbstick = Enum.KeyCode.Thumbstick2 }
 
     --Update the character and return if the character is nil.
     self:UpdateCharacterReference()
@@ -87,6 +92,44 @@ function BaseController:Enable(): ()
     --Disable auto rotate so that the default controls work.
     self.Character.Humanoid.AutoRotate = false
 
+	-- Snap or smooth turning based on UserGameSettings VRSmoothRotationEnabled
+	local UserGameSettings = UserSettings():GetService("UserGameSettings")
+	self.VRSmoothRotationEnabled = UserGameSettings.VRSmoothRotationEnabled
+	local function onUserGameSettingsChanged(property)
+		if property == "VRSmoothRotationEnabled" then
+			self.VRSmoothRotationEnabled = UserGameSettings.VRSmoothRotationEnabled
+		end
+	end
+	UserGameSettings.Changed:Connect(onUserGameSettingsChanged)
+	
+	--Detect when Left and Right key are pressed and released
+	self.LeftArrowKeyWasReleased = true
+	self.RightArrowKeyWasReleased = true
+	self.LeftArrowPressedAfterReleased = false
+	self.RightArrowPressedAfterReleased = false
+
+	UserInputService.InputBegan:Connect(function(input, processed)
+		if processed then return end
+		if input.KeyCode == Enum.KeyCode.Left then
+			if self.LeftArrowKeyWasReleased then
+				self.LeftArrowPressedAfterReleased = true
+			end
+		elseif input.KeyCode == Enum.KeyCode.Right then
+			if self.RightArrowKeyWasReleased then
+				self.RightArrowPressedAfterReleased = true
+			end
+		end
+	end)
+
+	UserInputService.InputEnded:Connect(function(input)
+		if input.KeyCode == Enum.KeyCode.Left then
+			self.LeftArrowKeyWasReleased = true
+		elseif input.KeyCode == Enum.KeyCode.Right then
+			self.RightArrowKeyWasReleased = true
+		end
+	end)
+
+	
     --Disable the controls.
     --Done in a loop to ensure changed controllers are disabled.
     task.spawn(function()
@@ -261,7 +304,7 @@ function BaseController:UpdateCharacter(): ()
     else
         --Set the absolute positions of the character.
         self.Character:UpdateFromInputsSeated(VRHeadCFrame, VRHeadCFrame * HeadToLeftHandCFrame,VRHeadCFrame * HeadToRightHandCFrame)
-    end
+	end
 
     --Update the camera.
     if self.Character.Parts.HumanoidRootPart:IsDescendantOf(Workspace) and self.Character.Humanoid.Health > 0 then
@@ -280,7 +323,9 @@ function BaseController:UpdateCharacter(): ()
         local HeadCFrame = self:ScaleInput(VRInputService:GetVRInputs()[Enum.UserCFrame.Head])
         CameraService:UpdateCamera(CurrentCameraCFrame * LastHeadCFrame:Inverse() * HeadCFrame)
         self.LastHeadCFrame = HeadCFrame
-    end
+	end
+
+	self:Turn()
 end
 
 --[[
@@ -304,6 +349,44 @@ function BaseController:UpdateVehicleSeat(): ()
     --Update the throttle and steering.
     SeatPart.ThrottleFloat = ForwardDirection
     SeatPart.SteerFloat = SideDirection
+end
+
+--[[
+Turning behavior from keyboard or controller
+--]]
+function BaseController:Turn(): ()
+	-- Break while sitting
+	if self.Character.Humanoid.Sit then
+		return
+	end
+		
+	local LeftArrowDown = not UserInputService:GetFocusedTextBox() and UserInputService:IsKeyDown(Enum.KeyCode.Left)
+	local RightArrowDown = not UserInputService:GetFocusedTextBox() and UserInputService:IsKeyDown(Enum.KeyCode.Right)
+
+	--Update and fetch the right joystick's state.
+	local DirectionState, _, StateChange = self:GetJoystickState(self.JoystickState)
+	
+	-- Rotates HumanoidRootPart
+	local HumanoidRootPart = self.Character.Parts.HumanoidRootPart
+	-- Smooth turning
+	if self.VRSmoothRotationEnabled then
+		if DirectionState == "Right" or RightArrowDown then
+			HumanoidRootPart.CFrame = CFrame.new(HumanoidRootPart.Position) * CFrame.Angles(0, -THUMBSTICK_SMOOTH_ROTATION_ANGLE, 0) * (CFrame.new(-HumanoidRootPart.Position) * HumanoidRootPart.CFrame)
+		elseif DirectionState == "Left" or LeftArrowDown then
+			HumanoidRootPart.CFrame = CFrame.new(HumanoidRootPart.Position) * CFrame.Angles(0, THUMBSTICK_SMOOTH_ROTATION_ANGLE, 0) * (CFrame.new(-HumanoidRootPart.Position) * HumanoidRootPart.CFrame)
+		end
+	-- Snap turning
+	else
+		if self.LeftArrowPressedAfterReleased or (StateChange=="Extended" and DirectionState=="Left") then
+			self:PlayBlur()
+			HumanoidRootPart.CFrame = CFrame.new(HumanoidRootPart.Position) * CFrame.Angles(0, -THUMBSTICK_SNAP_ROTATION_ANGLE, 0) * (CFrame.new(-HumanoidRootPart.Position) * HumanoidRootPart.CFrame)
+			self.LeftArrowPressedAfterReleased = false	
+		elseif self.RightArrowPressedAfterReleased or (StateChange=="Extended" and DirectionState=="Right") then
+			self:PlayBlur()
+			HumanoidRootPart.CFrame = CFrame.new(HumanoidRootPart.Position) * CFrame.Angles(0, THUMBSTICK_SNAP_ROTATION_ANGLE, 0) * (CFrame.new(-HumanoidRootPart.Position) * HumanoidRootPart.CFrame)  
+			self.RightArrowPressedAfterReleased = false	
+		end
+	end
 end
 
 

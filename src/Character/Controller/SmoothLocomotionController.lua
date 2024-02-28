@@ -5,7 +5,6 @@ Local character controller using teleporting.
 --]]
 --!strict
 
-local THUMBSTICK_MANUAL_ROTATION_ANGLE = math.rad(45)
 local THUMBSTICK_DEADZONE_RADIUS = 0.2
 
 
@@ -36,7 +35,6 @@ Enables the controller.
 --]]
 function SmoothLocomotionController:Enable(): ()
     BaseController.Enable(self)
-    self.JoystickState = { Thumbstick = Enum.KeyCode.Thumbstick2 }
 
     --Connect requesting jumping.
     --ButtonA does not work with IsButtonDown.
@@ -86,26 +84,6 @@ function SmoothLocomotionController:UpdateCharacter(): ()
 
     --Move the player in that direction.
     Players.LocalPlayer:Move(Vector3.new(SideDirection, 0, -ForwardDirection), true)
-
-    --Snap rotate the character.
-    if not self.Character.Humanoid.Sit then
-        --Update and fetch the right joystick's state.
-        local DirectionState, _, StateChange = self:GetJoystickState(self.JoystickState)
-
-        --Snap rotate the character.
-        local HumanoidRootPart = self.Character.Parts.HumanoidRootPart
-        if StateChange == "Extended" and RightHandInputActive then
-            if DirectionState == "Left" then
-                --Turn the player to the left.
-                self:PlayBlur()
-                HumanoidRootPart.CFrame = CFrame.new(HumanoidRootPart.Position) * CFrame.Angles(0, THUMBSTICK_MANUAL_ROTATION_ANGLE, 0) * (CFrame.new(-HumanoidRootPart.Position) * HumanoidRootPart.CFrame)
-            elseif DirectionState == "Right" then
-                --Turn the player to the right.
-                self:PlayBlur()
-                HumanoidRootPart.CFrame = CFrame.new(HumanoidRootPart.Position) * CFrame.Angles(0, -THUMBSTICK_MANUAL_ROTATION_ANGLE, 0) * (CFrame.new(-HumanoidRootPart.Position) * HumanoidRootPart.CFrame)
-            end
-        end
-    end
 
     --Update the vehicle seat.
     self:UpdateVehicleSeat()
