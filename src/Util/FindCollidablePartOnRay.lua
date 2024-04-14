@@ -14,22 +14,21 @@ local Workspace = game:GetService("Workspace")
 Ray casts to find a collidable part.
 --]]
 local function FindCollidablePartOnRay(StartPosition: Vector3, Direction: Vector3, IgnoreList: Instance | {Instance}?, CollisionGroup: string?): (BasePart?, Vector3)
-    --Convert the collision group.
-    if typeof(CollisionGroup) == "Instance" and CollisionGroup:IsA("BasePart") then
-        CollisionGroup = CollisionGroup.CollisionGroup
-    end
-
-    --Create the ignore list.
-    local Camera = Workspace.CurrentCamera
-    local NewIgnoreList = {Camera}
+    --Clone the ignore list to prevent unexpected mutation of the list.
+    local NewIgnoreList = {Workspace.CurrentCamera}
     if typeof(IgnoreList) == "Instance" then
         table.insert(NewIgnoreList, IgnoreList)
     elseif typeof(IgnoreList) == "table" then
         for _, Entry in IgnoreList do
-            if Entry ~= Camera then
+            if Entry ~= Workspace.CurrentCamera then
                 table.insert(NewIgnoreList, Entry)
             end
         end
+    end
+    
+    --Convert the collision group.
+    if typeof(CollisionGroup) == "Instance" and CollisionGroup:IsA("BasePart") then
+        CollisionGroup = CollisionGroup.CollisionGroup
     end
 
     --Create the parameters.
@@ -41,19 +40,22 @@ local function FindCollidablePartOnRay(StartPosition: Vector3, Direction: Vector
         RaycastParameters.CollisionGroup = CollisionGroup
     end
 
-    --Raycast and continue if the hit part isn't collidable.
-    local RaycastResult = Workspace:Raycast(StartPosition, Direction, RaycastParameters)
-    if not RaycastResult then
-        return nil, StartPosition + Direction
-    end
-    local HitPart,EndPosition = RaycastResult.Instance, RaycastResult.Position
-    if HitPart and not HitPart.CanCollide and (not HitPart:IsA("Seat") or not HitPart:IsA("VehicleSeat") or HitPart.Disabled) then
-        table.insert(NewIgnoreList, HitPart)
-        return FindCollidablePartOnRay(EndPosition, Direction + (EndPosition - StartPosition), NewIgnoreList, CollisionGroup)
-    end
+    while true do
+        --Raycast and try again if the hit part isn't collidable.
+        local RaycastResult = Workspace:Raycast(StartPosition, Direction, RaycastParameters)
+        if not RaycastResult then
+            return nil, StartPosition + Direction
+        end
+        local HitPart,EndPosition = RaycastResult.Instance, RaycastResult.Position
+        if HitPart and not HitPart.CanCollide and (not HitPart:IsA("Seat") or not HitPart:IsA("VehicleSeat") or HitPart.Disabled) then
+            table.insert(NewIgnoreList, HitPart)
+            RaycastParameters.FilterDescendantsInstances = NewIgnoreList
+            continue
+        end
 
-    --Return the hit result.
-    return HitPart, EndPosition
+        --Return the hit result.
+        return HitPart, EndPosition
+    end
 end
 
 
