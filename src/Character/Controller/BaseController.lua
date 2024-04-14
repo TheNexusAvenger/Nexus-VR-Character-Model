@@ -7,17 +7,16 @@ Base class for controlling the local character.
 
 local THUMBSTICK_INPUT_START_RADIUS = 0.6
 local THUMBSTICK_INPUT_RELEASE_RADIUS = 0.4
-local THUMBSTICK_DEADZONE_RADIUS = 0.2
+local THUMBSTICK_MANUAL_ROTATION_ANGLE = math.rad(30) --Roblox's snap rotation is 30 degrees.
 
 local BLUR_TWEEN_INFO = TweenInfo.new(0.25, Enum.EasingStyle.Quad)
 
 local Workspace = game:GetService("Workspace")
 local Players = game:GetService("Players")
-local ContextActionService = game:GetService("ContextActionService")
-local UserInputService = game:GetService("UserInputService")
 local TweenService = game:GetService("TweenService")
 
 local NexusVRCharacterModel = script.Parent.Parent.Parent
+local NexusVRCharacterModelApi = require(NexusVRCharacterModel).Api
 local CameraService = require(NexusVRCharacterModel:WaitForChild("State"):WaitForChild("CameraService")).GetInstance()
 local CharacterService = require(NexusVRCharacterModel:WaitForChild("State"):WaitForChild("CharacterService")).GetInstance()
 local Settings = require(NexusVRCharacterModel:WaitForChild("State"):WaitForChild("Settings")).GetInstance()
@@ -86,20 +85,6 @@ function BaseController:Enable(): ()
 
     --Disable auto rotate so that the default controls work.
     self.Character.Humanoid.AutoRotate = false
-
-    --Disable the controls.
-    --Done in a loop to ensure changed controllers are disabled.
-    task.spawn(function()
-        local ControlModule = require(Players.LocalPlayer:WaitForChild("PlayerScripts"):WaitForChild("PlayerModule"):WaitForChild("ControlModule")) :: any
-        local Character = self.Character
-        while self.Character == Character and Character.Humanoid.Health > 0 do
-            if ControlModule.activeController and ControlModule.activeController.enabled then
-                ControlModule:Disable()
-                ContextActionService:BindActivate(Enum.UserInputType.Gamepad1, Enum.KeyCode.ButtonR2)
-            end
-            task.wait()
-        end
-    end)
 end
 
 --[[
@@ -284,26 +269,31 @@ function BaseController:UpdateCharacter(): ()
 end
 
 --[[
-Updates the values of the vehicle seat.
+Performs snap or smooth turning based on the thumbstick input.
 --]]
-function BaseController:UpdateVehicleSeat(): ()
-    --Get the vehicle seat.
-    local SeatPart = self.Character:GetHumanoidSeatPart()
-    if not SeatPart or not SeatPart:IsA("VehicleSeat") then
+function BaseController:UpdateTurning(Hand: Enum.UserCFrame, Direction: string, StateChange: string): ()
+    if not self.Character or self.Character.Humanoid.Sit then
         return
     end
 
-    --Get the direction.
-    local ThumbstickPosition = VRInputService:GetThumbstickPosition(Enum.KeyCode.Thumbstick1)
-    if ThumbstickPosition.Magnitude < THUMBSTICK_DEADZONE_RADIUS then
-        ThumbstickPosition = Vector3.zero
+    --Return if the input is inactive.
+    if NexusVRCharacterModelApi.Controller and not NexusVRCharacterModelApi.Controller:IsControllerInputEnabled(Hand) then
+        return
     end
-    local ForwardDirection = (UserInputService:IsKeyDown(Enum.KeyCode.W) and 1 or 0) + (UserInputService:IsKeyDown(Enum.KeyCode.S) and -1 or 0) + ThumbstickPosition.Y
-    local SideDirection = (UserInputService:IsKeyDown(Enum.KeyCode.D) and 1 or 0) + (UserInputService:IsKeyDown(Enum.KeyCode.A) and -1 or 0) + ThumbstickPosition.X
 
-    --Update the throttle and steering.
-    SeatPart.ThrottleFloat = ForwardDirection
-    SeatPart.SteerFloat = SideDirection
+    --Snap rotate the character.
+    local HumanoidRootPart = self.Character.Parts.HumanoidRootPart
+    if StateChange == "Extended" then
+        if Direction == "Left" then
+            --Turn the player to the left.
+            self:PlayBlur()
+            HumanoidRootPart.CFrame = CFrame.new(HumanoidRootPart.Position) * CFrame.Angles(0, THUMBSTICK_MANUAL_ROTATION_ANGLE, 0) * (CFrame.new(-HumanoidRootPart.Position) * HumanoidRootPart.CFrame)
+        elseif Direction == "Right" then
+            --Turn the player to the right.
+            self:PlayBlur()
+            HumanoidRootPart.CFrame = CFrame.new(HumanoidRootPart.Position) * CFrame.Angles(0, -THUMBSTICK_MANUAL_ROTATION_ANGLE, 0) * (CFrame.new(-HumanoidRootPart.Position) * HumanoidRootPart.CFrame)
+        end
+    end
 end
 
 
