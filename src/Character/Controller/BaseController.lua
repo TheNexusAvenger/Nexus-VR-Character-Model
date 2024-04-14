@@ -7,9 +7,14 @@ Base class for controlling the local character.
 
 local THUMBSTICK_INPUT_START_RADIUS = 0.6
 local THUMBSTICK_INPUT_RELEASE_RADIUS = 0.4
-local THUMBSTICK_MANUAL_ROTATION_ANGLE = math.rad(30) --Roblox's snap rotation is 30 degrees.
-
+local THUMBSTICK_SNAP_ROTATION_ANGLE = math.rad(30) --Roblox's snap rotation is 30 degrees.
+local THUMBSTICK_SMOOTH_LOCOMOTION_DEADZONE = 0.2
+local THUMBSTICK_MANUAL_SMOOTH_ROTATION_RATE = math.rad(360) --May or may not be accurate for Roblox's player scripts.
 local BLUR_TWEEN_INFO = TweenInfo.new(0.25, Enum.EasingStyle.Quad)
+local USER_CFRAME_TO_THUMBSTICK = {
+    [Enum.UserCFrame.LeftHand] = Enum.KeyCode.Thumbstick1,
+    [Enum.UserCFrame.RightHand] = Enum.KeyCode.Thumbstick2,
+}
 
 local Workspace = game:GetService("Workspace")
 local Players = game:GetService("Players")
@@ -93,6 +98,7 @@ Disables the controller.
 function BaseController:Disable(): ()
     self.Character = nil
     self.LastHeadCFrame = nil
+    self.LastRotationUpdateTick = nil
     for _, Connection in self.Connections do
         Connection:Disconnect()
     end
@@ -269,10 +275,13 @@ function BaseController:UpdateCharacter(): ()
 end
 
 --[[
-Performs snap or smooth turning based on the thumbstick input.
+Performs snap or smooth rotating based on the thumbstick input.
 --]]
-function BaseController:UpdateTurning(Hand: Enum.UserCFrame, Direction: string, StateChange: string): ()
+function BaseController:UpdateRotating(Hand: Enum.UserCFrame, Direction: string, StateChange: string): ()
     if not self.Character or self.Character.Humanoid.Sit then
+        return
+    end
+    if Direction ~= "Left" and Direction ~= "Right" then
         return
     end
 
@@ -281,19 +290,32 @@ function BaseController:UpdateTurning(Hand: Enum.UserCFrame, Direction: string, 
         return
     end
 
-    --Snap rotate the character.
+    --Rotate the character.
+    local LastRotationUpdateTick = self.LastRotationUpdateTick or tick()
+    local CurrentRotationUpdateTick = tick()
+    local RotationUpdateDeltaTime = (CurrentRotationUpdateTick - LastRotationUpdateTick)
     local HumanoidRootPart = self.Character.Parts.HumanoidRootPart
-    if StateChange == "Extended" then
-        if Direction == "Left" then
-            --Turn the player to the left.
-            self:PlayBlur()
-            HumanoidRootPart.CFrame = CFrame.new(HumanoidRootPart.Position) * CFrame.Angles(0, THUMBSTICK_MANUAL_ROTATION_ANGLE, 0) * (CFrame.new(-HumanoidRootPart.Position) * HumanoidRootPart.CFrame)
-        elseif Direction == "Right" then
-            --Turn the player to the right.
-            self:PlayBlur()
-            HumanoidRootPart.CFrame = CFrame.new(HumanoidRootPart.Position) * CFrame.Angles(0, -THUMBSTICK_MANUAL_ROTATION_ANGLE, 0) * (CFrame.new(-HumanoidRootPart.Position) * HumanoidRootPart.CFrame)
+    if UserSettings():GetService("UserGameSettings").VRSmoothRotationEnabled then
+        --Smoothly rotate the character.
+        local InputPosition = VRInputService:GetThumbstickPosition(USER_CFRAME_TO_THUMBSTICK[Hand])
+        if math.abs(InputPosition.X) >= THUMBSTICK_SMOOTH_LOCOMOTION_DEADZONE then
+            HumanoidRootPart.CFrame = CFrame.new(HumanoidRootPart.Position) * CFrame.Angles(0, -InputPosition.X * THUMBSTICK_MANUAL_SMOOTH_ROTATION_RATE * RotationUpdateDeltaTime, 0) * (CFrame.new(-HumanoidRootPart.Position) * HumanoidRootPart.CFrame)
+        end
+    else
+        --Snap rotate the character.
+        if StateChange == "Extended" then
+            if Direction == "Left" then
+                --Turn the player to the left.
+                self:PlayBlur()
+                HumanoidRootPart.CFrame = CFrame.new(HumanoidRootPart.Position) * CFrame.Angles(0, THUMBSTICK_SNAP_ROTATION_ANGLE, 0) * (CFrame.new(-HumanoidRootPart.Position) * HumanoidRootPart.CFrame)
+            elseif Direction == "Right" then
+                --Turn the player to the right.
+                self:PlayBlur()
+                HumanoidRootPart.CFrame = CFrame.new(HumanoidRootPart.Position) * CFrame.Angles(0, -THUMBSTICK_SNAP_ROTATION_ANGLE, 0) * (CFrame.new(-HumanoidRootPart.Position) * HumanoidRootPart.CFrame)
+            end
         end
     end
+    self.LastRotationUpdateTick = CurrentRotationUpdateTick
 end
 
 

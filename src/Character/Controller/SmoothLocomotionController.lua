@@ -48,7 +48,7 @@ function SmoothLocomotionController:UpdateCharacter(): ()
 
     --Rotate the character.
     local DirectionState, _, StateChange = self:GetJoystickState(self.JoystickState)
-    self:UpdateTurning(Enum.UserCFrame.RightHand, DirectionState, StateChange)
+    self:UpdateRotating(Enum.UserCFrame.RightHand, DirectionState, StateChange)
 end
 
 
