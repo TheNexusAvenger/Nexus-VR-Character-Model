@@ -6,7 +6,6 @@ Local character controller using teleporting.
 --!strict
 
 local Workspace = game:GetService("Workspace")
-local Players = game:GetService("Players")
 
 local NexusVRCharacterModel = script.Parent.Parent.Parent
 local NexusVRCharacterModelApi = require(NexusVRCharacterModel).Api
@@ -24,7 +23,9 @@ setmetatable(TeleportController, BaseController)
 Creates a teleport controller object.
 --]]
 function TeleportController.new(): any
-    return setmetatable(BaseController.new(), TeleportController)
+    local self = setmetatable(BaseController.new(), TeleportController)
+    self.ActionsToLock = {Enum.KeyCode.Thumbstick1, Enum.KeyCode.ButtonR3}
+    return self
 end
 
 --[[
@@ -70,9 +71,6 @@ function TeleportController:UpdateCharacter(): ()
     if not self.Character then
         return
     end
-
-    --Stop the player from moving.
-    Players.LocalPlayer:Move(Vector3.new(0, 0, 0), true)
 
     --Get the VR inputs.
     local VRInputs = VRInputService:GetVRInputs()

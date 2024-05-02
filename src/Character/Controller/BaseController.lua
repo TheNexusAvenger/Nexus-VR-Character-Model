@@ -10,6 +10,8 @@ local THUMBSTICK_INPUT_RELEASE_RADIUS = 0.4
 local BLUR_TWEEN_INFO = TweenInfo.new(0.25, Enum.EasingStyle.Quad)
 
 local Players = game:GetService("Players")
+local ContextActionService = game:GetService("ContextActionService")
+local HttpService = game:GetService("HttpService")
 local TweenService = game:GetService("TweenService")
 
 local NexusVRCharacterModel = script.Parent.Parent.Parent
@@ -27,7 +29,10 @@ BaseController.__index = BaseController
 Creates a base controller object.
 --]]
 function BaseController.new(): any
-    return setmetatable({}, BaseController)
+    return setmetatable({
+        Active = false,
+        ActionsToLock = {Enum.KeyCode.ButtonR3},
+    }, BaseController)
 end
 
 --[[
@@ -47,6 +52,17 @@ Enables the controller.
 --]]
 function BaseController:Enable(): ()
     if not self.Connections then self.Connections = {} end
+    self.Active = true
+
+    --Bind the actions to sink inputs from the PlayerScripts.
+    if not self.ActionsToUnbind then self.ActionsToUnbind = {} end
+    for _, KeyCode in self.ActionsToLock do
+        local ActionName = HttpService:GenerateGUID()
+        ContextActionService:BindActionAtPriority(ActionName, function()
+            return self.Active and Enum.ContextActionResult.Sink or Enum.ContextActionResult.Pass
+        end, false, Enum.ContextActionPriority.High.Value, KeyCode)
+        table.insert(self.ActionsToUnbind, ActionName)
+    end
 
     --Update the character and return if the character is nil.
     self:UpdateCharacterReference()
@@ -71,12 +87,17 @@ end
 Disables the controller.
 --]]
 function BaseController:Disable(): ()
+    self.Active = false
     self.Character = nil
     self.LastRotationUpdateTick = nil
     for _, Connection in self.Connections do
         Connection:Disconnect()
     end
     self.Connections = nil
+    for _, ActionName in self.ActionsToUnbind do
+        ContextActionService:UnbindAction(ActionName)
+    end
+    self.ActionsToUnbind = nil
 end
 
 --[[
