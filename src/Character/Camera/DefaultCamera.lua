@@ -60,6 +60,8 @@ end
 Enables the camera.
 --]]
 function DefaultCamera:Enable(): ()
+    Players.LocalPlayer.CameraMaxZoomDistance = Players.LocalPlayer.CameraMinZoomDistance
+
     self.TransparencyEvents = {}
     if Players.LocalPlayer.Character then
         --Connect children being added.
