@@ -150,9 +150,6 @@ function TeleportController:UpdateCharacter(): ()
         elseif DirectionState == "Forward" and RadiusState == "Extended" then
             ArcData.LastHitPart, ArcData.LastHitPosition = ArcData.Arc:Update(Workspace.CurrentCamera:GetRenderCFrame() * VRInputs[Enum.UserCFrame.Head]:Inverse() * VRInputs[ArcData.UserCFrame])
         end
-
-        --Rotate the character.
-        self:UpdateRotating(ArcData.UserCFrame, DirectionState, StateChange)
     end
 end
 

@@ -7,21 +7,12 @@ Base class for controlling the local character.
 
 local THUMBSTICK_INPUT_START_RADIUS = 0.6
 local THUMBSTICK_INPUT_RELEASE_RADIUS = 0.4
-local THUMBSTICK_SNAP_ROTATION_ANGLE = math.rad(30) --Roblox's snap rotation is 30 degrees.
-local THUMBSTICK_SMOOTH_LOCOMOTION_DEADZONE = 0.2
-local THUMBSTICK_MANUAL_SMOOTH_ROTATION_RATE = math.rad(360) --May or may not be accurate for Roblox's player scripts.
 local BLUR_TWEEN_INFO = TweenInfo.new(0.25, Enum.EasingStyle.Quad)
-local USER_CFRAME_TO_THUMBSTICK = {
-    [Enum.UserCFrame.LeftHand] = Enum.KeyCode.Thumbstick1,
-    [Enum.UserCFrame.RightHand] = Enum.KeyCode.Thumbstick2,
-}
 
-local Workspace = game:GetService("Workspace")
 local Players = game:GetService("Players")
 local TweenService = game:GetService("TweenService")
 
 local NexusVRCharacterModel = script.Parent.Parent.Parent
-local NexusVRCharacterModelApi = require(NexusVRCharacterModel).Api
 local CameraService = require(NexusVRCharacterModel:WaitForChild("State"):WaitForChild("CameraService")).GetInstance()
 local CharacterService = require(NexusVRCharacterModel:WaitForChild("State"):WaitForChild("CharacterService")).GetInstance()
 local Settings = require(NexusVRCharacterModel:WaitForChild("State"):WaitForChild("Settings")).GetInstance()
@@ -29,15 +20,6 @@ local VRInputService = require(NexusVRCharacterModel:WaitForChild("State"):WaitF
 
 local BaseController = {}
 BaseController.__index = BaseController
-
-
-
---[[
-Returns the Y-axis angle of the given CFrame.
---]]
-local function GetAngleToGlobalY(CF: CFrame): number
-    return math.atan2(-CF.LookVector.X, -CF.LookVector.Z)
-end
 
 
 
@@ -72,13 +54,6 @@ function BaseController:Enable(): ()
         return
     end
 
-    --Connect the eye level being set.
-    table.insert(self.Connections, VRInputService.EyeLevelSet:Connect(function()
-        if self.LastHeadCFrame.Y > 0 then
-            self.LastHeadCFrame = CFrame.new(0, -self.LastHeadCFrame.Y, 0) * self.LastHeadCFrame
-        end
-    end))
-
     --Connect the character entering a seat.
     table.insert(self.Connections, self.Character.Humanoid:GetPropertyChangedSignal("SeatPart"):Connect(function()
         local SeatPart = self.Character:GetHumanoidSeatPart()
@@ -97,7 +72,6 @@ Disables the controller.
 --]]
 function BaseController:Disable(): ()
     self.Character = nil
-    self.LastHeadCFrame = nil
     self.LastRotationUpdateTick = nil
     for _, Connection in self.Connections do
         Connection:Disconnect()
@@ -209,113 +183,9 @@ function BaseController:UpdateCharacter(): ()
         self:Enable()
     end
 
-    --Get the VR inputs.
-    local VRInputs = VRInputService:GetVRInputs()
-    local VRHeadCFrame = self:ScaleInput(VRInputs[Enum.UserCFrame.Head])
-    local VRLeftHandCFrame,VRRightHandCFrame = self:ScaleInput(VRInputs[Enum.UserCFrame.LeftHand]), self:ScaleInput(VRInputs[Enum.UserCFrame.RightHand])
-    local HeadToLeftHandCFrame = VRHeadCFrame:Inverse() * VRLeftHandCFrame
-    local HeadToRightHandCFrame = VRHeadCFrame:Inverse() * VRRightHandCFrame
-
-    --Update the character.
-    local SeatPart = self.Character:GetHumanoidSeatPart()
-    if not SeatPart then
-        --Offset the character by the change in the head input.
-        if self.LastHeadCFrame then
-            --Get the eye CFrame of the current character, except the Y offset from the HumanoidRootPart.
-            --The Y position will be added absolutely since doing it relatively will result in floating or short characters.
-            local HumanoidRootPartCFrame = self.Character.Parts.HumanoidRootPart.CFrame
-            local LowerTorsoCFrame = HumanoidRootPartCFrame * self.Character.Attachments.HumanoidRootPart.RootRigAttachment.CFrame * CFrame.new(0, -self.Character.Motors.Root.Transform.Position.Y, 0) * self.Character.Motors.Root.Transform * self.Character.Attachments.LowerTorso.RootRigAttachment.CFrame:Inverse()
-            local UpperTorsoCFrame = LowerTorsoCFrame * self.Character.Attachments.LowerTorso.WaistRigAttachment.CFrame * self.Character.Motors.Waist.Transform * self.Character.Attachments.UpperTorso.WaistRigAttachment.CFrame:Inverse()
-            local HeadCFrame = UpperTorsoCFrame * self.Character.Attachments.UpperTorso.NeckRigAttachment.CFrame * self.Character.Motors.Neck.Transform * self.Character.Attachments.Head.NeckRigAttachment.CFrame:Inverse()
-            local EyesOffset = self.Character.Head:GetEyesOffset()
-            local CharacterEyeCFrame = HeadCFrame * EyesOffset
-
-            --Determine the input components.
-            local InputDelta = self.LastHeadCFrame:Inverse() * VRHeadCFrame
-            if VRHeadCFrame.UpVector.Y < 0 then
-                InputDelta = CFrame.Angles(0,math.pi,0) * InputDelta
-            end
-            local HeadRotationXZ = (CFrame.new(VRHeadCFrame.Position) * CFrame.Angles(0, math.atan2(-VRHeadCFrame.LookVector.X, -VRHeadCFrame.LookVector.Z), 0)):Inverse() * VRHeadCFrame
-            local LastHeadAngleY = GetAngleToGlobalY(self.LastHeadCFrame)
-            local HeadAngleY = GetAngleToGlobalY(VRHeadCFrame)
-            local HeightOffset = CFrame.new(0, (CFrame.new(0, EyesOffset.Y, 0) * (VRHeadCFrame * EyesOffset:Inverse())).Y, 0)
-
-            --Offset the character eyes for the current input.
-            local CurrentCharacterAngleY = GetAngleToGlobalY(CharacterEyeCFrame)
-            local RotationY = CFrame.Angles(0, CurrentCharacterAngleY + (HeadAngleY - LastHeadAngleY), 0)
-            local NewCharacterEyePosition = (HeightOffset *  CFrame.new((RotationY * CFrame.new(InputDelta.X, 0, InputDelta.Z)).Position) * CharacterEyeCFrame).Position
-            local NewCharacterEyeCFrame = CFrame.new(NewCharacterEyePosition) * RotationY * HeadRotationXZ
-
-            --Update the character.
-            self.Character:UpdateFromInputs(NewCharacterEyeCFrame, NewCharacterEyeCFrame * HeadToLeftHandCFrame,NewCharacterEyeCFrame * HeadToRightHandCFrame)
-        end
-    else
-        --Set the absolute positions of the character.
-        self.Character:UpdateFromInputsSeated(VRHeadCFrame, VRHeadCFrame * HeadToLeftHandCFrame,VRHeadCFrame * HeadToRightHandCFrame)
-    end
-
     --Update the camera.
-    if self.Character.Parts.HumanoidRootPart:IsDescendantOf(Workspace) and self.Character.Humanoid.Health > 0 then
-        --Update the camera based on the character.
-        --Done based on the HumanoidRootPart instead of the Head because of Motors not updating the same frame, leading to a delay.
-        local HumanoidRootPartCFrame = self.Character.Parts.HumanoidRootPart.CFrame
-        local LowerTorsoCFrame = HumanoidRootPartCFrame * self.Character.Attachments.HumanoidRootPart.RootRigAttachment.CFrame * self.Character.Motors.Root.Transform * self.Character.Attachments.LowerTorso.RootRigAttachment.CFrame:Inverse()
-        local UpperTorsoCFrame = LowerTorsoCFrame * self.Character.Attachments.LowerTorso.WaistRigAttachment.CFrame * self.Character.Motors.Waist.Transform * self.Character.Attachments.UpperTorso.WaistRigAttachment.CFrame:Inverse()
-        local HeadCFrame = UpperTorsoCFrame * self.Character.Attachments.UpperTorso.NeckRigAttachment.CFrame * self.Character.Motors.Neck.Transform * self.Character.Attachments.Head.NeckRigAttachment.CFrame:Inverse()
-        CameraService:UpdateCamera(HeadCFrame * self.Character.Head:GetEyesOffset())
-        self.LastHeadCFrame = VRHeadCFrame
-    elseif not Workspace.CurrentCamera.HeadLocked then
-        --Update the camera based on the last CFrame if the motors can't update (not in Workspace).
-        local CurrentCameraCFrame = Workspace.CurrentCamera:GetRenderCFrame()
-        local LastHeadCFrame = self.LastHeadCFrame or CFrame.new()
-        local HeadCFrame = self:ScaleInput(VRInputService:GetVRInputs()[Enum.UserCFrame.Head])
-        CameraService:UpdateCamera(CurrentCameraCFrame * LastHeadCFrame:Inverse() * HeadCFrame)
-        self.LastHeadCFrame = HeadCFrame
-    end
-end
-
---[[
-Performs snap or smooth rotating based on the thumbstick input.
---]]
-function BaseController:UpdateRotating(Hand: Enum.UserCFrame, Direction: string, StateChange: string): ()
-    if not self.Character or self.Character.Humanoid.Sit then
-        return
-    end
-    if Direction ~= "Left" and Direction ~= "Right" then
-        return
-    end
-
-    --Return if the input is inactive.
-    if NexusVRCharacterModelApi.Controller and not NexusVRCharacterModelApi.Controller:IsControllerInputEnabled(Hand) then
-        return
-    end
-
-    --Rotate the character.
-    local LastRotationUpdateTick = self.LastRotationUpdateTick or tick()
-    local CurrentRotationUpdateTick = tick()
-    local RotationUpdateDeltaTime = (CurrentRotationUpdateTick - LastRotationUpdateTick)
-    local HumanoidRootPart = self.Character.Parts.HumanoidRootPart
-    if UserSettings():GetService("UserGameSettings").VRSmoothRotationEnabled then
-        --Smoothly rotate the character.
-        local InputPosition = VRInputService:GetThumbstickPosition(USER_CFRAME_TO_THUMBSTICK[Hand])
-        if math.abs(InputPosition.X) >= THUMBSTICK_SMOOTH_LOCOMOTION_DEADZONE then
-            HumanoidRootPart.CFrame = CFrame.new(HumanoidRootPart.Position) * CFrame.Angles(0, -InputPosition.X * THUMBSTICK_MANUAL_SMOOTH_ROTATION_RATE * RotationUpdateDeltaTime, 0) * (CFrame.new(-HumanoidRootPart.Position) * HumanoidRootPart.CFrame)
-        end
-    else
-        --Snap rotate the character.
-        if StateChange == "Extended" then
-            if Direction == "Left" then
-                --Turn the player to the left.
-                self:PlayBlur()
-                HumanoidRootPart.CFrame = CFrame.new(HumanoidRootPart.Position) * CFrame.Angles(0, THUMBSTICK_SNAP_ROTATION_ANGLE, 0) * (CFrame.new(-HumanoidRootPart.Position) * HumanoidRootPart.CFrame)
-            elseif Direction == "Right" then
-                --Turn the player to the right.
-                self:PlayBlur()
-                HumanoidRootPart.CFrame = CFrame.new(HumanoidRootPart.Position) * CFrame.Angles(0, -THUMBSTICK_SNAP_ROTATION_ANGLE, 0) * (CFrame.new(-HumanoidRootPart.Position) * HumanoidRootPart.CFrame)
-            end
-        end
-    end
-    self.LastRotationUpdateTick = CurrentRotationUpdateTick
+    --TODO: Currently unsure how to handle the camera because the Head is no longer a source of truth for the camera.
+    --TODO: CameraService:UpdateCamera()
 end
 
 

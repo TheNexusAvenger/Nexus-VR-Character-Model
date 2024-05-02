@@ -20,6 +20,7 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Players = game:GetService("Players")
 local HttpService = game:GetService("HttpService")
 local StarterPlayer = game:GetService("StarterPlayer")
+local VRService = game:GetService("VRService")
 
 local Settings = require(script:WaitForChild("State"):WaitForChild("Settings")).GetInstance()
 local RateLimiter = require(script:WaitForChild("State"):WaitForChild("RateLimiter"))
@@ -74,6 +75,9 @@ function NexusVRCharacterModel:Load(): ()
     script.Name = "NexusVRCharacterModel"
     script:WaitForChild("NexusVRCore").Parent = ReplicatedStorage
     script.Parent = ReplicatedStorage;
+
+    --Enable AvatarGestures.
+    VRService.AvatarGestures = true
 
     --Output any warnings.
     (require(ReplicatedStorage:WaitForChild("NexusVRCharacterModel"):WaitForChild("Util"):WaitForChild("Warnings")) :: any)()

@@ -9,22 +9,6 @@ local Configuration = {
     Appearance = {
         --Transparency of the character when in first person.
         LocalCharacterTransparency = 0.5,
-
-        --If true, arms will be allowed to disconnect.
-        --Recommended to be true locally so that the controllers match the hands,
-        --and false for other players so that arms appear normal.
-        LocalAllowArmDisconnection = true,
-        NonLocalAllowArmDisconnection = true,
-
-        --Maximum angle the neck can turn before the torso turns.
-        MaxNeckRotation = math.rad(35),
-        MaxNeckSeatedRotation = math.rad(60),
-
-        --Maximum angle the neck can tilt before the torso tilts.
-        MaxNeckTilt = math.rad(60),
-
-        --Maximum angle the center of the torso can bend.
-        MaxTorsoBend = math.rad(10),
     },
     Camera = {
         --Options for the camera that can be enabled by the user.
@@ -90,13 +74,6 @@ local Configuration = {
         --Version information may be detectable based on behavior, or by exploiters decompiling
         --the client code.
         HideVersion = false,
-
-        --If true, Nexus-Appendage with IKControl will be used.
-        --Workspace.IKControlConstraintSupport MUST be set to Enabled for proper results.
-        --In Team Create, it may not set correctly. Make sure to close and re-open
-        --Roblox Studio to verify to verify it was set. Once this property defaults to Enabled
-        --or is removed, this setting will go away.
-        TEMPORARY_UseIKControl = false,
     },
 }
 

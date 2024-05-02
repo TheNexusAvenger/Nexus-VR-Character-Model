@@ -48,12 +48,6 @@ Players.PlayerRemoving:Connect(function(Player)
 end)
 ReplicationReady:FireServer()
 
---Connect updating all the character Motor6Ds.
---Must be done after Stepped to override Animators.
-RunService.Stepped:Connect(function()
-    CharacterService:RefreshAllCharacters()
-end)
-
 --Allow checking if Nexus VR Character Model is loaded without being in VR.
 local LoadedPrintStatementPrinted = false
 UserInputService.InputBegan:Connect(function(Input)

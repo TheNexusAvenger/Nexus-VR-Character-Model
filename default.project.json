@@ -12,9 +12,6 @@
             },
             "NexusButton": {
                 "$path": "./module/Nexus-Button/"
-            },
-            "NexusAppendage": {
-                "$path": "./module/Nexus-Appendage/"
             }
         }
     }
