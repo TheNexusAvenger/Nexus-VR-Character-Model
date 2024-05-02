@@ -75,6 +75,7 @@ function NexusVRCharacterModel:Load(): ()
 
     --Output any warnings.
     (require(ReplicatedStorage:WaitForChild("NexusVRCharacterModel"):WaitForChild("Util"):WaitForChild("Warnings")) :: any)()
+    warn("Nexus VR Character Model V.3 is a preview and is not ready for production use. Some features are incomplete, and there are known bugs with VRService.AvatarGestures.")
 
     --Set up the client scripts.
     local NexusVRCharacterModelClientLoader = script:WaitForChild("NexusVRCharacterModelClientLoader")
