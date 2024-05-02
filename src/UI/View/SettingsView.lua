@@ -50,7 +50,8 @@ function SettingsView:__new(View: any): ()
     NameText.Parent = Container
 
     --Create the settings.
-    local CameraSettingFrame = Instance.new("Frame")
+    --TODO: Cameras not implemented.
+    --[[local CameraSettingFrame = Instance.new("Frame")
     CameraSettingFrame.BackgroundTransparency = 1
     CameraSettingFrame.Size = UDim2.new(0.8, 0,0.11, 0)
     CameraSettingFrame.Position = UDim2.new(0.1, 0, 0.325, 0)
@@ -59,7 +60,7 @@ function SettingsView:__new(View: any): ()
         return CameraService.ActiveCamera
     end, function(NewValue)
         CameraService:SetActiveCamera(NewValue)
-    end)
+    end)]]
 
     local MovementSettingFrame = Instance.new("Frame")
     MovementSettingFrame.BackgroundTransparency = 1
@@ -86,6 +87,8 @@ function SettingsView:__new(View: any): ()
     end)
 
     --Create the callibration settings.
+    --TODO: Custom recenting currently unused.
+    --[[
     local RecenterButton,RecenterText = TextButtonFactory:Create()
     RecenterButton.Size = UDim2.new(0.4, 0, 0.075, 0)
     RecenterButton.Position = UDim2.new(0.075, 0, 0.85, 0)
@@ -106,7 +109,7 @@ function SettingsView:__new(View: any): ()
 
     SetEyeLevelButton.MouseButton1Down:Connect(function()
         VRInputService:SetEyeLevel()
-    end)
+    end)]]
 
     --Create the version information.
     local VersionText = Instance.new("TextLabel")
