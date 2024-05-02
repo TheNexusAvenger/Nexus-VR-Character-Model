@@ -15,38 +15,14 @@ local VRService = game:GetService("VRService")
 
 local NexusVRCharacterModel = ReplicatedStorage:WaitForChild("NexusVRCharacterModel") :: ModuleScript
 local CameraService = (require(NexusVRCharacterModel:WaitForChild("State"):WaitForChild("CameraService")) :: any).GetInstance()
-local CharacterService = (require(NexusVRCharacterModel:WaitForChild("State"):WaitForChild("CharacterService")) :: any).GetInstance()
 local ControlService = (require(NexusVRCharacterModel:WaitForChild("State"):WaitForChild("ControlService")) :: any).GetInstance()
 local DefaultCursorService = (require(NexusVRCharacterModel:WaitForChild("State"):WaitForChild("DefaultCursorService")) :: any).GetInstance()
 local Settings = (require(NexusVRCharacterModel:WaitForChild("State"):WaitForChild("Settings")) :: any).GetInstance()
-local UpdateInputs = NexusVRCharacterModel:WaitForChild("UpdateInputs") :: UnreliableRemoteEvent
-local ReplicationReady = NexusVRCharacterModel:WaitForChild("ReplicationReady") :: RemoteEvent
 
 
 
 --Load the settings.
 Settings:SetDefaults(HttpService:JSONDecode((NexusVRCharacterModel:WaitForChild("Configuration") :: StringValue).Value))
-
---Connect replication for other players.
-local LastPlayerUpdates = {} :: {[Player]: number}
-UpdateInputs.OnClientEvent:Connect(function(Player: Player, HeadCFrame: CFrame, LeftHandCFrame: CFrame, RightHandCFrame: CFrame, UpdateTime: number?)
-    --Return if the update is after the latest update.
-    --Unreliable events do not guarentee order.
-    if UpdateTime then
-        if LastPlayerUpdates[Player] and UpdateTime < LastPlayerUpdates[Player] then return end
-        LastPlayerUpdates[Player] = UpdateTime
-    end
-
-    --Update the character.
-    local Character = CharacterService:GetCharacter(Player)
-    if Character then
-        Character:UpdateFromInputs(HeadCFrame, LeftHandCFrame, RightHandCFrame)
-    end
-end)
-Players.PlayerRemoving:Connect(function(Player)
-    LastPlayerUpdates[Player] = nil
-end)
-ReplicationReady:FireServer()
 
 --Allow checking if Nexus VR Character Model is loaded without being in VR.
 local LoadedPrintStatementPrinted = false
