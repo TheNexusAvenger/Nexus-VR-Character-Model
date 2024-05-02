@@ -85,7 +85,7 @@ local MainModule = script:FindFirstChild("MainModule")
 if MainModule then
     NexusVRCharacterModelModule = require(MainModule)
 else
-    NexusVRCharacterModelModule = require(10728814921)
+    NexusVRCharacterModelModule = require(10728816434)
 end
 
 --Load Nexus VR Character Model.
