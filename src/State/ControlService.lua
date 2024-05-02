@@ -7,6 +7,7 @@ Manages controlling the local characters.
 
 local NexusVRCharacterModel = script.Parent.Parent
 local BaseController = require(NexusVRCharacterModel:WaitForChild("Character"):WaitForChild("Controller"):WaitForChild("BaseController"))
+local EmptyController = require(NexusVRCharacterModel:WaitForChild("Character"):WaitForChild("Controller"):WaitForChild("EmptyController"))
 local TeleportController = require(NexusVRCharacterModel:WaitForChild("Character"):WaitForChild("Controller"):WaitForChild("TeleportController"))
 
 local ControlService = {}
@@ -42,7 +43,7 @@ function ControlService.new(): ControlService
     setmetatable(self, ControlService)
 
     --Register the default controllers.
-    self:RegisterController("None", BaseController.new()) --TODO: Deprecate. This serves no purpose now.
+    self:RegisterController("None", EmptyController.new())
     self:RegisterController("Teleport", TeleportController.new())
     self:RegisterController("SmoothLocomotion", BaseController.new())
 
