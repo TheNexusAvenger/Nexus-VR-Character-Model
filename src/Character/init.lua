@@ -16,6 +16,7 @@ local Torso = require(NexusVRCharacterModel:WaitForChild("Character"):WaitForChi
 local AppendageLegacy = require(NexusVRCharacterModel:WaitForChild("Character"):WaitForChild("Appendage"))
 local Appendage = require(NexusVRCharacterModel:WaitForChild("NexusAppendage"):WaitForChild("Appendage"))
 local FootPlanter = require(NexusVRCharacterModel:WaitForChild("Character"):WaitForChild("FootPlanter"))
+local EnigmaService = require(NexusVRCharacterModel:WaitForChild("State"):WaitForChild("EnigmaService")).GetInstance()
 local Settings = require(NexusVRCharacterModel:WaitForChild("State"):WaitForChild("Settings")).GetInstance()
 local UpdateInputs = NexusVRCharacterModel:WaitForChild("UpdateInputs") :: UnreliableRemoteEvent
 
@@ -398,11 +399,24 @@ function Character:UpdateFromInputs(HeadControllerCFrame: CFrame, LeftHandContro
     local LowerTorsoCFrame: CFrame, UpperTorsoCFrame = self.Torso:GetTorsoCFrames(NeckCFrame)
     local JointCFrames = self.Torso:GetAppendageJointCFrames(LowerTorsoCFrame, UpperTorsoCFrame)
 
+    --Get the tracker CFrames from Enigma and fallback feet CFrames.
+    local LeftFoot: CFrame, RightFoot: CFrame = self.FootPlanter:GetFeetCFrames()
+    local NewCFrames = EnigmaService:GetCFrames(self)
+    if NewCFrames.LeftFoot then
+        LeftFoot = NewCFrames.LeftFoot
+    else
+        LeftFoot = LeftFoot * CFrame.Angles(0, math.pi, 0)
+    end
+    if NewCFrames.RightFoot then
+        RightFoot = NewCFrames.RightFoot
+    else
+        RightFoot = RightFoot * CFrame.Angles(0, math.pi, 0)
+    end
+
     --Set the character CFrames.
     --HumanoidRootParts must always face up. This makes the math more complicated.
     --Setting the CFrame directly to something not facing directly up will result in the physics
     --attempting to correct that within the next frame, causing the character to appear to move.
-    local LeftFoot: CFrame, RightFoot: CFrame = self.FootPlanter:GetFeetCFrames()
     local TargetHumanoidRootPartCFrame = LowerTorsoCFrame * self.Attachments.LowerTorso.RootRigAttachment.CFrame * self.Attachments.HumanoidRootPart.RootRigAttachment.CFrame:Inverse()
     local ActualHumanoidRootPartCFrame: CFrame = self.Parts.HumanoidRootPart.CFrame
     local HumanoidRootPartHeightDifference = ActualHumanoidRootPartCFrame.Y - TargetHumanoidRootPartCFrame.Y
@@ -414,15 +428,15 @@ function Character:UpdateFromInputs(HeadControllerCFrame: CFrame, LeftHandContro
     if self.UseIKControl then
         self.LeftArm:MoveToWorld(LeftHandControllerCFrame)
         self.RightArm:MoveToWorld(RightHandControllerCFrame)
-        self.LeftLeg:MoveToWorld(LeftFoot * CFrame.Angles(0, math.pi, 0))
-        self.RightLeg:MoveToWorld(RightFoot * CFrame.Angles(0, math.pi, 0))
+        self.LeftLeg:MoveToWorld(LeftFoot)
+        self.RightLeg:MoveToWorld(RightFoot)
         self.LeftLeg:Enable()
         self.RightLeg:Enable()
     else
         local LeftUpperArmCFrame, LeftLowerArmCFrame, LeftHandCFrame = self.LeftArm:GetAppendageCFrames(JointCFrames["LeftShoulder"], LeftHandControllerCFrame)
         local RightUpperArmCFrame, RightLowerArmCFrame, RightHandCFrame = self.RightArm:GetAppendageCFrames(JointCFrames["RightShoulder"], RightHandControllerCFrame)
-        local LeftUpperLegCFrame, LeftLowerLegCFrame, LeftFootCFrame = self.LeftLeg:GetAppendageCFrames(JointCFrames["LeftHip"], LeftFoot * CFrame.Angles(0, math.pi, 0))
-        local RightUpperLegCFrame, RightLowerLegCFrame, RightFootCFrame = self.RightLeg:GetAppendageCFrames(JointCFrames["RightHip"], RightFoot * CFrame.Angles(0, math.pi, 0))
+        local LeftUpperLegCFrame, LeftLowerLegCFrame, LeftFootCFrame = self.LeftLeg:GetAppendageCFrames(JointCFrames["LeftHip"], LeftFoot)
+        local RightUpperLegCFrame, RightLowerLegCFrame, RightFootCFrame = self.RightLeg:GetAppendageCFrames(JointCFrames["RightHip"], RightFoot)
         self:SetTransform("RightHip", "RightHipRigAttachment", "LowerTorso", "RightUpperLeg", LowerTorsoCFrame, RightUpperLegCFrame)
         self:SetTransform("RightKnee", "RightKneeRigAttachment", "RightUpperLeg", "RightLowerLeg", RightUpperLegCFrame, RightLowerLegCFrame)
         self:SetTransform("RightAnkle", "RightAnkleRigAttachment", "RightLowerLeg", "RightFoot", RightLowerLegCFrame, RightFootCFrame)

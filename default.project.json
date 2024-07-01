@@ -4,6 +4,9 @@
         "$path": "./MainModule.lua",
         "NexusVRCharacterModel": {
             "$path": "./src",
+            "Enigma": {
+                "$path": "./module/Enigma/"
+            },
             "NexusInstance": {
                 "$path": "./module/Nexus-Instance/"
             },

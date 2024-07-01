@@ -18,6 +18,7 @@ local CameraService = (require(NexusVRCharacterModel:WaitForChild("State"):WaitF
 local CharacterService = (require(NexusVRCharacterModel:WaitForChild("State"):WaitForChild("CharacterService")) :: any).GetInstance()
 local ControlService = (require(NexusVRCharacterModel:WaitForChild("State"):WaitForChild("ControlService")) :: any).GetInstance()
 local DefaultCursorService = (require(NexusVRCharacterModel:WaitForChild("State"):WaitForChild("DefaultCursorService")) :: any).GetInstance()
+local EnigmaService = (require(NexusVRCharacterModel:WaitForChild("State"):WaitForChild("EnigmaService")) :: any).GetInstance()
 local Settings = (require(NexusVRCharacterModel:WaitForChild("State"):WaitForChild("Settings")) :: any).GetInstance()
 local UpdateInputs = NexusVRCharacterModel:WaitForChild("UpdateInputs") :: UnreliableRemoteEvent
 local ReplicationReady = NexusVRCharacterModel:WaitForChild("ReplicationReady") :: RemoteEvent
@@ -109,6 +110,9 @@ if Settings:GetSetting("Extra.NexusVRBackpackEnabled") ~= false then
         NexusVRBackpack:Load()
     end)
 end
+
+--Load Enigma.
+EnigmaService:Enable()
 
 --Start updating the VR character.
 RunService:BindToRenderStep("NexusVRCharacterModelUpdate", Enum.RenderPriority.Camera.Value - 1, function()
