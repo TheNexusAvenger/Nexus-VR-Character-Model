@@ -22,6 +22,7 @@ local Settings = require(NexusVRCharacterModel:WaitForChild("State"):WaitForChil
 local VRInputService = require(NexusVRCharacterModel:WaitForChild("State"):WaitForChild("VRInputService")).GetInstance()
 local ApiBaseView = require(NexusVRCharacterModel:WaitForChild("UI"):WaitForChild("View"):WaitForChild("ApiBaseView"))
 local ChatView = require(NexusVRCharacterModel:WaitForChild("UI"):WaitForChild("View"):WaitForChild("ChatView"))
+local EnigmaView = require(NexusVRCharacterModel:WaitForChild("UI"):WaitForChild("View"):WaitForChild("EnigmaView"))
 local SettingsView = require(NexusVRCharacterModel:WaitForChild("UI"):WaitForChild("View"):WaitForChild("SettingsView"))
 local TextButtonFactory = require(NexusVRCharacterModel:WaitForChild("NexusButton"):WaitForChild("Factory"):WaitForChild("TextButtonFactory")).CreateDefault(Color3.fromRGB(0, 170, 255))
 TextButtonFactory:SetDefault("Theme", "RoundedCorners")
@@ -103,6 +104,7 @@ function MainMenu.new(): any
     self.CurrentView = 1
     self.Views = {}
     (SettingsView :: any).new(self:CreateView("Settings"));
+    (EnigmaView :: any).new(self:CreateView("Enigma (Beta)"));
     (ChatView :: any).new(self:CreateView("Chat"))
     self:UpdateVisibleView()
 
