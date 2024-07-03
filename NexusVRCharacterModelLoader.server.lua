@@ -91,6 +91,12 @@ local Configuration = {
         --the client code.
         HideVersion = false,
 
+        --If true, Enigma (https://github.com/TheNexusAvenger/Enigma) will be enabled
+        --to allow players to use additional SteamVR trackers.
+        --It is only recommended to disable if this causes problems, and said problems
+        --can't be addressed.
+        EnigmaEnabled = true,
+
         --If true, Nexus-Appendage with IKControl will be used.
         --Workspace.IKControlConstraintSupport MUST be set to Enabled for proper results.
         --In Team Create, it may not set correctly. Make sure to close and re-open

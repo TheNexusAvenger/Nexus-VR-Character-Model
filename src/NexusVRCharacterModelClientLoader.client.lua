@@ -112,7 +112,9 @@ if Settings:GetSetting("Extra.NexusVRBackpackEnabled") ~= false then
 end
 
 --Load Enigma.
-EnigmaService:Enable()
+if Settings:GetSetting("Extra.EnigmaEnabled") ~= false then
+    EnigmaService:Enable()
+end
 
 --Start updating the VR character.
 RunService:BindToRenderStep("NexusVRCharacterModelUpdate", Enum.RenderPriority.Camera.Value - 1, function()

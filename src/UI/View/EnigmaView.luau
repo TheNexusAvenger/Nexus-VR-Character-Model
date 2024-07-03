@@ -9,6 +9,7 @@ local Enigma = require(NexusVRCharacterModel:WaitForChild("Enigma"))
 local NexusInstance = require(NexusVRCharacterModel:WaitForChild("NexusInstance"):WaitForChild("NexusInstance"))
 local CharacterService = require(NexusVRCharacterModel:WaitForChild("State"):WaitForChild("CharacterService")).GetInstance()
 local EnigmaService = require(NexusVRCharacterModel:WaitForChild("State"):WaitForChild("EnigmaService")).GetInstance()
+local Settings = require(NexusVRCharacterModel:WaitForChild("State"):WaitForChild("Settings")).GetInstance()
 
 local TextButtonFactory = require(NexusVRCharacterModel:WaitForChild("NexusButton"):WaitForChild("Factory"):WaitForChild("TextButtonFactory")).CreateDefault(Color3.fromRGB(0, 170, 255))
 TextButtonFactory:SetDefault("Theme", "RoundedCorners")
@@ -38,6 +39,10 @@ function EnigmaView:__new(View: any): ()
     EnigmaText.TextStrokeTransparency = 0
     EnigmaText.Parent = Container
     self.EnigmaText = EnigmaText
+    if Settings:GetSetting("Extra.EnigmaEnabled") == false then
+        EnigmaText.Text = "This game has disabled Enigma (Beta)."
+        return
+    end
     self:UpdateText()
 
     task.spawn(function()

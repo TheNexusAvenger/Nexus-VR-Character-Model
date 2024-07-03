@@ -8,6 +8,7 @@ local UserInputService = game:GetService("UserInputService")
 local NexusVRCharacterModel = script.Parent.Parent
 local Enigma = require(NexusVRCharacterModel:WaitForChild("Enigma"))
 local Head = require(NexusVRCharacterModel:WaitForChild("Character"):WaitForChild("Head"))
+local Settings = require(NexusVRCharacterModel:WaitForChild("State"):WaitForChild("Settings")).GetInstance()
 
 local EnigmaService = {}
 EnigmaService.__index = EnigmaService
@@ -50,6 +51,7 @@ end
 Returns the CFrames for the trackers.
 --]]
 function EnigmaService.GetCFrames(self: EnigmaService, Character: any): TrackerData
+    if Settings:GetSetting("Extra.EnigmaEnabled") == false then return {} end
     local HeadsetWorldCFrame = Character.Parts.Head.CFrame * Character.Head:GetEyesOffset()
     local FloorWorldCFrame = HeadsetWorldCFrame * (UserInputService:GetUserCFrame(Enum.UserCFrame.Head):Inverse() * UserInputService:GetUserCFrame(Enum.UserCFrame.Floor))
 
@@ -69,6 +71,7 @@ end
 Calibrates any inputs based on the current inputs.
 --]]
 function EnigmaService.Calibrate(self: EnigmaService, Character: any): ()
+    if Settings:GetSetting("Extra.EnigmaEnabled") == false then return end
     local LeftFootTrackerCFrame = Enigma:GetUserCFrame("LeftFoot")
     local RightFootTrackerCFrame = Enigma:GetUserCFrame("RightFoot")
     if not LeftFootTrackerCFrame and not RightFootTrackerCFrame then return end
