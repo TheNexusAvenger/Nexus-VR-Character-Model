@@ -77,7 +77,7 @@ function EnigmaView:UpdateText(): ()
         if EnigmaService.Offsets.LeftFoot then
             Text = `{Text}\nLeft Foot Tracker: Active`
         else
-            Text = `{Text}\nLeft Foot Tracker: Requires Callibration`
+            Text = `{Text}\nLeft Foot Tracker: Requires Calibration`
         end
     else
         Text = `{Text}\nLeft Foot Tracker: Inactive`
@@ -86,7 +86,7 @@ function EnigmaView:UpdateText(): ()
         if EnigmaService.Offsets.RightFoot then
             Text = `{Text}\nRight Foot Tracker: Active`
         else
-            Text = `{Text}\nRight Foot Tracker: Requires Callibration`
+            Text = `{Text}\nRight Foot Tracker: Requires Calibration`
         end
     else
         Text = `{Text}\nRight Foot Tracker: Inactive`
