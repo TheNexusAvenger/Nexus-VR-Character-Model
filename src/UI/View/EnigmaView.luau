@@ -73,7 +73,7 @@ function EnigmaView:UpdateText(): ()
     local Text = "⚠️ Enigma is in a beta, and requires a desktop application. There may be issues.\n"
 
     --Add the tracker information.
-    if Enigma:GetUserCFrameEnabled("LeftFoot") then
+    if Enigma.Enabled and Enigma:GetUserCFrameEnabled("LeftFoot") then
         if EnigmaService.Offsets.LeftFoot then
             Text = `{Text}\nLeft Foot Tracker: Active`
         else
@@ -82,7 +82,7 @@ function EnigmaView:UpdateText(): ()
     else
         Text = `{Text}\nLeft Foot Tracker: Inactive`
     end
-    if Enigma:GetUserCFrameEnabled("RightFoot") then
+    if Enigma.Enabled and Enigma:GetUserCFrameEnabled("RightFoot") then
         if EnigmaService.Offsets.RightFoot then
             Text = `{Text}\nRight Foot Tracker: Active`
         else

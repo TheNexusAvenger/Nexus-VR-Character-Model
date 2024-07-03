@@ -1,8 +1,11 @@
 --Manages reeading UserCframes from Enigma.
 --!strict
 
+local THUMBSTICK_DEADZONE = 0.2
+
 local Workspace = game:GetService("Workspace")
 local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
 local UserInputService = game:GetService("UserInputService")
 
 local NexusVRCharacterModel = script.Parent.Parent
@@ -46,12 +49,11 @@ function EnigmaService.GetInstance(): EnigmaService
     return StaticInstance
 end
 
-
 --[[
 Returns the CFrames for the trackers.
 --]]
 function EnigmaService.GetCFrames(self: EnigmaService, Character: any): TrackerData
-    if Settings:GetSetting("Extra.EnigmaEnabled") == false then return {} end
+    if not Enigma.Enabled then return {} end
     local HeadsetWorldCFrame = Character.Parts.Head.CFrame * Character.Head:GetEyesOffset()
     local FloorWorldCFrame = HeadsetWorldCFrame * (UserInputService:GetUserCFrame(Enum.UserCFrame.Head):Inverse() * UserInputService:GetUserCFrame(Enum.UserCFrame.Floor))
 
@@ -71,7 +73,7 @@ end
 Calibrates any inputs based on the current inputs.
 --]]
 function EnigmaService.Calibrate(self: EnigmaService, Character: any): ()
-    if Settings:GetSetting("Extra.EnigmaEnabled") == false then return end
+    if not Enigma.Enabled then return end
     local LeftFootTrackerCFrame = Enigma:GetUserCFrame("LeftFoot")
     local RightFootTrackerCFrame = Enigma:GetUserCFrame("RightFoot")
     if not LeftFootTrackerCFrame and not RightFootTrackerCFrame then return end
@@ -104,7 +106,54 @@ end
 Enables Enigma.
 --]]
 function EnigmaService.Enable(self: EnigmaService): ()
+    --Enable Enigma.
     Enigma:Enable()
+
+    --Implement the inputs.
+    --Pasting data interrupts the gamepad inputs.
+    local LastLeftThumbstick = Vector3.zero
+    local ButtonADown = false
+    UserInputService.InputBegan:Connect(function(Input)
+        if Input.KeyCode == Enum.KeyCode.ButtonA then
+            ButtonADown = true
+        end
+    end)
+    UserInputService.InputChanged:Connect(function(Input)
+        if Input.KeyCode == Enum.KeyCode.Thumbstick1 then
+            if Input.Position.Magnitude > THUMBSTICK_DEADZONE then
+                LastLeftThumbstick = Input.Position
+            else
+                LastLeftThumbstick = Vector3.zero
+            end
+        end
+    end)
+    UserInputService.InputEnded:Connect(function(Input)
+        if Input.KeyCode == Enum.KeyCode.Thumbstick1 then
+            LastLeftThumbstick = Vector3.zero
+        elseif Input.KeyCode == Enum.KeyCode.ButtonA then
+            ButtonADown = false
+        end
+    end)
+
+    RunService:BindToRenderStep("EnigmaCustomMovement", Enum.RenderPriority.Input.Value + 1, function()
+        --Return if Enigma isn't active.
+        if not Enigma:IsActive() then return end
+
+        --Return if the character is invalid.
+        local Character = Players.LocalPlayer.Character
+        if not Character then return end
+        local Humanoid = Character:FindFirstChildOfClass("Humanoid")
+        if not Humanoid or Humanoid.Health <= 0 then return end
+
+        --Move the character.
+        local MovementReferenceWorldCFrame = Workspace.CurrentCamera:GetRenderCFrame()
+        local MovementReferenceRotation = CFrame.new(-MovementReferenceWorldCFrame.Position) * MovementReferenceWorldCFrame
+        local MoveDirection = (MovementReferenceRotation * CFrame.new(LastLeftThumbstick.X, 0, -LastLeftThumbstick.Y)).Position
+        Players.LocalPlayer:Move(MoveDirection, false)
+        if ButtonADown then
+            Humanoid.Jump = true
+        end
+    end)
 end
 
 
