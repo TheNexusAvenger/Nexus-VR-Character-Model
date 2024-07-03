@@ -83,7 +83,8 @@ function Character.new(CharacterModel: Model): Character
                 local ReplicationCFrames = (self :: any).ReplicationCFrames :: {CFrame}
                 if (self :: any).LastReplicationCFrames ~= ReplicationCFrames then
                     (self :: any).LastReplicationCFrames = ReplicationCFrames
-                    UpdateInputs:FireServer(ReplicationCFrames[1], ReplicationCFrames[2], ReplicationCFrames[3], tick())
+                    local ReplicationTrackerData = (self :: any).ReplicationTrackerData :: {[string]: CFrame}?
+                    UpdateInputs:FireServer(ReplicationCFrames[1], ReplicationCFrames[2], ReplicationCFrames[3], tick(), ReplicationTrackerData)
                 end
 
                 --Wait 1/30th of a second to send the next set of CFrames.
@@ -372,7 +373,7 @@ end
 --[[
 Updates the character from the inputs.
 --]]
-function Character:UpdateFromInputs(HeadControllerCFrame: CFrame, LeftHandControllerCFrame: CFrame, RightHandControllerCFrame: CFrame): ()
+function Character:UpdateFromInputs(HeadControllerCFrame: CFrame, LeftHandControllerCFrame: CFrame, RightHandControllerCFrame: CFrame, TrackerData: {[string]: CFrame}?): ()
     --Return if the humanoid is dead.
     if self.Humanoid.Health <= 0 then
         return
@@ -401,14 +402,18 @@ function Character:UpdateFromInputs(HeadControllerCFrame: CFrame, LeftHandContro
 
     --Get the tracker CFrames from Enigma and fallback feet CFrames.
     local LeftFoot: CFrame, RightFoot: CFrame = self.FootPlanter:GetFeetCFrames()
-    local NewCFrames = EnigmaService:GetCFrames(self)
-    if NewCFrames.LeftFoot then
-        LeftFoot = NewCFrames.LeftFoot
+    local NewTrackerCFrames = EnigmaService:GetCFrames(self)
+    if NewTrackerCFrames.LeftFoot then
+        LeftFoot = NewTrackerCFrames.LeftFoot
+    elseif TrackerData and TrackerData.LeftFoot then
+        LeftFoot = TrackerData.LeftFoot
     else
         LeftFoot = LeftFoot * CFrame.Angles(0, math.pi, 0)
     end
-    if NewCFrames.RightFoot then
-        RightFoot = NewCFrames.RightFoot
+    if NewTrackerCFrames.RightFoot then
+        RightFoot = NewTrackerCFrames.RightFoot
+    elseif TrackerData and TrackerData.RightFoot then
+        RightFoot = TrackerData.RightFoot
     else
         RightFoot = RightFoot * CFrame.Angles(0, math.pi, 0)
     end
@@ -454,6 +459,10 @@ function Character:UpdateFromInputs(HeadControllerCFrame: CFrame, LeftHandContro
     --Replicate the changes to the server.
     if Players.LocalPlayer and Players.LocalPlayer.Character == self.CharacterModel then
         self.ReplicationCFrames = {HeadControllerCFrame, LeftHandControllerCFrame, RightHandControllerCFrame}
+        self.ReplicationTrackerData = {
+            LeftFoot = NewTrackerCFrames.LeftFoot,
+            RightFoot = NewTrackerCFrames.RightFoot,
+        }
     end
 end
 

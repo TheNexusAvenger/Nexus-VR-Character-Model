@@ -30,7 +30,7 @@ Settings:SetDefaults(HttpService:JSONDecode((NexusVRCharacterModel:WaitForChild(
 
 --Connect replication for other players.
 local LastPlayerUpdates = {} :: {[Player]: number}
-UpdateInputs.OnClientEvent:Connect(function(Player: Player, HeadCFrame: CFrame, LeftHandCFrame: CFrame, RightHandCFrame: CFrame, UpdateTime: number?)
+UpdateInputs.OnClientEvent:Connect(function(Player: Player, HeadCFrame: CFrame, LeftHandCFrame: CFrame, RightHandCFrame: CFrame, UpdateTime: number?, TrackerData: {[string]: CFrame}?)
     --Return if the update is after the latest update.
     --Unreliable events do not guarentee order.
     if UpdateTime then
@@ -41,7 +41,7 @@ UpdateInputs.OnClientEvent:Connect(function(Player: Player, HeadCFrame: CFrame, 
     --Update the character.
     local Character = CharacterService:GetCharacter(Player)
     if Character then
-        Character:UpdateFromInputs(HeadCFrame, LeftHandCFrame, RightHandCFrame)
+        Character:UpdateFromInputs(HeadCFrame, LeftHandCFrame, RightHandCFrame, TrackerData)
     end
 end)
 Players.PlayerRemoving:Connect(function(Player)
