@@ -401,21 +401,30 @@ function Character:UpdateFromInputs(HeadControllerCFrame: CFrame, LeftHandContro
     local JointCFrames = self.Torso:GetAppendageJointCFrames(LowerTorsoCFrame, UpperTorsoCFrame)
 
     --Get the tracker CFrames from Enigma and fallback feet CFrames.
+    local IsLocalCharacter = (Players.LocalPlayer and Players.LocalPlayer.Character == self.CharacterModel)
     local LeftFoot: CFrame, RightFoot: CFrame = self.FootPlanter:GetFeetCFrames()
-    local NewTrackerCFrames = EnigmaService:GetCFrames(self)
-    if NewTrackerCFrames.LeftFoot then
-        LeftFoot = NewTrackerCFrames.LeftFoot
-    elseif TrackerData and TrackerData.LeftFoot then
+    if TrackerData and TrackerData.LeftFoot then
         LeftFoot = TrackerData.LeftFoot
     else
         LeftFoot = LeftFoot * CFrame.Angles(0, math.pi, 0)
     end
-    if NewTrackerCFrames.RightFoot then
-        RightFoot = NewTrackerCFrames.RightFoot
-    elseif TrackerData and TrackerData.RightFoot then
+    if TrackerData and TrackerData.RightFoot then
         RightFoot = TrackerData.RightFoot
     else
         RightFoot = RightFoot * CFrame.Angles(0, math.pi, 0)
+    end
+    if IsLocalCharacter then
+        local NewTrackerCFrames = EnigmaService:GetCFrames(self)
+        if NewTrackerCFrames.LeftFoot then
+            LeftFoot = NewTrackerCFrames.LeftFoot
+        end
+        if NewTrackerCFrames.RightFoot then
+            RightFoot = NewTrackerCFrames.RightFoot
+        end
+        self.ReplicationTrackerData = {
+            LeftFoot = NewTrackerCFrames.LeftFoot,
+            RightFoot = NewTrackerCFrames.RightFoot,
+        }
     end
 
     --Set the character CFrames.
@@ -457,12 +466,8 @@ function Character:UpdateFromInputs(HeadControllerCFrame: CFrame, LeftHandContro
     end
 
     --Replicate the changes to the server.
-    if Players.LocalPlayer and Players.LocalPlayer.Character == self.CharacterModel then
+    if IsLocalCharacter then
         self.ReplicationCFrames = {HeadControllerCFrame, LeftHandControllerCFrame, RightHandControllerCFrame}
-        self.ReplicationTrackerData = {
-            LeftFoot = NewTrackerCFrames.LeftFoot,
-            RightFoot = NewTrackerCFrames.RightFoot,
-        }
     end
 end
 
