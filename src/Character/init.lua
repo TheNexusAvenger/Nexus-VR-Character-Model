@@ -28,7 +28,7 @@ export type Character = {
 
     GetHumanoidScale: (self: Character, ScaleName: string) -> (number),
     RefreshCharacter: (self: Character) -> (),
-    UpdateFromInputs: (self: Character, HeadControllerCFrame: CFrame, LeftHandControllerCFrame: CFrame, RightHandControllerCFrame: CFrame) -> (),
+    UpdateFromInputs: (self: Character, HeadControllerCFrame: CFrame, LeftHandControllerCFrame: CFrame, RightHandControllerCFrame: CFrame, CurrentWalkspeed: number?, TrackerData: {[string]: CFrame}?) -> (),
 }
 
 
@@ -60,7 +60,11 @@ function Character.new(CharacterModel: Model): Character
     end
 
     --Store the body parts.
-    self.Humanoid = CharacterModel:WaitForChild("Humanoid")
+    self.Humanoid = CharacterModel:WaitForChild("Humanoid") :: Humanoid
+    self.CurrentWalkspeed = 0
+    self.Humanoid.Running:Connect(function(WalkSpeed)
+        self.CurrentWalkspeed = WalkSpeed
+    end)
 
     --Set up the character parts.
     self.PreventArmDisconnection = PreventArmDisconnection
@@ -84,7 +88,7 @@ function Character.new(CharacterModel: Model): Character
                 if (self :: any).LastReplicationCFrames ~= ReplicationCFrames then
                     (self :: any).LastReplicationCFrames = ReplicationCFrames
                     local ReplicationTrackerData = (self :: any).ReplicationTrackerData :: {[string]: CFrame}?
-                    UpdateInputs:FireServer(ReplicationCFrames[1], ReplicationCFrames[2], ReplicationCFrames[3], tick(), ReplicationTrackerData)
+                    UpdateInputs:FireServer(ReplicationCFrames[1], ReplicationCFrames[2], ReplicationCFrames[3], tick(), self.CurrentWalkspeed, ReplicationTrackerData)
                 end
 
                 --Wait 1/30th of a second to send the next set of CFrames.
@@ -373,7 +377,7 @@ end
 --[[
 Updates the character from the inputs.
 --]]
-function Character:UpdateFromInputs(HeadControllerCFrame: CFrame, LeftHandControllerCFrame: CFrame, RightHandControllerCFrame: CFrame, TrackerData: {[string]: CFrame}?): ()
+function Character:UpdateFromInputs(HeadControllerCFrame: CFrame, LeftHandControllerCFrame: CFrame, RightHandControllerCFrame: CFrame, CurrentWalkspeed: number?, TrackerData: {[string]: CFrame}?): ()
     --Return if the humanoid is dead.
     if self.Humanoid.Health <= 0 then
         return
@@ -431,6 +435,7 @@ function Character:UpdateFromInputs(HeadControllerCFrame: CFrame, LeftHandContro
     --HumanoidRootParts must always face up. This makes the math more complicated.
     --Setting the CFrame directly to something not facing directly up will result in the physics
     --attempting to correct that within the next frame, causing the character to appear to move.
+    local IsWalking = ((CurrentWalkspeed or self.CurrentWalkspeed) > 0.1)
     local TargetHumanoidRootPartCFrame = LowerTorsoCFrame * self.Attachments.LowerTorso.RootRigAttachment.CFrame * self.Attachments.HumanoidRootPart.RootRigAttachment.CFrame:Inverse()
     local ActualHumanoidRootPartCFrame: CFrame = self.Parts.HumanoidRootPart.CFrame
     local HumanoidRootPartHeightDifference = ActualHumanoidRootPartCFrame.Y - TargetHumanoidRootPartCFrame.Y
@@ -442,27 +447,41 @@ function Character:UpdateFromInputs(HeadControllerCFrame: CFrame, LeftHandContro
     if self.UseIKControl then
         self.LeftArm:MoveToWorld(LeftHandControllerCFrame)
         self.RightArm:MoveToWorld(RightHandControllerCFrame)
-        self.LeftLeg:MoveToWorld(LeftFoot)
-        self.RightLeg:MoveToWorld(RightFoot)
-        self.LeftLeg:Enable()
-        self.RightLeg:Enable()
+        if not IsWalking then
+            self.LeftLeg:MoveToWorld(LeftFoot)
+            self.RightLeg:MoveToWorld(RightFoot)
+            self.LeftLeg:Enable()
+            self.RightLeg:Enable()
+        else
+            self.LeftLeg:Disable()
+            self.RightLeg:Disable()
+        end
     else
         local LeftUpperArmCFrame, LeftLowerArmCFrame, LeftHandCFrame = self.LeftArm:GetAppendageCFrames(JointCFrames["LeftShoulder"], LeftHandControllerCFrame)
         local RightUpperArmCFrame, RightLowerArmCFrame, RightHandCFrame = self.RightArm:GetAppendageCFrames(JointCFrames["RightShoulder"], RightHandControllerCFrame)
-        local LeftUpperLegCFrame, LeftLowerLegCFrame, LeftFootCFrame = self.LeftLeg:GetAppendageCFrames(JointCFrames["LeftHip"], LeftFoot)
-        local RightUpperLegCFrame, RightLowerLegCFrame, RightFootCFrame = self.RightLeg:GetAppendageCFrames(JointCFrames["RightHip"], RightFoot)
-        self:SetTransform("RightHip", "RightHipRigAttachment", "LowerTorso", "RightUpperLeg", LowerTorsoCFrame, RightUpperLegCFrame)
-        self:SetTransform("RightKnee", "RightKneeRigAttachment", "RightUpperLeg", "RightLowerLeg", RightUpperLegCFrame, RightLowerLegCFrame)
-        self:SetTransform("RightAnkle", "RightAnkleRigAttachment", "RightLowerLeg", "RightFoot", RightLowerLegCFrame, RightFootCFrame)
-        self:SetTransform("LeftHip", "LeftHipRigAttachment", "LowerTorso", "LeftUpperLeg", LowerTorsoCFrame, LeftUpperLegCFrame)
-        self:SetTransform("LeftKnee", "LeftKneeRigAttachment", "LeftUpperLeg", "LeftLowerLeg", LeftUpperLegCFrame, LeftLowerLegCFrame)
-        self:SetTransform("LeftAnkle", "LeftAnkleRigAttachment", "LeftLowerLeg", "LeftFoot", LeftLowerLegCFrame, LeftFootCFrame)
         self:SetTransform("RightShoulder", "RightShoulderRigAttachment", "UpperTorso", "RightUpperArm", UpperTorsoCFrame, RightUpperArmCFrame)
         self:SetTransform("RightElbow", "RightElbowRigAttachment", "RightUpperArm", "RightLowerArm", RightUpperArmCFrame, RightLowerArmCFrame)
         self:SetTransform("RightWrist", "RightWristRigAttachment", "RightLowerArm", "RightHand", RightLowerArmCFrame, RightHandCFrame)
         self:SetTransform("LeftShoulder", "LeftShoulderRigAttachment", "UpperTorso", "LeftUpperArm", UpperTorsoCFrame, LeftUpperArmCFrame)
         self:SetTransform("LeftElbow", "LeftElbowRigAttachment", "LeftUpperArm", "LeftLowerArm", LeftUpperArmCFrame, LeftLowerArmCFrame)
         self:SetTransform("LeftWrist", "LeftWristRigAttachment", "LeftLowerArm", "LeftHand", LeftLowerArmCFrame, LeftHandCFrame)
+        if not IsWalking then
+            local LeftUpperLegCFrame, LeftLowerLegCFrame, LeftFootCFrame = self.LeftLeg:GetAppendageCFrames(JointCFrames["LeftHip"], LeftFoot)
+            local RightUpperLegCFrame, RightLowerLegCFrame, RightFootCFrame = self.RightLeg:GetAppendageCFrames(JointCFrames["RightHip"], RightFoot)
+            self:SetTransform("RightHip", "RightHipRigAttachment", "LowerTorso", "RightUpperLeg", LowerTorsoCFrame, RightUpperLegCFrame)
+            self:SetTransform("RightKnee", "RightKneeRigAttachment", "RightUpperLeg", "RightLowerLeg", RightUpperLegCFrame, RightLowerLegCFrame)
+            self:SetTransform("RightAnkle", "RightAnkleRigAttachment", "RightLowerLeg", "RightFoot", RightLowerLegCFrame, RightFootCFrame)
+            self:SetTransform("LeftHip", "LeftHipRigAttachment", "LowerTorso", "LeftUpperLeg", LowerTorsoCFrame, LeftUpperLegCFrame)
+            self:SetTransform("LeftKnee", "LeftKneeRigAttachment", "LeftUpperLeg", "LeftLowerLeg", LeftUpperLegCFrame, LeftLowerLegCFrame)
+            self:SetTransform("LeftAnkle", "LeftAnkleRigAttachment", "LeftLowerLeg", "LeftFoot", LeftLowerLegCFrame, LeftFootCFrame)
+        else
+            self.CurrentMotor6DTransforms[self.Motors.RightHip] = nil
+            self.CurrentMotor6DTransforms[self.Motors.LeftHip] = nil
+            self.CurrentMotor6DTransforms[self.Motors.RightKnee] = nil
+            self.CurrentMotor6DTransforms[self.Motors.LeftKnee] = nil
+            self.CurrentMotor6DTransforms[self.Motors.RightAnkle] = nil
+            self.CurrentMotor6DTransforms[self.Motors.LeftAnkle] = nil
+        end
     end
 
     --Replicate the changes to the server.

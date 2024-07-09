@@ -105,12 +105,13 @@ function NexusVRCharacterModel:Load(): ()
     ReplicationReadyEvent.Name = "ReplicationReady"
     ReplicationReadyEvent.Parent = script
 
-    UpdateInputsEvent.OnServerEvent:Connect(function(Player, HeadCFrame: CFrame, LeftHandCFrame: CFrame, RightHandCFrame: CFrame, UpdateTime: number?, TrackerData: {[string]: CFrame}?)
+    UpdateInputsEvent.OnServerEvent:Connect(function(Player, HeadCFrame: CFrame, LeftHandCFrame: CFrame, RightHandCFrame: CFrame, UpdateTime: number?, CurrentWalkspeed: number?, TrackerData: {[string]: CFrame}?)
         --Ignore the input if 3 CFrames aren't given.
         if typeof(HeadCFrame) ~= "CFrame" then return end
         if typeof(LeftHandCFrame) ~= "CFrame" then return end
         if typeof(RightHandCFrame) ~= "CFrame" then return end
         if UpdateTime and typeof(UpdateTime) ~= "number" then return end
+        if UpdateTime and typeof(CurrentWalkspeed) ~= "number" then return end
         if TrackerData then
             if typeof(TrackerData) ~= "table" then return end
             for Key, Value in TrackerData do
@@ -125,7 +126,7 @@ function NexusVRCharacterModel:Load(): ()
         --Replicate the CFrames to the other players.
         for _,OtherPlayer in Players:GetPlayers() do
             if Player ~= OtherPlayer and ReadyPlayers[OtherPlayer] then
-                UpdateInputsEvent:FireClient(OtherPlayer, Player, HeadCFrame, LeftHandCFrame, RightHandCFrame, UpdateTime, TrackerData)
+                UpdateInputsEvent:FireClient(OtherPlayer, Player, HeadCFrame, LeftHandCFrame, RightHandCFrame, UpdateTime, CurrentWalkspeed, TrackerData)
             end
         end
     end)
