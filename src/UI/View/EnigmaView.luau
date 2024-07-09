@@ -22,10 +22,11 @@ EnigmaView:SetClassName("EnigmaView")
 --[[
 Creates the Enigma view.
 --]]
-function EnigmaView:__new(View: any): ()
+function EnigmaView:__new(View: any, Menu: any): ()
     NexusInstance.__new(self)
     View:AddBackground()
 
+    --Create the calibrate view.
     local Container = View:GetContainer()
     local EnigmaText = Instance.new("TextLabel")
     EnigmaText.BackgroundTransparency = 1
@@ -63,6 +64,42 @@ function EnigmaView:__new(View: any): ()
         local Character = CharacterService:GetCharacter(Players.LocalPlayer)
         if not Character then return end
         EnigmaService:Calibrate(Character)
+    end)
+
+    --Present the view if an uncalibratedd input becomes visible.
+    task.spawn(function()
+        local UncalibratedInputsPrompted = {
+            LeftFoot = false,
+            RightFoot = false,
+        }
+        while true do
+            --Determine if there are unprompted inputs.
+            local AllInputsCalibrated = true
+            local InputsToPrompt = {}
+            for InputName, Prompted in UncalibratedInputsPrompted do
+                if Prompted then continue end
+                if not Prompted then
+                    AllInputsCalibrated = false
+                end
+                if not Enigma.Enabled or not Enigma:GetUserCFrameEnabled(InputName :: any) then continue end
+                if EnigmaService.Offsets[InputName] then continue end
+                table.insert(InputsToPrompt, InputName)
+            end
+            for _, InputName in InputsToPrompt do
+                UncalibratedInputsPrompted[InputName] = true
+            end
+
+            --Show the view.
+            if #InputsToPrompt > 0 then
+                Menu:UpdateVisibleView(View.Name)
+                Menu:Toggle(true)
+                self:UpdateText()
+            end
+
+            --Break the loop if all inputs are prompted.
+            if AllInputsCalibrated then break end
+            task.wait()
+        end
     end)
 end
 

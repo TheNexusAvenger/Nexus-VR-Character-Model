@@ -104,7 +104,7 @@ function MainMenu.new(): any
     self.CurrentView = 1
     self.Views = {}
     (SettingsView :: any).new(self:CreateView("Settings"));
-    (EnigmaView :: any).new(self:CreateView("Enigma (Beta)"));
+    (EnigmaView :: any).new(self:CreateView("Enigma (Beta)"), self);
     (ChatView :: any).new(self:CreateView("Chat"))
     self:UpdateVisibleView()
 
@@ -447,7 +447,9 @@ end
 --[[
 Toggles the menu being open.
 --]]
-function MainMenu:Toggle(): ()
+function MainMenu:Toggle(Visible: boolean?): ()
+    if self.ScreenGui.Enabled == Visible then return end
+
     --Determine the start and end values.
     local StartFieldOfView, EndFieldOfView = (self.ScreenGui.Enabled and math.rad(40) or 0), (self.ScreenGui.Enabled and 0 or math.rad(40))
 
@@ -517,12 +519,19 @@ end
 --[[
 Updates the visible view.
 --]]
-function MainMenu:UpdateVisibleView(): ()
+function MainMenu:UpdateVisibleView(NewView: string?): ()
     --Update the button visibility.
     self.LeftButton.Visible = (#self.Views > 1)
     self.RightButton.Visible = (#self.Views > 1)
 
     --Update the display text.
+    if NewView then
+        for i, View in self.Views do
+            if View.Name ~= NewView then continue end
+            self.CurrentView = i
+            break
+        end
+    end
     self.ViewTextLabel.Text = self.Views[self.CurrentView].Name
 
     --Update the view visibilites.
