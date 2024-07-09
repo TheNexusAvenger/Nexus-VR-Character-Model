@@ -11,7 +11,6 @@ local UserInputService = game:GetService("UserInputService")
 local NexusVRCharacterModel = script.Parent.Parent
 local Enigma = require(NexusVRCharacterModel:WaitForChild("Enigma"))
 local Head = require(NexusVRCharacterModel:WaitForChild("Character"):WaitForChild("Head"))
-local Settings = require(NexusVRCharacterModel:WaitForChild("State"):WaitForChild("Settings")).GetInstance()
 
 local EnigmaService = {}
 EnigmaService.__index = EnigmaService
