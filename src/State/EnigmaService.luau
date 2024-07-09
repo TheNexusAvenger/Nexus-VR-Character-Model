@@ -90,6 +90,8 @@ function EnigmaService.Calibrate(self: EnigmaService, Character: any): ()
         local LeftUpperLegCFrame = LowerTorsoCFrame * Attachments.LowerTorso.LeftHipRigAttachment.CFrame * Attachments.LeftUpperLeg.LeftHipRigAttachment.CFrame:Inverse()
         local LeftLowerLegCFrame = LeftUpperLegCFrame * Attachments.LeftUpperLeg.LeftKneeRigAttachment.CFrame * Attachments.LeftLowerLeg.LeftKneeRigAttachment.CFrame:Inverse()
         local LeftFootCFrame = LeftLowerLegCFrame * Attachments.LeftLowerLeg.LeftAnkleRigAttachment.CFrame * Attachments.LeftFoot.LeftAnkleRigAttachment.CFrame:Inverse()
+        local LeftFootBottomCFrame = LeftFootCFrame * Attachments.LeftFoot.LeftFootAttachment.CFrame
+        LeftFootCFrame = CFrame.new(0, FloorWorldCFrame.Y - LeftFootBottomCFrame.Y, 0) * LeftFootCFrame
         self.Offsets.LeftFoot = LeftFootTrackerWorldCFrame:Inverse() * LeftFootCFrame
     end
     if RightFootTrackerCFrame then
@@ -97,6 +99,8 @@ function EnigmaService.Calibrate(self: EnigmaService, Character: any): ()
         local RightUpperLegCFrame = LowerTorsoCFrame * Attachments.LowerTorso.RightHipRigAttachment.CFrame * Attachments.RightUpperLeg.RightHipRigAttachment.CFrame:Inverse()
         local RightLowerLegCFrame = RightUpperLegCFrame * Attachments.RightUpperLeg.RightKneeRigAttachment.CFrame * Attachments.RightLowerLeg.RightKneeRigAttachment.CFrame:Inverse()
         local RightFootCFrame = RightLowerLegCFrame * Attachments.RightLowerLeg.RightAnkleRigAttachment.CFrame * Attachments.RightFoot.RightAnkleRigAttachment.CFrame:Inverse()
+        local RightFootBottomCFrame = RightFootCFrame * Attachments.RightFoot.RightFootAttachment.CFrame
+        RightFootCFrame = CFrame.new(0, FloorWorldCFrame.Y - RightFootBottomCFrame.Y, 0) * RightFootCFrame
         self.Offsets.RightFoot = RightFootTrackerWorldCFrame:Inverse() * RightFootCFrame
     end
 end
