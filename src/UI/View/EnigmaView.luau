@@ -1,6 +1,11 @@
 --View for the Enigma library.
 --!strict
 
+local SUPPORTED_PROTOCOL_VERSIONS = {
+    ["1"] = true,
+    ["2"] = true,
+}
+
 local Workspace = game:GetService("Workspace")
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
@@ -24,6 +29,13 @@ EnigmaView:SetClassName("EnigmaView")
 
 
 --[[
+Returns text with rich text color.
+--]]
+local function AddColor(Text: string, R: number, G: number, B: number): string
+    return `<font color="rgb({R},{G},{B})">{Text}</font>`
+end
+
+--[[
 Creates the Enigma view.
 --]]
 function EnigmaView:__new(View: any, Menu: any): ()
@@ -34,39 +46,37 @@ function EnigmaView:__new(View: any, Menu: any): ()
     local Container = View:GetContainer()
     local EnigmaText = Instance.new("TextLabel")
     EnigmaText.BackgroundTransparency = 1
-    EnigmaText.Size = UDim2.new(0.8, 0, 0.5, 0)
-    EnigmaText.Position = UDim2.new(0.1, 0, 0.1, 0)
+    EnigmaText.Size = UDim2.new(0.9, 0, 0.6, 0)
+    EnigmaText.Position = UDim2.new(0.05, 0, 0.075, 0)
     EnigmaText.Font = Enum.Font.SourceSansBold
     EnigmaText.Text = ""
-    EnigmaText.TextScaled = true
+    EnigmaText.RichText = true
+    EnigmaText.TextWrapped = true
     EnigmaText.TextColor3 = Color3.fromRGB(255, 255, 255)
     EnigmaText.TextStrokeColor3 = Color3.fromRGB(0, 0, 0)
     EnigmaText.TextStrokeTransparency = 0
+    EnigmaText.TextSize = 28
+    EnigmaText.TextYAlignment = Enum.TextYAlignment.Top
     EnigmaText.Parent = Container
     self.EnigmaText = EnigmaText
     if Settings:GetSetting("Extra.EnigmaEnabled") == false then
         EnigmaText.Text = "This game has disabled Enigma (Beta)."
         return
     end
-    self:UpdateText()
 
-    task.spawn(function()
-        while true do
-            self:UpdateText()
-            task.wait(0.1)
-        end
-    end)
-
-    --TODO: Only show when trackers are active.
     local ShowTrackersButton, ShowTrackersText = TextButtonFactory:Create()
     ShowTrackersButton.Size = UDim2.new(0.5, 0, 0.075, 0)
     ShowTrackersButton.Position = UDim2.new(0.25, 0, 0.775, 0)
     ShowTrackersButton.SizeConstraint = Enum.SizeConstraint.RelativeYY
     ShowTrackersButton.Parent = Container
     ShowTrackersText.Text = " Show Trackers "
+    self.ShowTrackersButton = ShowTrackersButton
 
     self.DebugTrackersVisible = false
+    local DB = true
     ShowTrackersButton.MouseButton1Down:Connect(function()
+        if not DB then return end
+        DB = false
         self.DebugTrackersVisible = not self.DebugTrackersVisible
         if self.DebugTrackersVisible then
             task.spawn(function()
@@ -74,6 +84,8 @@ function EnigmaView:__new(View: any, Menu: any): ()
             end)
         end
         ShowTrackersText.Text = (self.DebugTrackersVisible and " Hide Trackers" or " Show Trackers ")
+        task.wait()
+        DB = true
     end)
 
     local CalibrateButton, CalibrateText = TextButtonFactory:Create()
@@ -82,11 +94,26 @@ function EnigmaView:__new(View: any, Menu: any): ()
     CalibrateButton.SizeConstraint = Enum.SizeConstraint.RelativeYY
     CalibrateButton.Parent = Container
     CalibrateText.Text = " Calibrate Trackers "
+    self.CalibrateButton = CalibrateButton
 
     CalibrateButton.MouseButton1Down:Connect(function()
+        if not DB then return end
+        DB = false
         local Character = CharacterService:GetCharacter(Players.LocalPlayer)
-        if not Character then return end
-        EnigmaService:Calibrate(Character)
+        if Character then
+            EnigmaService:Calibrate(Character)
+        end
+        task.wait()
+        DB = true
+    end)
+
+    --Update the text in the background.
+    self:UpdateText()
+    task.spawn(function()
+        while true do
+            self:UpdateText()
+            task.wait(0.1)
+        end
     end)
 
     --Present the view if an uncalibratedd input becomes visible.
@@ -130,42 +157,54 @@ end
 Updates the Enigma text.
 --]]
 function EnigmaView:UpdateText(): ()
-    local Text = "⚠️ Enigma is in a beta, and requires a desktop application. There may be issues.\n"
-
     --Add the tracker information.
+    local Text = ""
     if Enigma.Enabled and Enigma:GetUserCFrameEnabled("LeftFoot") then
         if EnigmaService.Offsets.LeftFoot then
-            Text = `{Text}\nLeft Foot Tracker: Active`
+            Text = `{Text}Left Foot Tracker: {AddColor("Active", 0, 200, 0)}`
         else
-            Text = `{Text}\nLeft Foot Tracker: Requires Calibration`
+            Text = `{Text}Left Foot Tracker: {AddColor("Requires Calibration", 200, 150, 0)}`
         end
     else
-        Text = `{Text}\nLeft Foot Tracker: Inactive`
+        Text = `{Text}Left Foot Tracker: {AddColor("Inactive", 200, 0, 0)}`
     end
     if Enigma.Enabled and Enigma:GetUserCFrameEnabled("RightFoot") then
         if EnigmaService.Offsets.RightFoot then
-            Text = `{Text}\nRight Foot Tracker: Active`
+            Text = `{Text}\nRight Foot Tracker: {AddColor("Active", 0, 200, 0)}`
         else
-            Text = `{Text}\nRight Foot Tracker: Requires Calibration`
+            Text = `{Text}\nRight Foot Tracker: {AddColor("Requires Calibration", 200, 150, 0)}`
         end
     else
-        Text = `{Text}\nRight Foot Tracker: Inactive`
+        Text = `{Text}\nRight Foot Tracker: {AddColor("Inactive", 200, 0, 0)}`
     end
 
     --Add the data transfer status.
-    local FocusedTextBox = UserInputService:GetFocusedTextBox()
-    if FocusedTextBox then
-        if FocusedTextBox.Parent and FocusedTextBox.Parent.Name == "EnigmaTextBoxInput" then
-            Text = `{Text}\nData transfer: Active`
+    if Enigma:IsActive() then
+        local FocusedTextBox = UserInputService:GetFocusedTextBox()
+        if not FocusedTextBox or (FocusedTextBox.Parent and FocusedTextBox.Parent.Name == "EnigmaTextBoxInput") then
+            Text = `{Text}\nData transfer: {AddColor("Active", 0, 200, 0)}`
+            if Enigma.Input then
+                local EnigmaVersion = string.split(Enigma.Input:GetCurrentText(), "|")[1]
+                if SUPPORTED_PROTOCOL_VERSIONS[EnigmaVersion] then
+                    Text = `{Text}\n\nProtocol version: {EnigmaVersion}`
+                else
+                    Text = `{Text}\n\nProtocol version: {AddColor(EnigmaVersion.." (Unsupported)", 200, 150, 0)}`
+                end
+            end
         else
-            Text = `{Text}\nData transfer: Invalid`
+            Text = `{Text}\nData transfer: {AddColor("Inactive", 200, 0, 0)}`
         end
+        Text = `{Text}\n\nTo calibrate, stand up straight with your head level and facing forward with your feet next to each other pointing forward.`
+        self.ShowTrackersButton.Visible = true
+        self.CalibrateButton.Visible = true
     else
-        Text = `{Text}\nData transfer: Inactive`
+        Text = `{Text}\nData transfer: {AddColor("Inactive", 200, 150, 0)}`
+        Text = `{Text}\n\n⚠️ Enigma is in a beta, and requires a desktop application. There may be issues.`
+        self.ShowTrackersButton.Visible = false
+        self.CalibrateButton.Visible = false
     end
 
     --Set the text.
-    Text = `{Text}\n\nTo calibrate, stand up straight with your head level and facing forward with your feet next to each other pointing forward.`
     self.EnigmaText.Text = Text
 end
 
@@ -183,7 +222,7 @@ function EnigmaView:ShowDebugTrackers(): ()
         --Get the visible trackers.
         local ActiveInputs = {}
         local TotalInputs = 0
-        local OriginWorldCFrame = Workspace.CurrentCamera:GetRenderCFrame() * VRService:GetUserCFrame(Enum.UserCFrame.Head):Inverse()
+        local OriginWorldCFrame = Workspace.CurrentCamera:GetRenderCFrame() * VRService:GetUserCFrame(Enum.UserCFrame.Head):Inverse() * VRService:GetUserCFrame(Enum.UserCFrame.Floor) --TODO: Remove Floor; Enigma should be relative to Origin, not floor.
         for _, UserCFrameName: EnigmaTrackerRoles.TrackerRole in EnigmaTrackerRoles do
             if not Enigma:GetUserCFrameEnabled(UserCFrameName) then continue end
             ActiveInputs[UserCFrameName] = OriginWorldCFrame * Enigma:GetUserCFrame(UserCFrameName)
