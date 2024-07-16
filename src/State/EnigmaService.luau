@@ -54,16 +54,16 @@ Returns the CFrames for the trackers.
 function EnigmaService.GetCFrames(self: EnigmaService, Character: any): TrackerData
     if not Enigma.Enabled then return {} end
     local HeadsetWorldCFrame = Character.Parts.Head.CFrame * Character.Head:GetEyesOffset()
-    local FloorWorldCFrame = HeadsetWorldCFrame * (UserInputService:GetUserCFrame(Enum.UserCFrame.Head):Inverse() * UserInputService:GetUserCFrame(Enum.UserCFrame.Floor))
+    local OriginWorldCFrame = HeadsetWorldCFrame * UserInputService:GetUserCFrame(Enum.UserCFrame.Head):Inverse()
 
     local LeftFootTrackerCFrame = Enigma:GetUserCFrame("LeftFoot")
     local RightFootTrackerCFrame = Enigma:GetUserCFrame("RightFoot")
     local Offsets = {}
     if LeftFootTrackerCFrame and self.Offsets.LeftFoot then
-        Offsets.LeftFoot = FloorWorldCFrame * LeftFootTrackerCFrame * self.Offsets.LeftFoot
+        Offsets.LeftFoot = OriginWorldCFrame * LeftFootTrackerCFrame * self.Offsets.LeftFoot
     end
     if RightFootTrackerCFrame and self.Offsets.RightFoot then
-        Offsets.RightFoot = FloorWorldCFrame * RightFootTrackerCFrame * self.Offsets.RightFoot
+        Offsets.RightFoot = OriginWorldCFrame * RightFootTrackerCFrame * self.Offsets.RightFoot
     end
     return Offsets
 end
@@ -78,7 +78,8 @@ function EnigmaService.Calibrate(self: EnigmaService, Character: any): ()
     if not LeftFootTrackerCFrame and not RightFootTrackerCFrame then return end
     local Attachments = Character.Attachments
     local HeadsetWorldCFrame = Workspace.CurrentCamera:GetRenderCFrame()
-    local FloorWorldCFrame = HeadsetWorldCFrame * (UserInputService:GetUserCFrame(Enum.UserCFrame.Head):Inverse() * UserInputService:GetUserCFrame(Enum.UserCFrame.Floor))
+    local OriginWorldCFrame = HeadsetWorldCFrame * UserInputService:GetUserCFrame(Enum.UserCFrame.Head):Inverse()
+    local FloorWorldCFrame = OriginWorldCFrame * UserInputService:GetUserCFrame(Enum.UserCFrame.Floor)
     
     local NewCharacterHead = Head.new(Character.Parts.Head)
     local HeadWorldCFrame = NewCharacterHead:GetHeadCFrame(HeadsetWorldCFrame)
@@ -86,7 +87,7 @@ function EnigmaService.Calibrate(self: EnigmaService, Character: any): ()
     local LowerTorsoCFrame = NeckWorldCFrame * Attachments.UpperTorso.NeckRigAttachment.CFrame:Inverse() * Attachments.UpperTorso.WaistRigAttachment.CFrame * Attachments.LowerTorso.WaistRigAttachment.CFrame:Inverse()
 
     if LeftFootTrackerCFrame then
-        local LeftFootTrackerWorldCFrame = FloorWorldCFrame * LeftFootTrackerCFrame
+        local LeftFootTrackerWorldCFrame = OriginWorldCFrame * LeftFootTrackerCFrame
         local LeftUpperLegCFrame = LowerTorsoCFrame * Attachments.LowerTorso.LeftHipRigAttachment.CFrame * Attachments.LeftUpperLeg.LeftHipRigAttachment.CFrame:Inverse()
         local LeftLowerLegCFrame = LeftUpperLegCFrame * Attachments.LeftUpperLeg.LeftKneeRigAttachment.CFrame * Attachments.LeftLowerLeg.LeftKneeRigAttachment.CFrame:Inverse()
         local LeftFootCFrame = LeftLowerLegCFrame * Attachments.LeftLowerLeg.LeftAnkleRigAttachment.CFrame * Attachments.LeftFoot.LeftAnkleRigAttachment.CFrame:Inverse()
@@ -95,7 +96,7 @@ function EnigmaService.Calibrate(self: EnigmaService, Character: any): ()
         self.Offsets.LeftFoot = LeftFootTrackerWorldCFrame:Inverse() * LeftFootCFrame
     end
     if RightFootTrackerCFrame then
-        local RightFootTrackerWorldCFrame = FloorWorldCFrame * RightFootTrackerCFrame
+        local RightFootTrackerWorldCFrame = OriginWorldCFrame * RightFootTrackerCFrame
         local RightUpperLegCFrame = LowerTorsoCFrame * Attachments.LowerTorso.RightHipRigAttachment.CFrame * Attachments.RightUpperLeg.RightHipRigAttachment.CFrame:Inverse()
         local RightLowerLegCFrame = RightUpperLegCFrame * Attachments.RightUpperLeg.RightKneeRigAttachment.CFrame * Attachments.RightLowerLeg.RightKneeRigAttachment.CFrame:Inverse()
         local RightFootCFrame = RightLowerLegCFrame * Attachments.RightLowerLeg.RightAnkleRigAttachment.CFrame * Attachments.RightFoot.RightAnkleRigAttachment.CFrame:Inverse()

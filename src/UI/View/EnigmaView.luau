@@ -222,7 +222,7 @@ function EnigmaView:ShowDebugTrackers(): ()
         --Get the visible trackers.
         local ActiveInputs = {}
         local TotalInputs = 0
-        local OriginWorldCFrame = Workspace.CurrentCamera:GetRenderCFrame() * VRService:GetUserCFrame(Enum.UserCFrame.Head):Inverse() * VRService:GetUserCFrame(Enum.UserCFrame.Floor) --TODO: Remove Floor; Enigma should be relative to Origin, not floor.
+        local OriginWorldCFrame = Workspace.CurrentCamera:GetRenderCFrame() * VRService:GetUserCFrame(Enum.UserCFrame.Head):Inverse()
         for _, UserCFrameName: EnigmaTrackerRoles.TrackerRole in EnigmaTrackerRoles do
             if not Enigma:GetUserCFrameEnabled(UserCFrameName) then continue end
             ActiveInputs[UserCFrameName] = OriginWorldCFrame * Enigma:GetUserCFrame(UserCFrameName)
