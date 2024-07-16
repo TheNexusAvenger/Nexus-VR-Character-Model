@@ -224,9 +224,13 @@ function EnigmaView:ShowDebugTrackers(): ()
         local TotalInputs = 0
         local OriginWorldCFrame = Workspace.CurrentCamera:GetRenderCFrame() * VRService:GetUserCFrame(Enum.UserCFrame.Head):Inverse()
         for _, UserCFrameName: EnigmaTrackerRoles.TrackerRole in EnigmaTrackerRoles do
-            if not Enigma:GetUserCFrameEnabled(UserCFrameName) then continue end
-            ActiveInputs[UserCFrameName] = OriginWorldCFrame * Enigma:GetUserCFrame(UserCFrameName)
-            TotalInputs += 1
+            local TrackerIndex = 1
+            while Enigma:GetUserCFrameEnabled(UserCFrameName, TrackerIndex) do
+                local DisplayUserCFrame = (TrackerIndex == 1 and UserCFrameName or `{UserCFrameName} ({TrackerIndex})`)
+                ActiveInputs[DisplayUserCFrame] = OriginWorldCFrame * Enigma:GetUserCFrame(UserCFrameName, TrackerIndex)
+                TotalInputs += 1
+                TrackerIndex += 1
+            end
         end
 
         --Update the debug trackers.
