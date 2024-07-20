@@ -14,18 +14,6 @@ local Workspace = game:GetService("Workspace")
 Ray casts to find a collidable part.
 --]]
 local function FindCollidablePartOnRay(StartPosition: Vector3, Direction: Vector3, IgnoreList: Instance | {Instance}?, CollisionGroup: string?): (BasePart?, Vector3)
-    --Clone the ignore list to prevent unexpected mutation of the list.
-    local NewIgnoreList = {Workspace.CurrentCamera}
-    if typeof(IgnoreList) == "Instance" then
-        table.insert(NewIgnoreList, IgnoreList)
-    elseif typeof(IgnoreList) == "table" then
-        for _, Entry in IgnoreList do
-            if Entry ~= Workspace.CurrentCamera then
-                table.insert(NewIgnoreList, Entry)
-            end
-        end
-    end
-    
     --Convert the collision group.
     if typeof(CollisionGroup) == "Instance" and CollisionGroup:IsA("BasePart") then
         CollisionGroup = CollisionGroup.CollisionGroup
@@ -34,7 +22,10 @@ local function FindCollidablePartOnRay(StartPosition: Vector3, Direction: Vector
     --Create the parameters.
     local RaycastParameters = RaycastParams.new()
     RaycastParameters.FilterType = Enum.RaycastFilterType.Exclude
-    RaycastParameters.FilterDescendantsInstances = NewIgnoreList
+    RaycastParameters.FilterDescendantsInstances = {Workspace.CurrentCamera}
+    if IgnoreList then
+        RaycastParameters:AddToFilter(IgnoreList)
+    end
     RaycastParameters.IgnoreWater = true
     if CollisionGroup then
         RaycastParameters.CollisionGroup = CollisionGroup
@@ -48,8 +39,7 @@ local function FindCollidablePartOnRay(StartPosition: Vector3, Direction: Vector
         end
         local HitPart,EndPosition = RaycastResult.Instance, RaycastResult.Position
         if HitPart and not HitPart.CanCollide and (not HitPart:IsA("Seat") or not HitPart:IsA("VehicleSeat") or HitPart.Disabled) then
-            table.insert(NewIgnoreList, HitPart)
-            RaycastParameters.FilterDescendantsInstances = NewIgnoreList
+            RaycastParameters:AddToFilter(HitPart)
             continue
         end
 
