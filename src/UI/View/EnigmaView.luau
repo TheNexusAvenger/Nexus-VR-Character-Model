@@ -199,7 +199,7 @@ function EnigmaView:UpdateText(): ()
         self.CalibrateButton.Visible = true
     else
         Text = `{Text}\nData transfer: {AddColor("Inactive", 200, 150, 0)}`
-        Text = `{Text}\n\n⚠️ Enigma is in a beta, and requires a desktop application. There may be issues.`
+        Text = `{Text}\n\n⚠️ Enigma requires a desktop application. There may be experience-specific issues when Enigma is active.`
         self.ShowTrackersButton.Visible = false
         self.CalibrateButton.Visible = false
     end

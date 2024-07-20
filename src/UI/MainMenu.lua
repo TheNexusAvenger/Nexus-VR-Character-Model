@@ -104,7 +104,7 @@ function MainMenu.new(): any
     self.CurrentView = 1
     self.Views = {}
     (SettingsView :: any).new(self:CreateView("Settings"));
-    (EnigmaView :: any).new(self:CreateView("Enigma (Beta)"), self);
+    (EnigmaView :: any).new(self:CreateView("Enigma"), self);
     (ChatView :: any).new(self:CreateView("Chat"))
     self:UpdateVisibleView()
 
