@@ -38,6 +38,7 @@ function Beacon.new(): Beacon
     self.Sphere.Material = Enum.Material.Neon
     self.Sphere.Anchored = true
     self.Sphere.CanCollide = false
+    self.Sphere.CanQuery = false
     self.Sphere.Size = Vector3.new(0.5, 0.5, 0.5)
     self.Sphere.Shape = Enum.PartType.Ball
     self.Sphere.Parent = Workspace.CurrentCamera

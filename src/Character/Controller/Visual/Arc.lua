@@ -72,6 +72,7 @@ function Arc:Update(StartCFrame: CFrame): (BasePart?, Vector3?)
             self.BeamParts[i].Size = Vector3.new(0, 0, 0)
             self.BeamParts[i].Anchored = true
             self.BeamParts[i].CanCollide = false
+            self.BeamParts[i].CanQuery = false
             self.BeamParts[i].Parent = Workspace.CurrentCamera
 
             local Attachment = Instance.new("Attachment")
@@ -86,6 +87,7 @@ function Arc:Update(StartCFrame: CFrame): (BasePart?, Vector3?)
             self.BeamParts[i + 1].Size = Vector3.new(0, 0, 0)
             self.BeamParts[i + 1].Anchored = true
             self.BeamParts[i + 1].CanCollide = false
+            self.BeamParts[i + 1].CanQuery = false
             self.BeamParts[i + 1].Parent = Workspace.CurrentCamera
 
             local Attachment = Instance.new("Attachment")
