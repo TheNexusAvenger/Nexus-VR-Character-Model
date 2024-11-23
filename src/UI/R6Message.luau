@@ -3,17 +3,13 @@
 
 local MESSAGE_OPEN_TIME = 0.25
 
-
-
-local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 
 local NexusVRCharacterModel = script.Parent.Parent
+local ScreenGui3D = require(NexusVRCharacterModel:WaitForChild("NexusVRCore"):WaitForChild("Container"):WaitForChild("ScreenGui3D"))
 local TextButtonFactory = require(NexusVRCharacterModel:WaitForChild("NexusButton"):WaitForChild("Factory"):WaitForChild("TextButtonFactory")).CreateDefault(Color3.fromRGB(0, 170, 255))
 TextButtonFactory:SetDefault("Theme", "RoundedCorners")
-local NexusVRCore = require(ReplicatedStorage:WaitForChild("NexusVRCore")) :: any
-local ScreenGui = NexusVRCore:GetResource("Container.ScreenGui")
 
 local R6Message = {}
 R6Message.__index = R6Message
@@ -29,7 +25,7 @@ Creates the R6 message.
 --]]
 function R6Message.new(): R6Message
     --Set up the ScreenGui.
-    local MessageScreenGui = ScreenGui.new()
+    local MessageScreenGui = ScreenGui3D.new()
     MessageScreenGui.ResetOnSpawn = false
     MessageScreenGui.Enabled = false
     MessageScreenGui.CanvasSize = Vector2.new(500, 500)

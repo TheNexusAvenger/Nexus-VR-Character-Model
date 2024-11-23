@@ -188,7 +188,7 @@ function SettingsView.PopulateSettingsFrame(self: SettingsView, ContainerFrame: 
         local InitialValueName = GetValueFunction()
         local CurrentValue = 1
         local Options = (GetOptionsSettings :: () -> ({string}))()
-        for i,Option in pairs(Options) do
+        for i,Option in Options do
             if Option == InitialValueName then
                 CurrentValue = i
                 break

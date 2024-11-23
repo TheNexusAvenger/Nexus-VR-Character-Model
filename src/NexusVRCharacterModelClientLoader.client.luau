@@ -21,6 +21,14 @@ local ReplicationReady = NexusVRCharacterModel:WaitForChild("ReplicationReady") 
 
 
 
+--Add the deprecation warning to the bundled Nexus VR Core.
+local BaseScreenGui = require(ReplicatedStorage:WaitForChild("NexusVRCore"):WaitForChild("Container"):WaitForChild("BaseScreenGui")) :: any
+local OriginalBaseScreenGuiConstructor = BaseScreenGui.__new
+BaseScreenGui.__new = function(...)
+    warn("Using the bundled (automically loaded) Nexus VR Core with Nexus VR Character Model is deprecated.\nIt is recommended to move to a fixed version, which can be downloaded from GitHub.")
+    return OriginalBaseScreenGuiConstructor(...)
+end
+
 --Load the settings.
 Settings:SetDefaults(HttpService:JSONDecode((NexusVRCharacterModel:WaitForChild("Configuration") :: StringValue).Value))
 

@@ -8,25 +8,36 @@ local MENU_OPEN_TIME = 0.25
 
 local Workspace = game:GetService("Workspace")
 local Players = game:GetService("Players")
-local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local GuiService = game:GetService("GuiService")
 local RunService = game:GetService("RunService")
 local TweenService = game:GetService("TweenService")
 
 local NexusVRCharacterModel = script.Parent.Parent
+local ScreenGui3D = require(NexusVRCharacterModel:WaitForChild("NexusVRCore"):WaitForChild("Container"):WaitForChild("ScreenGui3D"))
 local Settings = require(NexusVRCharacterModel:WaitForChild("State"):WaitForChild("Settings")).GetInstance()
 local VRInputService = require(NexusVRCharacterModel:WaitForChild("State"):WaitForChild("VRInputService")).GetInstance()
 local ApiBaseView = require(NexusVRCharacterModel:WaitForChild("UI"):WaitForChild("View"):WaitForChild("ApiBaseView"))
 local EnigmaView = require(NexusVRCharacterModel:WaitForChild("UI"):WaitForChild("View"):WaitForChild("EnigmaView"))
 local SettingsView = require(NexusVRCharacterModel:WaitForChild("UI"):WaitForChild("View"):WaitForChild("SettingsView"))
+local NexusButton = require(NexusVRCharacterModel:WaitForChild("NexusButton"))
 local TextButtonFactory = require(NexusVRCharacterModel:WaitForChild("NexusButton"):WaitForChild("Factory"):WaitForChild("TextButtonFactory")).CreateDefault(Color3.fromRGB(0, 170, 255))
 TextButtonFactory:SetDefault("Theme", "RoundedCorners")
-local NexusVRCore = require(ReplicatedStorage:WaitForChild("NexusVRCore")) :: any
-local ScreenGui = NexusVRCore:GetResource("Container.ScreenGui")
 
 local MainMenu = {}
 MainMenu.__index = MainMenu
 local StaticInstance = nil
+
+export type MainMenu = {
+    CurrentView: number,
+    Views: {any},
+    ScreenGui: ScreenGui3D.NexusInstanceScreenGui3D,
+    ViewAdornFrame: Frame,
+    LeftButton: NexusButton.NexusButton,
+    RightButton: NexusButton.NexusButton,
+    ViewTextLabel: TextLabel,
+    LeftHandHintVisible: boolean,
+    RightHandHintVisible: boolean,
+} & typeof(setmetatable({}, MainMenu))
 
 
 
@@ -34,11 +45,10 @@ local StaticInstance = nil
 Creates the main menu.
 --]]
 function MainMenu.new(): any
-    local self = {}
-    setmetatable(self, MainMenu)
+    local self = setmetatable({}, MainMenu) :: MainMenu
 
     --Set up the ScreenGui.
-    local MainMenuScreenGui = ScreenGui.new()
+    local MainMenuScreenGui = ScreenGui3D.new()
     MainMenuScreenGui.ResetOnSpawn = false
     MainMenuScreenGui.Enabled = false
     MainMenuScreenGui.CanvasSize = Vector2.new(500, 605)
@@ -98,8 +108,8 @@ function MainMenu.new(): any
     --Set up the default views.
     self.CurrentView = 1
     self.Views = {}
-    (SettingsView :: any).new(self:CreateView("Settings"));
-    (EnigmaView :: any).new(self:CreateView("Enigma"), self);
+    SettingsView.new(self:CreateView("Settings"));
+    EnigmaView.new(self:CreateView("Enigma"), self);
     self:UpdateVisibleView()
 
     --Connect changing views.
@@ -143,7 +153,7 @@ end
 --[[
 Returns a singleton instance of the character service.
 --]]
-function MainMenu.GetInstance(): any
+function MainMenu.GetInstance(): MainMenu
     if not StaticInstance then
         StaticInstance = MainMenu.new()
     end
@@ -154,7 +164,7 @@ end
 Sets up opening based on the controllers
 being rotated upwards.
 --]]
-function MainMenu:SetUpOpening(): ()
+function MainMenu.SetUpOpening(self: MainMenu): ()
     --Create the animation parts.
     local InitialMenuToggleGestureActive = Settings:GetSetting("Menu.MenuToggleGestureActive")
     if InitialMenuToggleGestureActive == nil then
@@ -441,7 +451,7 @@ end
 --[[
 Toggles the menu being open.
 --]]
-function MainMenu:Toggle(Visible: boolean?): ()
+function MainMenu.Toggle(self: MainMenu, Visible: boolean?): ()
     if self.ScreenGui.Enabled == Visible then return end
 
     --Determine the start and end values.
@@ -470,7 +480,7 @@ end
 --[[
 Registers a view.
 --]]
-function MainMenu:RegisterView(ViewName: string, ViewInstance: any): ()
+function MainMenu.RegisterView(self: MainMenu, ViewName: string, ViewInstance: any): ()
     warn("MainMenu::RegisterView is deprecated and may be removed in the future. Use MainMenu::CreateView instead.")
 
     --Set up the view instance.
@@ -485,7 +495,7 @@ end
 --[[
 Creates a menu view.
 --]]
-function MainMenu:CreateView(InitialViewName: string): any
+function MainMenu.CreateView(self: MainMenu, InitialViewName: string): any
     --Create and store the view.
     local View = ApiBaseView.new(InitialViewName)
     View.Frame.Parent = (self :: any).ViewAdornFrame
@@ -513,7 +523,7 @@ end
 --[[
 Updates the visible view.
 --]]
-function MainMenu:UpdateVisibleView(NewView: string?): ()
+function MainMenu.UpdateVisibleView(self: MainMenu, NewView: string?): ()
     --Update the button visibility.
     self.LeftButton.Visible = (#self.Views > 1)
     self.RightButton.Visible = (#self.Views > 1)

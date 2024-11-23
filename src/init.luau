@@ -22,13 +22,15 @@ local RateLimiter = require(script:WaitForChild("State"):WaitForChild("RateLimit
 
 local NexusVRCharacterModel = {}
 
+export type NexusVRCharacterModel = typeof(NexusVRCharacterModel)
+
 
 
 --[[
 Sets the configuration to use. Intended to be
 run once by the server.
 --]]
-function NexusVRCharacterModel:SetConfiguration(Configuration: any): ()
+function NexusVRCharacterModel.SetConfiguration(self: NexusVRCharacterModel, Configuration: any): ()
     --Create the value.
     local ConfigurationValue = script:FindFirstChild("Configuration")
     if not ConfigurationValue then
@@ -60,7 +62,7 @@ end
 --[[
 Loads Nexus VR Character Model.
 --]]
-function NexusVRCharacterModel:Load(): ()
+function NexusVRCharacterModel.Load(self: NexusVRCharacterModel): ()
     --Return if a version is already loaded.
     if ReplicatedStorage:FindFirstChild("NexusVRCharacterModel") then
         return
@@ -68,15 +70,19 @@ function NexusVRCharacterModel:Load(): ()
 
     --Rename and move the script to ReplicatedStorage.
     script.Name = "NexusVRCharacterModel"
-    script:WaitForChild("NexusVRCore").Parent = ReplicatedStorage
-    script.Parent = ReplicatedStorage;
+    script.Parent = ReplicatedStorage
+
+    --Copy Nexus VR Core.
+    if not ReplicatedStorage:FindFirstChild("NexusVRCore") then
+        script:WaitForChild("NexusVRCore"):Clone().Parent = ReplicatedStorage
+    end
 
     --Output any warnings.
     (require(ReplicatedStorage:WaitForChild("NexusVRCharacterModel"):WaitForChild("Util"):WaitForChild("Warnings")) :: any)()
 
     --Set up the client scripts.
     local NexusVRCharacterModelClientLoader = script:WaitForChild("NexusVRCharacterModelClientLoader")
-    for _,Player in pairs(Players:GetPlayers()) do
+    for _, Player in Players:GetPlayers() do
         task.spawn(function()
             --Create and store a ScreenGui with the script.
             --This prevents the script disappearing on respawn.
