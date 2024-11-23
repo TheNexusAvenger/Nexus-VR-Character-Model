@@ -1,8 +1,4 @@
---[[
-TheNexusAvenger
-
-Default camera that follows the character.
---]]
+--Default camera that follows the character.
 --!strict
 
 local BUMP_DEFAULT_TRANSPARENCY_WORKAROUND = true
@@ -23,6 +19,10 @@ local Settings = require(NexusVRCharacterModel:WaitForChild("State"):WaitForChil
 local DefaultCamera = {}
 DefaultCamera.__index = DefaultCamera
 setmetatable(DefaultCamera, CommonCamera)
+
+export type DefaultCamera = {
+    TransparencyEvents: {RBXScriptConnection}?,
+} & typeof(setmetatable({}, DefaultCamera)) & CommonCamera.CommonCamera
 
 
 
@@ -52,15 +52,17 @@ end
 --[[
 Creates a default camera object.
 --]]
-function DefaultCamera.new(): any
-    return setmetatable(CommonCamera.new(), DefaultCamera)
+function DefaultCamera.new(): DefaultCamera
+    return setmetatable(CommonCamera.new() :: any, DefaultCamera) :: DefaultCamera
 end
 
 --[[
 Enables the camera.
 --]]
-function DefaultCamera:Enable(): ()
-    self.TransparencyEvents = {}
+function DefaultCamera.Enable(self: DefaultCamera): ()
+    local TransparencyEvents = {}
+    self.TransparencyEvents = TransparencyEvents
+
     if Players.LocalPlayer.Character then
         --Connect children being added.
         local Transparency = Settings:GetSetting("Appearance.LocalCharacterTransparency")
@@ -71,7 +73,7 @@ function DefaultCamera:Enable(): ()
                 warn("Values of <0.5 with Appearance.LocalCharacterTransparency are currently known to cause black screen issues. This will hopefully be resolved by Roblox in a future update: https://devforum.roblox.com/t/vr-screen-becomes-black-due-to-non-transparent-character/2215099")
             end
         end
-        table.insert(self.TransparencyEvents, Players.LocalPlayer.Character.DescendantAdded:Connect(function(Part)
+        table.insert(TransparencyEvents, Players.LocalPlayer.Character.DescendantAdded:Connect(function(Part: BasePart)
             if Part:IsA("BasePart") then
                 local PartTransparency = Transparency
                 if Part:FindFirstAncestorOfClass("Tool") then
@@ -81,7 +83,7 @@ function DefaultCamera:Enable(): ()
                 end
 
                 Part.LocalTransparencyModifier = PartTransparency
-                table.insert(self.TransparencyEvents, Part:GetPropertyChangedSignal("LocalTransparencyModifier"):Connect(function()
+                table.insert(TransparencyEvents, Part:GetPropertyChangedSignal("LocalTransparencyModifier"):Connect(function()
                     Part.LocalTransparencyModifier = PartTransparency
                 end))
             end
@@ -96,7 +98,7 @@ function DefaultCamera:Enable(): ()
                 end
                 
                 Part.LocalTransparencyModifier = PartTransparency
-                table.insert(self.TransparencyEvents, Part:GetPropertyChangedSignal("LocalTransparencyModifier"):Connect(function()
+                table.insert(TransparencyEvents, Part:GetPropertyChangedSignal("LocalTransparencyModifier"):Connect(function()
                     Part.LocalTransparencyModifier = PartTransparency
                 end))
             end
@@ -104,20 +106,20 @@ function DefaultCamera:Enable(): ()
     end
 
     --Connect the character and local transparency changing.
-    table.insert(self.TransparencyEvents, Players.LocalPlayer:GetPropertyChangedSignal("Character"):Connect(function()
+    table.insert(TransparencyEvents, Players.LocalPlayer:GetPropertyChangedSignal("Character"):Connect(function()
         self:Disable()
         self:Enable()
     end))
-    table.insert(self.TransparencyEvents, Settings:GetSettingsChangedSignal("Appearance.LocalCharacterTransparency"):Connect(function()
+    table.insert(TransparencyEvents, Settings:GetSettingsChangedSignal("Appearance.LocalCharacterTransparency"):Connect(function()
         self:Disable()
         self:Enable()
-    end))
+    end) :: any)
 end
 
 --[[
 Disables the camera.
 --]]
-function DefaultCamera:Disable(): ()
+function DefaultCamera.Disable(self: DefaultCamera): ()
     --Disconnect the character events.
     if self.TransparencyEvents then
         for _, Event in self.TransparencyEvents do
@@ -139,7 +141,7 @@ end
 --[[
 Updates the camera.
 --]]
-function DefaultCamera:UpdateCamera(HeadsetCFrameWorld: CFrame): ()
+function DefaultCamera.UpdateCamera(self: DefaultCamera, HeadsetCFrameWorld: CFrame): ()
     self:SetCFrame(HeadsetCFrameWorld)
 end
 

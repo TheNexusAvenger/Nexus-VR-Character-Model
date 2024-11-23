@@ -1,8 +1,4 @@
- --[[
-TheNexusAvenger
-
-Stores information about the torso of a character.
---]]
+ --Stores information about the torso of a character.
 --!strict
 
 local NexusVRCharacterModel = script.Parent.Parent
@@ -16,10 +12,7 @@ setmetatable(Torso, Limb)
 export type Torso = {
     LowerTorso: BasePart,
     UpperTorso: BasePart,
-    new: (LowerTorso: BasePart, UpperTorso: BasePart) -> Torso,
-    GetTorsoCFrames: (self: Torso, NeckCFrame: CFrame) -> (CFrame, CFrame),
-    GetAppendageJointCFrames: (self: Torso, LowerTorsoCFrame: CFrame, UpperTorsoCFrame: CFrame) -> ({CFrame}),
-} & Limb.Limb
+} & typeof(setmetatable({}, Torso)) & Limb.Limb
 
 
 
@@ -27,17 +20,17 @@ export type Torso = {
 Creates a torso.
 --]]
 function Torso.new(LowerTorso: BasePart, UpperTorso: BasePart): Torso
-    local self = Limb.new() :: Torso
+    local self = setmetatable(Limb.new() :: any, Torso) :: Torso
     self.LowerTorso = LowerTorso
     self.UpperTorso = UpperTorso
-    return setmetatable(self, Torso)
+    return self
 end
 
 --[[
 Returns the lower and upper torso CFrames
 for the given neck CFrame in global world space.
 --]]
-function Torso:GetTorsoCFrames(NeckCFrame: CFrame): (CFrame, CFrame)
+function Torso.GetTorsoCFrames(self: Torso, NeckCFrame: CFrame): (CFrame, CFrame)
     --Determine the upper torso CFrame.
     local UpperTorsoCFrame = NeckCFrame * self:GetAttachmentCFrame(self.UpperTorso, "NeckRigAttachment"):Inverse()
 
@@ -55,7 +48,7 @@ end
 Returns the CFrames of the joints for
 the appendages.
 --]]
-function Torso:GetAppendageJointCFrames(LowerTorsoCFrame: CFrame, UpperTorsoCFrame: CFrame): {CFrame}
+function Torso.GetAppendageJointCFrames(self: Torso, LowerTorsoCFrame: CFrame, UpperTorsoCFrame: CFrame): {CFrame}
     return {
         RightShoulder = UpperTorsoCFrame * self:GetAttachmentCFrame(self.UpperTorso, "RightShoulderRigAttachment"),
         LeftShoulder = UpperTorsoCFrame * self:GetAttachmentCFrame(self.UpperTorso, "LeftShoulderRigAttachment"),

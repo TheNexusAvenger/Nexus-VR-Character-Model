@@ -1,16 +1,10 @@
---[[
-TheNexusAvenger
-
-Visual indicator aiming with an arc.
---]]
+--Visual indicator aiming with an arc.
 --!strict
 
 local MAX_SEGMENTS = 100
 local SEGMENT_SEPARATION = 2
 local BASE_POINTER_ANGLE = math.rad(60)
 local POINTER_PARABOLA_HEIGHT_MULTIPLIER = -0.2
-
-
 
 local Workspace = game:GetService("Workspace")
 local Players = game:GetService("Players")
@@ -22,12 +16,8 @@ local Arc = {}
 Arc.__index = Arc
 
 export type Arc = {
-    new: () -> (Arc),
-
-    Update: (self: Arc, StartCFrame: CFrame) -> (BasePart?, Vector3?),
-    Hide: (self: Arc) -> (),
-    Destroy: (self: Arc) -> (),
-}
+    BeamParts: {BasePart},
+} & typeof(setmetatable({}, Arc))
 
 
 
@@ -37,16 +27,16 @@ Creates an arc.
 function Arc.new(): Arc
     local self = setmetatable({
         BeamParts = {},
-    }, Arc)
+    }, Arc) :: Arc
     self:Hide()
-    return (self :: any) :: Arc
+    return self
 end
 
 --[[
 Updates the arc. Returns the part and
 position that were hit.
 --]]
-function Arc:Update(StartCFrame: CFrame): (BasePart?, Vector3?)
+function Arc.Update(self: Arc, StartCFrame: CFrame): (BasePart?, Vector3?)
     --Calculate the starting angle.
     local StartPosition = StartCFrame.Position
     local FaceAngle = math.atan2(-StartCFrame.LookVector.X, -StartCFrame.LookVector.Z)
@@ -135,16 +125,16 @@ end
 --[[
 Hides the arc.
 --]]
-function Arc:Hide(): ()
+function Arc.Hide(self: Arc): ()
     for i = 0, #self.BeamParts - 1 do
-        self.BeamParts[i + 1].Beam.Enabled = false
+        (self.BeamParts[i + 1] :: any).Beam.Enabled = false
     end
 end
 
 --[[
 Destroys the arc.
 --]]
-function Arc:Destroy(): ()
+function Arc.Destroy(self: Arc): ()
     for _, BeamPart in self.BeamParts do
         BeamPart:Destroy()
     end
@@ -153,4 +143,4 @@ end
 
 
 
-return (Arc :: any) :: Arc
+return Arc

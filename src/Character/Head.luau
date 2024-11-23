@@ -1,8 +1,4 @@
---[[
-TheNexusAvenger
-
-Stores information about the head of a character.
---]]
+--Stores information about the head of a character.
 --!strict
 
 local NexusVRCharacterModel = script.Parent.Parent
@@ -15,11 +11,8 @@ setmetatable(Head, Limb)
 
 export type Head = {
     Head: BasePart,
-    new: (HeadPart: BasePart) -> (Head),
-    GetEyesOffset: (self: Head) -> (CFrame),
-    GetHeadCFrame: (self: Head, VRHeadCFrame: CFrame) -> (CFrame),
-    GetNeckCFrame: (self: Head, VRHeadCFrame: CFrame, TargetAngle: number?) -> (CFrame),
-} & Limb.Limb
+    LastNeckRotationGlobal: number?,
+} & typeof(setmetatable({}, Head)) & Limb.Limb
 
 
 
@@ -27,16 +20,16 @@ export type Head = {
 Creates a head.
 --]]
 function Head.new(HeadPart: BasePart): Head
-    local self = Limb.new() :: Head
+    local self = setmetatable(Limb.new() :: any, Head) :: Head
     self.Head = HeadPart
-    return setmetatable(self, Head)
+    return self
 end
 
 --[[
 Returns the offset from the head to
 the location of the eyes.
 --]]
-function Head:GetEyesOffset(): CFrame
+function Head.GetEyesOffset(self: Head): CFrame
     return (self:GetAttachmentCFrame(self.Head, "FaceFrontAttachment") :: CFrame) * CFrame.new(0, (self.Head :: BasePart).Size.Y / 4, 0)
 end
 
@@ -44,7 +37,7 @@ end
 Returns the head CFrame for the
 given VR input in global world space.
 --]]
-function Head:GetHeadCFrame(VRHeadCFrame: CFrame): CFrame
+function Head.GetHeadCFrame(self: Head, VRHeadCFrame: CFrame): CFrame
     return VRHeadCFrame * self:GetEyesOffset():Inverse()
 end
 
@@ -52,7 +45,7 @@ end
 Returns the neck CFrame for the
 given VR input in global world space.
 --]]
-function Head:GetNeckCFrame(VRHeadCFrame: CFrame, TargetAngle: number?): CFrame
+function Head.GetNeckCFrame(self: Head, VRHeadCFrame: CFrame, TargetAngle: number?): CFrame
     --Get the base neck CFrame and angles.
     local BaseNeckCFrame = (self:GetHeadCFrame(VRHeadCFrame) :: CFrame) * (self:GetAttachmentCFrame(self.Head, "NeckRigAttachment") :: CFrame)
     local BaseNeckLookVector = BaseNeckCFrame.LookVector
@@ -86,10 +79,11 @@ function Head:GetNeckCFrame(VRHeadCFrame: CFrame, TargetAngle: number?): CFrame
         end
     else
         local MaxNeckRotation = Settings:GetSetting("Appearance.MaxNeckRotation") or math.rad(35)
-        if self.LastNeckRotationGlobal then
+        local LastNeckRotationGlobal = self.LastNeckRotationGlobal
+        if LastNeckRotationGlobal then
             --Determine the minimum angle difference.
             --Modulus is not used as it guarentees a positive answer, not the minimum answer, which can be negative.
-            local RotationDifference = (BaseNeckLook - self.LastNeckRotationGlobal)
+            local RotationDifference = (BaseNeckLook - LastNeckRotationGlobal)
             while RotationDifference > math.pi do RotationDifference = RotationDifference - (2 * math.pi) end
             while RotationDifference < -math.pi do RotationDifference = RotationDifference + (2 * math.pi) end
 
@@ -101,7 +95,7 @@ function Head:GetNeckCFrame(VRHeadCFrame: CFrame, TargetAngle: number?): CFrame
                 elseif RotationDifference < -MaxNeckRotation then
                     BaseNeckLook = BaseNeckLook + MaxNeckRotation
                 else
-                    BaseNeckLook = self.LastNeckRotationGlobal
+                    BaseNeckLook = LastNeckRotationGlobal
                 end
             end
         end

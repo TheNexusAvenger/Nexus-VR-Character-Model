@@ -1,9 +1,5 @@
- --[[
-TheNexusAvenger
-
-Stores information about an appendage, such as
-an arm or a leg.
---]]
+ --Stores information about an appendage, such as an arm or a leg.
+--!strict
 
 local Limb = require(script.Parent.Parent:WaitForChild("NexusAppendage"):WaitForChild("Limb"))
 
@@ -11,13 +7,24 @@ local Appendage = {}
 Appendage.__index = Appendage
 setmetatable(Appendage, Limb)
 
+export type Appendage = {
+    UpperLimb: BasePart,
+    LowerLimb: BasePart,
+    LimbEnd: BasePart,
+    StartAttachment: string,
+    LimbJointAttachment: string,
+    LimbEndAttachment: string,
+    LimbHoldAttachment: string,
+    InvertBendDirection: boolean,
+    PreventDisconnection: boolean, 
+} & typeof(setmetatable({}, Appendage)) & Limb.Limb
 
 
 --[[
 Creates an appendage.
 --]]
-function Appendage.new(UpperLimb: BasePart, LowerLimb: BasePart, LimbEnd: BasePart, StartAttachment: string, LimbJointAttachment: string, LimbEndAttachment: string, LimbHoldAttachment: string, PreventDisconnection: boolean?): any
-    local self = Limb.new()
+function Appendage.new(UpperLimb: BasePart, LowerLimb: BasePart, LimbEnd: BasePart, StartAttachment: string, LimbJointAttachment: string, LimbEndAttachment: string, LimbHoldAttachment: string, PreventDisconnection: boolean?): Appendage
+    local self = setmetatable(Limb.new() :: any, Appendage)
     self.UpperLimb = UpperLimb
     self.LowerLimb = LowerLimb
     self.LimbEnd = LimbEnd
@@ -25,6 +32,7 @@ function Appendage.new(UpperLimb: BasePart, LowerLimb: BasePart, LimbEnd: BasePa
     self.LimbJointAttachment = LimbJointAttachment
     self.LimbEndAttachment = LimbEndAttachment
     self.LimbHoldAttachment = LimbHoldAttachment
+    self.InvertBendDirection = false
     self.PreventDisconnection = PreventDisconnection or false
     return setmetatable(self, Appendage)
 end
@@ -33,9 +41,9 @@ end
 Attempts to solve a joint. This uses
 the "naive" approach for inverse kinematics.
 --]]
-function Appendage:SolveJoint(OriginCFrame: CFrame, TargetPosition: Vector3, Length1: number, Length2: number): (CFrame, number, number)
+function Appendage.SolveJoint(self: Appendage, OriginCFrame: CFrame, TargetPosition: Vector3, Length1: number, Length2: number): (CFrame, number, number)
     local LocalizedPosition = OriginCFrame:PointToObjectSpace(TargetPosition)
-    local LocalizedUnit = LocalizedPosition.unit
+    local LocalizedUnit = LocalizedPosition.Unit
     local Hypotenuse = LocalizedPosition.Magnitude
 
     --Get the axis and correct it if it is 0.
@@ -80,7 +88,7 @@ end
 Returns the rotation offset relative to the Y axis
 to an end CFrame.
 --]]
-function Appendage:RotationTo(StartCFrame: CFrame, EndCFrame: CFrame): CFrame
+function Appendage.RotationTo(self: Appendage, StartCFrame: CFrame, EndCFrame: CFrame): CFrame
 	local Offset = (StartCFrame:Inverse() * EndCFrame).Position
 	return CFrame.Angles(math.atan2(Offset.Z, Offset.Y), 0, -math.atan2(Offset.X, Offset.Y))
 end
@@ -90,7 +98,7 @@ Returns the CFrames of the appendage for
 the starting and holding CFrames. The implementation
 works, but could be improved.
 --]]
-function Appendage:GetAppendageCFrames(StartCFrame: CFrame, HoldCFrame: CFrame): (CFrame, CFrame, CFrame)
+function Appendage.GetAppendageCFrames(self: Appendage, StartCFrame: CFrame, HoldCFrame: CFrame): (CFrame, CFrame, CFrame)
     --Get the attachment CFrames.
     local LimbHoldCFrame = self:GetAttachmentCFrame(self.LimbEnd, self.LimbHoldAttachment)
     local LimbEndCFrame = self:GetAttachmentCFrame(self.LimbEnd, self.LimbEndAttachment)
@@ -100,8 +108,8 @@ function Appendage:GetAppendageCFrames(StartCFrame: CFrame, HoldCFrame: CFrame):
     local LowerLimbEndCFrame = self:GetAttachmentCFrame(self.LowerLimb, self.LimbEndAttachment)
 
     --Calculate the appendage lengths.
-    local UpperLimbLength = (UpperLimbStartCFrame.Position - UpperLimbJointCFrame.Position).magnitude
-    local LowerLimbLength = (LowerLimbJointCFrame.Position - LowerLimbEndCFrame.Position).magnitude
+    local UpperLimbLength = (UpperLimbStartCFrame.Position - UpperLimbJointCFrame.Position).Magnitude
+    local LowerLimbLength = (LowerLimbJointCFrame.Position - LowerLimbEndCFrame.Position).Magnitude
 
     --Calculate the end point of the limb.
     local AppendageEndJointCFrame = HoldCFrame * LimbHoldCFrame:Inverse() * LimbEndCFrame

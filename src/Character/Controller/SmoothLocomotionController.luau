@@ -1,8 +1,4 @@
- --[[
-TheNexusAvenger
-
-Local character controller using teleporting.
---]]
+--Local character controller using teleporting.
 --!strict
 
 local BaseController = require(script.Parent:WaitForChild("BaseController"))
@@ -11,19 +7,22 @@ local SmoothLocomotionController = {}
 SmoothLocomotionController.__index = SmoothLocomotionController
 setmetatable(SmoothLocomotionController, BaseController)
 
+export type SmoothLocomotionController = {
+    JoystickState: {[string]: Enum.KeyCode}?,
+} & typeof(setmetatable({}, SmoothLocomotionController)) & BaseController.BaseController
 
 
 --[[
 Creates a smooth locomotion controller object.
 --]]
-function SmoothLocomotionController.new(): any
-    return setmetatable(BaseController.new(), SmoothLocomotionController)
+function SmoothLocomotionController.new(): SmoothLocomotionController
+    return setmetatable(BaseController.new(), SmoothLocomotionController) :: SmoothLocomotionController
 end
 
 --[[
 Enables the controller.
 --]]
-function SmoothLocomotionController:Enable(): ()
+function SmoothLocomotionController.Enable(self: SmoothLocomotionController): ()
     BaseController.Enable(self)
     self.JoystickState = {Thumbstick = Enum.KeyCode.Thumbstick2}
 end
@@ -31,7 +30,7 @@ end
 --[[
 Disables the controller.
 --]]
-function SmoothLocomotionController:Disable(): ()
+function SmoothLocomotionController.Disable(self: SmoothLocomotionController): ()
     BaseController.Disable(self)
     self.JoystickState = nil
 end
@@ -39,7 +38,7 @@ end
 --[[
 Updates the local character. Must also update the camara.
 --]]
-function SmoothLocomotionController:UpdateCharacter(): ()
+function SmoothLocomotionController.UpdateCharacter(self: SmoothLocomotionController): ()
     --Update the base character.
     BaseController.UpdateCharacter(self)
     if not self.Character then

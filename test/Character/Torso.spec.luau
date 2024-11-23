@@ -1,8 +1,4 @@
---[[
-TheNexusAvenger
-
-Tests the Torso class.
---]]
+--Tests the Torso class.
 --!strict
 
 local NexusVRCharacterModel = game:GetService("ServerScriptService"):WaitForChild("NexusVRCharacterModelLoader"):WaitForChild("MainModule"):WaitForChild("NexusVRCharacterModel")

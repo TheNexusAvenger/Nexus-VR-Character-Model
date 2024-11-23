@@ -1,13 +1,7 @@
---[[
-TheNexusAvenger
-
-Third person camera that moves with the player.
---]]
+--Third person camera that moves with the player.
 --!strict
 
 local THIRD_PERSON_ZOOM = 10
-
-
 
 local Players = game:GetService("Players")
 
@@ -18,37 +12,43 @@ local ThirdPersonTrackCamera = {}
 ThirdPersonTrackCamera.__index = ThirdPersonTrackCamera
 setmetatable(ThirdPersonTrackCamera, CommonCamera)
 
+export type ThirdPersonTrackCamera = {
+    FetchInitialCFrame: boolean?,
+    BaseFaceAngleY: number?,
+    BaseCFrame: CFrame?,
+} & typeof(setmetatable({}, ThirdPersonTrackCamera)) & CommonCamera.CommonCamera
 
 
 --[[
 Creates a third-person camera object.
 --]]
-function ThirdPersonTrackCamera.new(): any
-    return setmetatable(CommonCamera.new(), ThirdPersonTrackCamera)
+function ThirdPersonTrackCamera.new(): ThirdPersonTrackCamera
+    return setmetatable(CommonCamera.new() :: any, ThirdPersonTrackCamera) :: ThirdPersonTrackCamera
 end
 
 --[[
 Enables the camera.
 --]]
-function ThirdPersonTrackCamera:Enable(): ()
+function ThirdPersonTrackCamera.Enable(self: ThirdPersonTrackCamera): ()
     self.FetchInitialCFrame = true
 end
 
 --[[
 Disables the camera.
 --]]
-function ThirdPersonTrackCamera:Disable(): ()
+function ThirdPersonTrackCamera.Disable(self: ThirdPersonTrackCamera): ()
     self.FetchInitialCFrame = nil
 end
 
 --[[
 Updates the camera.
 --]]
-function ThirdPersonTrackCamera:UpdateCamera(HeadsetCFrameWorld: CFrame): ()
+function ThirdPersonTrackCamera.UpdateCamera(self: ThirdPersonTrackCamera, HeadsetCFrameWorld: CFrame): ()
     --Set the initial CFrame to use.
     if self.FetchInitialCFrame then
-        self.BaseFaceAngleY = math.atan2(-HeadsetCFrameWorld.LookVector.X, -HeadsetCFrameWorld.LookVector.Z)
-        self.BaseCFrame = CFrame.new(HeadsetCFrameWorld.Position) * CFrame.Angles(0, self.BaseFaceAngleY, 0)
+        local BaseFaceAngleY = math.atan2(-HeadsetCFrameWorld.LookVector.X, -HeadsetCFrameWorld.LookVector.Z)
+        self.BaseFaceAngleY = BaseFaceAngleY
+        self.BaseCFrame = CFrame.new(HeadsetCFrameWorld.Position) * CFrame.Angles(0, BaseFaceAngleY, 0)
         self.FetchInitialCFrame = nil
     end
 
@@ -66,8 +66,9 @@ function ThirdPersonTrackCamera:UpdateCamera(HeadsetCFrameWorld: CFrame): ()
     end
 
     --Calculate the third person CFrame.
-    local HeadsetRelative = self.BaseCFrame:Inverse() * HeadsetCFrameWorld
-    local TargetCFrame = self.BaseCFrame * CFrame.new(0, 0, -THIRD_PERSON_ZOOM * Scale) * CFrame.Angles(0, math.pi, 0) * HeadsetRelative
+    local BaseCFrame = self.BaseCFrame :: CFrame
+    local HeadsetRelative = BaseCFrame:Inverse() * HeadsetCFrameWorld
+    local TargetCFrame = BaseCFrame * CFrame.new(0, 0, -THIRD_PERSON_ZOOM * Scale) * CFrame.Angles(0, math.pi, 0) * HeadsetRelative
 
     --Update the camera.
     self:SetCFrame(TargetCFrame)

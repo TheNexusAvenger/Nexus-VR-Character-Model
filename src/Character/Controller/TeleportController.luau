@@ -1,8 +1,4 @@
- --[[
-TheNexusAvenger
-
-Local character controller using teleporting.
---]]
+ --Local character controller using teleporting.
 --!strict
 
 local Workspace = game:GetService("Workspace")
@@ -18,19 +14,36 @@ local TeleportController = {}
 TeleportController.__index = TeleportController
 setmetatable(TeleportController, BaseController)
 
+export type TeleportController = {
+    LeftArc: ArcWithBeacon.ArcWithBeacon,
+    RightArc: ArcWithBeacon.ArcWithBeacon,
+    ArcControls: {
+        {
+            Thumbstick: Enum.KeyCode,
+            UserCFrame: Enum.UserCFrame,
+            Arc: ArcWithBeacon.ArcWithBeacon,
+            WaitForRelease: boolean?,
+            RadiusState: ("Forward" | "Released")?,
+            LastHitPart: BasePart?,
+            LastHitPosition: Vector3?,
+        }
+    },
+    IgnoreNextExternalTeleport: boolean?,
+} & typeof(setmetatable({}, TeleportController)) & BaseController.BaseController
+
 
 
 --[[
 Creates a teleport controller object.
 --]]
-function TeleportController.new(): any
-    return setmetatable(BaseController.new(), TeleportController)
+function TeleportController.new(): TeleportController
+    return setmetatable(BaseController.new(), TeleportController) :: TeleportController
 end
 
 --[[
 Enables the controller.
 --]]
-function TeleportController:Enable(): ()
+function TeleportController.Enable(self: TeleportController): ()
     BaseController.Enable(self)
 
     --Create the arcs.
@@ -53,7 +66,7 @@ end
 --[[
 Disables the controller.
 --]]
-function TeleportController:Disable(): ()
+function TeleportController.Disable(self: TeleportController): ()
     BaseController.Disable(self)
 
     --Destroy the arcs.
@@ -64,7 +77,7 @@ end
 --[[
 Updates the local character. Must also update the camara.
 --]]
-function TeleportController:UpdateCharacter(): ()
+function TeleportController.UpdateCharacter(self: TeleportController): ()
     --Update the base character.
     BaseController.UpdateCharacter(self)
     if not self.Character then
@@ -108,7 +121,8 @@ function TeleportController:UpdateCharacter(): ()
             ArcData.Arc:Hide()
             if DirectionState == "Forward" then
                 --Teleport the player.
-                if ArcData.LastHitPart and ArcData.LastHitPosition then
+                local LastHitPart = ArcData.LastHitPart
+                if LastHitPart and ArcData.LastHitPosition then
                     --Unsit the player.
                     --The teleport event is set to ignored since the CFrame will be different when the player gets out of the seat.
                     local WasSitting = false
@@ -120,16 +134,17 @@ function TeleportController:UpdateCharacter(): ()
                         self.Character.Humanoid.Sit = false
                     end
 
-                    if (ArcData.LastHitPart:IsA("Seat") or ArcData.LastHitPart:IsA("VehicleSeat")) and not ArcData.LastHitPart.Occupant and not ArcData.LastHitPart.Disabled then
+                    if (LastHitPart:IsA("Seat") or LastHitPart:IsA("VehicleSeat")) and not LastHitPart.Occupant and not LastHitPart.Disabled then
                         --Sit in the seat.
                         --Waiting is done if the player was in an existing seat because the player no longer sitting will prevent sitting.
+                        local LastHitSeat = (LastHitPart :: Seat)
                         if WasSitting then
                             task.spawn(function()
                                 while self.Character.Humanoid.SeatPart do task.wait() end
-                                ArcData.LastHitPart:Sit(self.Character.Humanoid)
+                                LastHitSeat:Sit(self.Character.Humanoid)
                             end)
                         else
-                            ArcData.LastHitPart:Sit(self.Character.Humanoid)
+                            LastHitSeat:Sit(self.Character.Humanoid)
                         end
                     else
                         --Teleport the player.

@@ -1,8 +1,4 @@
---[[
-TheNexusAvenger
-
-Common camera functionality.
---]]
+--Common camera functionality.
 --!strict
 
 local Workspace = game:GetService("Workspace")
@@ -14,40 +10,42 @@ local Settings = require(NexusVRCharacterModel:WaitForChild("State"):WaitForChil
 local CommonCamera = {}
 CommonCamera.__index = CommonCamera
 
+export type CommonCamera = typeof(setmetatable({}, CommonCamera))
+
 
 
 --[[
 Creates the common camera.
 --]]
-function CommonCamera.new(): any
+function CommonCamera.new(): CommonCamera
     return setmetatable({}, CommonCamera)
 end
 
 --[[
 Enables the camera.
 --]]
-function CommonCamera:Enable(): ()
+function CommonCamera.Enable(self: CommonCamera): ()
 
 end
 
 --[[
 Disables the camera.
 --]]
-function CommonCamera:Disable(): ()
+function CommonCamera.Disable(self: CommonCamera): ()
 
 end
 
 --[[
 Updates the camera.
 --]]
-function CommonCamera:UpdateCamera(HeadsetCFrameWorld: CFrame): ()
+function CommonCamera.UpdateCamera(self: CommonCamera, HeadsetCFrameWorld: CFrame): ()
 
 end
 
 --[[
 Sets the camera CFrame.
 --]]
-function CommonCamera:SetCFrame(HeadsetCFrameWorld: CFrame): ()
+function CommonCamera.SetCFrame(self: CommonCamera, HeadsetCFrameWorld: CFrame): ()
     --Lock HeadLocked to false.
     --The default behavior is to do it for backwards compatibility with 2.6.0 and earlier.
     local Camera = Workspace.CurrentCamera

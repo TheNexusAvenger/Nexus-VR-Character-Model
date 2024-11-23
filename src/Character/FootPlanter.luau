@@ -1,6 +1,4 @@
 --[[
-TheNexusAvenger
-
 Attempts to solve footplanting.
 This code is heavily "zombified" off of a project by
 Stravant, and is taken from Nexus VR Character Model V1
@@ -116,7 +114,7 @@ function FootPlanter:CreateSolver(CenterPart,ScaleValue)
 	local mLegs = {}
 	local lastCF
 	local function initLegs()
-		local cf = flatten(getBaseCFrame(CenterPart.CFrame))
+		local cf = flatten(getBaseCFrame())
 		lastCF = cf
 		mRightLeg = {
 			OffsetModifier = CFnew(-LEG_GAP/2, 0, 0);

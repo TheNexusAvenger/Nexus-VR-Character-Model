@@ -1,8 +1,4 @@
- --[[
-TheNexusAvenger
-
-Base class for controlling the local character.
---]]
+ --Base class for controlling the local character.
 --!strict
 
 local THUMBSTICK_INPUT_START_RADIUS = 0.6
@@ -22,6 +18,7 @@ local TweenService = game:GetService("TweenService")
 
 local NexusVRCharacterModel = script.Parent.Parent.Parent
 local NexusVRCharacterModelApi = require(NexusVRCharacterModel).Api
+local Character = require(NexusVRCharacterModel:WaitForChild("Character"))
 local CameraService = require(NexusVRCharacterModel:WaitForChild("State"):WaitForChild("CameraService")).GetInstance()
 local CharacterService = require(NexusVRCharacterModel:WaitForChild("State"):WaitForChild("CharacterService")).GetInstance()
 local Settings = require(NexusVRCharacterModel:WaitForChild("State"):WaitForChild("Settings")).GetInstance()
@@ -29,6 +26,13 @@ local VRInputService = require(NexusVRCharacterModel:WaitForChild("State"):WaitF
 
 local BaseController = {}
 BaseController.__index = BaseController
+
+export type BaseController = {
+    Character: Character.Character?,
+    Connections: {RBXScriptConnection}?,
+    LastHeadCFrame: CFrame?,
+    LastRotationUpdateTick: number?,
+} & typeof(setmetatable({}, BaseController))
 
 
 
@@ -39,19 +43,17 @@ local function GetAngleToGlobalY(CF: CFrame): number
     return math.atan2(-CF.LookVector.X, -CF.LookVector.Z)
 end
 
-
-
 --[[
 Creates a base controller object.
 --]]
-function BaseController.new(): any
-    return setmetatable({}, BaseController)
+function BaseController.new(): BaseController
+    return setmetatable({}, BaseController) :: BaseController
 end
 
 --[[
 Updates the character. Returns if it changed.
 --]]
-function BaseController:UpdateCharacterReference(): boolean
+function BaseController.UpdateCharacterReference(self: BaseController): boolean
     local LastCharacter = self.Character
     self.Character = CharacterService:GetCharacter(Players.LocalPlayer)
     if not self.Character then
@@ -63,7 +65,7 @@ end
 --[[
 Enables the controller.
 --]]
-function BaseController:Enable(): ()
+function BaseController.Enable(self: BaseController): ()
     if not self.Connections then self.Connections = {} end
 
     --Update the character and return if the character is nil.
@@ -73,14 +75,16 @@ function BaseController:Enable(): ()
     end
 
     --Connect the eye level being set.
-    table.insert(self.Connections, VRInputService.EyeLevelSet:Connect(function()
-        if self.LastHeadCFrame.Y > 0 then
-            self.LastHeadCFrame = CFrame.new(0, -self.LastHeadCFrame.Y, 0) * self.LastHeadCFrame
+    local Connections = self.Connections :: {RBXScriptConnection}
+    table.insert(Connections, VRInputService.EyeLevelSet:Connect(function()
+        local LastHeadCFrame = self.LastHeadCFrame
+        if LastHeadCFrame and LastHeadCFrame.Y > 0 then
+            self.LastHeadCFrame = CFrame.new(0, -LastHeadCFrame.Y, 0) * LastHeadCFrame
         end
-    end))
+    end) :: any)
 
     --Connect the character entering a seat.
-    table.insert(self.Connections, self.Character.Humanoid:GetPropertyChangedSignal("SeatPart"):Connect(function()
+    table.insert(Connections, self.Character.Humanoid:GetPropertyChangedSignal("SeatPart"):Connect(function()
         local SeatPart = self.Character:GetHumanoidSeatPart()
         if SeatPart then
             self:PlayBlur()
@@ -95,12 +99,14 @@ end
 --[[
 Disables the controller.
 --]]
-function BaseController:Disable(): ()
+function BaseController.Disable(self: BaseController): ()
     self.Character = nil
     self.LastHeadCFrame = nil
     self.LastRotationUpdateTick = nil
-    for _, Connection in self.Connections do
-        Connection:Disconnect()
+    if self.Connections then
+        for _, Connection in self.Connections do
+            Connection:Disconnect()
+        end
     end
     self.Connections = nil
 end
@@ -109,7 +115,7 @@ end
 Scales the local-space input CFrame based on
 the height multiplier of the character.
 --]]
-function BaseController:ScaleInput(InputCFrame: CFrame): CFrame
+function BaseController.ScaleInput(self: BaseController, InputCFrame: CFrame): CFrame
     --Return the original CFrame if there is no character.
     if not self.Character or not InputCFrame then
         return InputCFrame
@@ -124,7 +130,7 @@ Updates the provided 'Store' table with the state of its
 Thumbstick (Enum.KeyCode.ThumbstickX) field. Returns the
 direction state, radius state, and overall state change.
 --]]
-function BaseController:GetJoystickState(Store: any): (string, string, string)
+function BaseController.GetJoystickState(self: BaseController, Store: any): (string, string, string)
     local InputPosition = VRInputService:GetThumbstickPosition(Store.Thumbstick)
     local InputRadius = ((InputPosition.X ^ 2) + (InputPosition.Y ^ 2)) ^ 0.5
     local InputAngle = math.atan2(InputPosition.X, InputPosition.Y)
@@ -176,7 +182,7 @@ end
 Plays a temporary blur effect to make
 teleports and snap turns less jarring.
 ]]--
-function BaseController:PlayBlur(): ()
+function BaseController.PlayBlur(self: BaseController): ()
     local SnapTeleportBlur = Settings:GetSetting("Movement.SnapTeleportBlur")
     SnapTeleportBlur = (if SnapTeleportBlur == nil then true else SnapTeleportBlur)
 
@@ -199,7 +205,7 @@ end
 --[[
 Updates the reference world CFrame.
 --]]
-function BaseController:UpdateCharacter(): ()
+function BaseController.UpdateCharacter(self: BaseController): ()
     --Return if the character is nil.
     local CharacterChanged = self:UpdateCharacterReference()
     if not self.Character then
@@ -277,7 +283,7 @@ end
 --[[
 Performs snap or smooth rotating based on the thumbstick input.
 --]]
-function BaseController:UpdateRotating(Hand: Enum.UserCFrame, Direction: string, StateChange: string): ()
+function BaseController.UpdateRotating(self: BaseController, Hand: Enum.UserCFrame, Direction: string, StateChange: string): ()
     if not self.Character or self.Character.Humanoid.Sit then
         return
     end

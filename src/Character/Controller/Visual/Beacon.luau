@@ -1,13 +1,7 @@
---[[
-TheNexusAvenger
-
-Visual indicator for the end of aiming.
---]]
+--Visual indicator for the end of aiming.
 --!strict
 
 local BEACON_SPEED_MULTIPLIER = 2
-
-
 
 local Workspace = game:GetService("Workspace")
 
@@ -15,12 +9,10 @@ local Beacon = {}
 Beacon.__index = Beacon
 
 export type Beacon = {
-    new: () -> (Beacon),
-
-    Update: (self: Beacon, CenterCFrame: CFrame, HoverPart: BasePart) -> (),
-    Hide: (self: Beacon) -> (),
-    Destroy: (self: Beacon) -> (),
-}
+    Sphere: Part,
+    ConstantRing: ImageHandleAdornment,
+    MovingRing: ImageHandleAdornment,
+} & typeof(setmetatable({}, Beacon))
 
 
 
@@ -33,38 +25,42 @@ function Beacon.new(): Beacon
     setmetatable(self, Beacon)
 
     --Create the parts.
-    self.Sphere = Instance.new("Part")
-    self.Sphere.Transparency = 1
-    self.Sphere.Material = Enum.Material.Neon
-    self.Sphere.Anchored = true
-    self.Sphere.CanCollide = false
-    self.Sphere.CanQuery = false
-    self.Sphere.Size = Vector3.new(0.5, 0.5, 0.5)
-    self.Sphere.Shape = Enum.PartType.Ball
-    self.Sphere.Parent = Workspace.CurrentCamera
+    local Sphere = Instance.new("Part")
+    Sphere.Transparency = 1
+    Sphere.Material = Enum.Material.Neon
+    Sphere.Anchored = true
+    Sphere.CanCollide = false
+    Sphere.CanQuery = false
+    Sphere.Size = Vector3.new(0.5, 0.5, 0.5)
+    Sphere.Shape = Enum.PartType.Ball
+    Sphere.Parent = Workspace.CurrentCamera
 
-    self.ConstantRing = Instance.new("ImageHandleAdornment")
-    self.ConstantRing.Adornee = self.Sphere
-    self.ConstantRing.Size = Vector2.new(2, 2)
-    self.ConstantRing.Image = "rbxasset://textures/ui/VR/VRPointerDiscBlue.png"
-    self.ConstantRing.Visible = false
-    self.ConstantRing.Parent = self.Sphere
+    local ConstantRing = Instance.new("ImageHandleAdornment")
+    ConstantRing.Adornee = Sphere
+    ConstantRing.Size = Vector2.new(2, 2)
+    ConstantRing.Image = "rbxasset://textures/ui/VR/VRPointerDiscBlue.png"
+    ConstantRing.Visible = false
+    ConstantRing.Parent = Sphere
 
-    self.MovingRing = Instance.new("ImageHandleAdornment")
-    self.MovingRing.Adornee = self.Sphere
-    self.MovingRing.Size = Vector2.new(2, 2)
-    self.MovingRing.Image = "rbxasset://textures/ui/VR/VRPointerDiscBlue.png"
-    self.MovingRing.Visible = false
-    self.MovingRing.Parent = self.Sphere
+    local MovingRing = Instance.new("ImageHandleAdornment")
+    MovingRing.Adornee = Sphere
+    MovingRing.Size = Vector2.new(2, 2)
+    MovingRing.Image = "rbxasset://textures/ui/VR/VRPointerDiscBlue.png"
+    MovingRing.Visible = false
+    MovingRing.Parent = Sphere
 
     --Return the object.
-    return (self :: any) :: Beacon
+    return setmetatable({
+        Sphere = Sphere,
+        ConstantRing = ConstantRing,
+        MovingRing = MovingRing,
+    }, Beacon) :: Beacon
 end
 
 --[[
 Updates the beacon at a given CFrame.
 --]]
-function Beacon:Update(CenterCFrame: CFrame, HoverPart: BasePart): ()
+function Beacon.Update(self: Beacon, CenterCFrame: CFrame, HoverPart: BasePart): ()
     --Calculate the size for the current time.
     local Height = 0.4 + (-math.cos(tick() * 2 * BEACON_SPEED_MULTIPLIER) / 8)
     local BeaconSize = 2 * ((tick() * BEACON_SPEED_MULTIPLIER) % math.pi) / math.pi
@@ -97,7 +93,7 @@ end
 --[[
 Hides the beacon.
 --]]
-function Beacon:Hide(): ()
+function Beacon.Hide(self: Beacon): ()
     --Hide the beacon.
     self.Sphere.Transparency = 1
     self.ConstantRing.Visible = false
@@ -107,10 +103,10 @@ end
 --[[
 Destroys the beacon.
 --]]
-function Beacon:Destroy(): ()
+function Beacon.Destroy(self: Beacon): ()
     self.Sphere:Destroy()
 end
 
 
 
-return (Beacon :: any) :: Beacon
+return Beacon

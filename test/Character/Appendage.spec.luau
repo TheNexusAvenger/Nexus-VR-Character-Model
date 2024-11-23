@@ -1,8 +1,4 @@
---[[
-TheNexusAvenger
-
-Tests the Appendage class.
---]]
+--Tests the Appendage class.
 --!strict
 --$NexusUnitTestExtensions
 

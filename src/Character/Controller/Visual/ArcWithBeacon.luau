@@ -1,8 +1,4 @@
---[[
-TheNexusAvenger
-
-Extension of the arc to add a beacon.
---]]
+--Extension of the arc to add a beacon.
 --!strict
 
 local Arc = require(script.Parent:WaitForChild("Arc"))
@@ -13,8 +9,8 @@ ArcWithBeacon.__index = ArcWithBeacon
 setmetatable(ArcWithBeacon, Arc)
 
 export type ArcWithBeacon = {
-    new: () -> (ArcWithBeacon),
-} & Arc.Arc
+    Beacon: Beacon.Beacon,
+} & typeof(setmetatable({}, ArcWithBeacon)) & Arc.Arc
 
 
 
@@ -22,8 +18,7 @@ export type ArcWithBeacon = {
 Creates an arc.
 --]]
 function ArcWithBeacon.new(): ArcWithBeacon
-    local self = Arc.new() :: any
-    setmetatable(self, ArcWithBeacon)
+    local self = setmetatable(Arc.new() :: any, ArcWithBeacon) :: ArcWithBeacon
     self.Beacon = Beacon.new()
     self:Hide()
     return self :: ArcWithBeacon
@@ -33,7 +28,7 @@ end
 Updates the arc. Returns the part and
 position that were hit.
 --]]
-function ArcWithBeacon:Update(StartCFrame: CFrame): (BasePart?, Vector3?)
+function ArcWithBeacon.Update(self: ArcWithBeacon, StartCFrame: CFrame): (BasePart?, Vector3?)
     --Update the arc.
     local HitPart, HitPosition = Arc.Update(self, StartCFrame)
 
@@ -52,19 +47,19 @@ end
 --[[
 Hides the arc.
 --]]
-function ArcWithBeacon:Hide(): ()
+function ArcWithBeacon.Hide(self: ArcWithBeacon): ()
     Arc.Hide(self);
-    (self :: any).Beacon:Hide()
+    self.Beacon:Hide()
 end
 
 --[[
 Destroys the arc.
 --]]
-function ArcWithBeacon:Destroy(): ()
+function ArcWithBeacon.Destroy(self: ArcWithBeacon): ()
     Arc.Destroy(self);
-    (self :: any).Beacon:Destroy()
+    self.Beacon:Destroy()
 end
 
 
 
-return (ArcWithBeacon :: any) :: ArcWithBeacon
+return ArcWithBeacon

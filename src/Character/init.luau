@@ -1,8 +1,4 @@
---[[
-TheNexusAvenger
-
-Manipulates a character model.
---]]
+--Manipulates a character model.
 --!strict
 
 local SMOOTHING_DURATION_SECONDS = 1 / 30
@@ -24,12 +20,27 @@ local Character = {}
 Character.__index = Character
 
 export type Character = {
-    new: (CharacterModel: Model) -> Character,
-
-    GetHumanoidScale: (self: Character, ScaleName: string) -> (number),
-    RefreshCharacter: (self: Character) -> (),
-    UpdateFromInputs: (self: Character, HeadControllerCFrame: CFrame, LeftHandControllerCFrame: CFrame, RightHandControllerCFrame: CFrame, CurrentWalkspeed: number?, TrackerData: {[string]: CFrame}?) -> (),
-}
+    CharacterModel: Model,
+    Humanoid: Humanoid,
+    Head: Head.Head,
+    Torso: Torso.Torso,
+    LeftArm: Appendage.Appendage,
+    RightArm: Appendage.Appendage,
+    LeftLeg: Appendage.Appendage,
+    RightLeg: Appendage.Appendage,
+    FootPlanter: any,
+    CurrentWalkspeed: number,
+    TweenComponents: boolean,
+    UseIKControl: boolean,
+    PreventArmDisconnection: boolean,
+    Parts: {[string]: BasePart},
+    Motors: {[string]: Motor6D},
+    Attachments: {[string]: {[string]: Attachment}},
+    CurrentMotor6DTransforms: {CFrame},
+    LastMotor6DTransforms: {CFrame},
+    LastRefreshTime: number,
+    AppearanceChangedConnection: RBXScriptConnection?,
+} & typeof(setmetatable({}, Character))
 
 
 
@@ -37,12 +48,11 @@ export type Character = {
 Creates a character.
 --]]
 function Character.new(CharacterModel: Model): Character
-    local self = {
+    local self = setmetatable({
         CharacterModel = CharacterModel,
         TweenComponents = (CharacterModel ~= Players.LocalPlayer.Character),
         UseIKControl = Settings:GetSetting("Extra.TEMPORARY_UseIKControl"),
-    }
-    setmetatable(self, Character)
+    }, Character) :: Character
 
     --Determine if the arms can be disconnected.
     --Checking for the setting to be explicitly false is done in case the setting is undefined (default is true).
@@ -74,7 +84,6 @@ function Character.new(CharacterModel: Model): Character
     self.AppearanceChangedConnection = nil :: RBXScriptConnection?
     self:SetUpAppearanceChanged()
 
-    self.MoodAnimationIds = {}
     self.CurrentMotor6DTransforms = {}
     self.LastMotor6DTransforms = {}
     self.LastRefreshTime = tick()
@@ -109,104 +118,104 @@ function Character:SetUpVRParts()
     local PreventArmDisconnection = self.PreventArmDisconnection
 
     self.Parts = {
-        Head = CharacterModel:WaitForChild("Head"),
-        UpperTorso = CharacterModel:WaitForChild("UpperTorso"),
-        LowerTorso = CharacterModel:WaitForChild("LowerTorso"),
-        HumanoidRootPart = CharacterModel:WaitForChild("HumanoidRootPart"),
-        RightUpperArm = CharacterModel:WaitForChild("RightUpperArm"),
-        RightLowerArm = CharacterModel:WaitForChild("RightLowerArm"),
-        RightHand = CharacterModel:WaitForChild("RightHand"),
-        LeftUpperArm = CharacterModel:WaitForChild("LeftUpperArm"),
-        LeftLowerArm = CharacterModel:WaitForChild("LeftLowerArm"),
-        LeftHand = CharacterModel:WaitForChild("LeftHand"),
-        RightUpperLeg = CharacterModel:WaitForChild("RightUpperLeg"),
-        RightLowerLeg = CharacterModel:WaitForChild("RightLowerLeg"),
-        RightFoot = CharacterModel:WaitForChild("RightFoot"),
-        LeftUpperLeg = CharacterModel:WaitForChild("LeftUpperLeg"),
-        LeftLowerLeg = CharacterModel:WaitForChild("LeftLowerLeg"),
-        LeftFoot = CharacterModel:WaitForChild("LeftFoot"),
+        Head = CharacterModel:WaitForChild("Head") :: BasePart,
+        UpperTorso = CharacterModel:WaitForChild("UpperTorso") :: BasePart,
+        LowerTorso = CharacterModel:WaitForChild("LowerTorso") :: BasePart,
+        HumanoidRootPart = CharacterModel:WaitForChild("HumanoidRootPart") :: BasePart,
+        RightUpperArm = CharacterModel:WaitForChild("RightUpperArm") :: BasePart,
+        RightLowerArm = CharacterModel:WaitForChild("RightLowerArm") :: BasePart,
+        RightHand = CharacterModel:WaitForChild("RightHand") :: BasePart,
+        LeftUpperArm = CharacterModel:WaitForChild("LeftUpperArm") :: BasePart,
+        LeftLowerArm = CharacterModel:WaitForChild("LeftLowerArm") :: BasePart,
+        LeftHand = CharacterModel:WaitForChild("LeftHand") :: BasePart,
+        RightUpperLeg = CharacterModel:WaitForChild("RightUpperLeg") :: BasePart,
+        RightLowerLeg = CharacterModel:WaitForChild("RightLowerLeg") :: BasePart,
+        RightFoot = CharacterModel:WaitForChild("RightFoot") :: BasePart,
+        LeftUpperLeg = CharacterModel:WaitForChild("LeftUpperLeg") :: BasePart,
+        LeftLowerLeg = CharacterModel:WaitForChild("LeftLowerLeg") :: BasePart,
+        LeftFoot = CharacterModel:WaitForChild("LeftFoot") :: BasePart,
     }
     self.Motors = {
-        Neck = self.Parts.Head:WaitForChild("Neck"),
-        Waist = self.Parts.UpperTorso:WaitForChild("Waist"),
-        Root = self.Parts.LowerTorso:WaitForChild("Root"),
-        RightShoulder = self.Parts.RightUpperArm:WaitForChild("RightShoulder"),
-        RightElbow = self.Parts.RightLowerArm:WaitForChild("RightElbow"),
-        RightWrist = self.Parts.RightHand:WaitForChild("RightWrist"),
-        LeftShoulder = self.Parts.LeftUpperArm:WaitForChild("LeftShoulder"),
-        LeftElbow = self.Parts.LeftLowerArm:WaitForChild("LeftElbow"),
-        LeftWrist = self.Parts.LeftHand:WaitForChild("LeftWrist"),
-        RightHip = self.Parts.RightUpperLeg:WaitForChild("RightHip"),
-        RightKnee = self.Parts.RightLowerLeg:WaitForChild("RightKnee"),
-        RightAnkle = self.Parts.RightFoot:WaitForChild("RightAnkle"),
-        LeftHip = self.Parts.LeftUpperLeg:WaitForChild("LeftHip"),
-        LeftKnee = self.Parts.LeftLowerLeg:WaitForChild("LeftKnee"),
-        LeftAnkle = self.Parts.LeftFoot:WaitForChild("LeftAnkle"),
+        Neck = self.Parts.Head:WaitForChild("Neck") :: Motor6D,
+        Waist = self.Parts.UpperTorso:WaitForChild("Waist") :: Motor6D,
+        Root = self.Parts.LowerTorso:WaitForChild("Root") :: Motor6D,
+        RightShoulder = self.Parts.RightUpperArm:WaitForChild("RightShoulder") :: Motor6D,
+        RightElbow = self.Parts.RightLowerArm:WaitForChild("RightElbow") :: Motor6D,
+        RightWrist = self.Parts.RightHand:WaitForChild("RightWrist") :: Motor6D,
+        LeftShoulder = self.Parts.LeftUpperArm:WaitForChild("LeftShoulder") :: Motor6D,
+        LeftElbow = self.Parts.LeftLowerArm:WaitForChild("LeftElbow") :: Motor6D,
+        LeftWrist = self.Parts.LeftHand:WaitForChild("LeftWrist") :: Motor6D,
+        RightHip = self.Parts.RightUpperLeg:WaitForChild("RightHip") :: Motor6D,
+        RightKnee = self.Parts.RightLowerLeg:WaitForChild("RightKnee") :: Motor6D,
+        RightAnkle = self.Parts.RightFoot:WaitForChild("RightAnkle") :: Motor6D,
+        LeftHip = self.Parts.LeftUpperLeg:WaitForChild("LeftHip") :: Motor6D,
+        LeftKnee = self.Parts.LeftLowerLeg:WaitForChild("LeftKnee") :: Motor6D,
+        LeftAnkle = self.Parts.LeftFoot:WaitForChild("LeftAnkle") :: Motor6D,
     }
     self.Attachments = {
         Head = {
-            NeckRigAttachment = self.Parts.Head:WaitForChild("NeckRigAttachment"),
+            NeckRigAttachment = self.Parts.Head:WaitForChild("NeckRigAttachment") :: Attachment,
         },
         UpperTorso = {
-            NeckRigAttachment = self.Parts.UpperTorso:WaitForChild("NeckRigAttachment"),
-            LeftShoulderRigAttachment = self.Parts.UpperTorso:WaitForChild("LeftShoulderRigAttachment"),
-            RightShoulderRigAttachment = self.Parts.UpperTorso:WaitForChild("RightShoulderRigAttachment"),
-            WaistRigAttachment = self.Parts.UpperTorso:WaitForChild("WaistRigAttachment"),
+            NeckRigAttachment = self.Parts.UpperTorso:WaitForChild("NeckRigAttachment") :: Attachment,
+            LeftShoulderRigAttachment = self.Parts.UpperTorso:WaitForChild("LeftShoulderRigAttachment") :: Attachment,
+            RightShoulderRigAttachment = self.Parts.UpperTorso:WaitForChild("RightShoulderRigAttachment") :: Attachment,
+            WaistRigAttachment = self.Parts.UpperTorso:WaitForChild("WaistRigAttachment") :: Attachment,
         },
         LowerTorso = {
-            WaistRigAttachment = self.Parts.LowerTorso:WaitForChild("WaistRigAttachment"),
-            LeftHipRigAttachment = self.Parts.LowerTorso:WaitForChild("LeftHipRigAttachment"),
-            RightHipRigAttachment = self.Parts.LowerTorso:WaitForChild("RightHipRigAttachment"),
-            RootRigAttachment = self.Parts.LowerTorso:WaitForChild("RootRigAttachment"),
+            WaistRigAttachment = self.Parts.LowerTorso:WaitForChild("WaistRigAttachment") :: Attachment,
+            LeftHipRigAttachment = self.Parts.LowerTorso:WaitForChild("LeftHipRigAttachment") :: Attachment,
+            RightHipRigAttachment = self.Parts.LowerTorso:WaitForChild("RightHipRigAttachment") :: Attachment,
+            RootRigAttachment = self.Parts.LowerTorso:WaitForChild("RootRigAttachment") :: Attachment,
         },
         HumanoidRootPart = {
-            RootRigAttachment = self.Parts.HumanoidRootPart:WaitForChild("RootRigAttachment"),
+            RootRigAttachment = self.Parts.HumanoidRootPart:WaitForChild("RootRigAttachment") :: Attachment,
         },
         RightUpperArm = {
-            RightShoulderRigAttachment = self.Parts.RightUpperArm:WaitForChild("RightShoulderRigAttachment"),
-            RightElbowRigAttachment = self.Parts.RightUpperArm:WaitForChild("RightElbowRigAttachment"),
+            RightShoulderRigAttachment = self.Parts.RightUpperArm:WaitForChild("RightShoulderRigAttachment") :: Attachment,
+            RightElbowRigAttachment = self.Parts.RightUpperArm:WaitForChild("RightElbowRigAttachment") :: Attachment,
         },
         RightLowerArm = {
-            RightElbowRigAttachment = self.Parts.RightLowerArm:WaitForChild("RightElbowRigAttachment"),
-            RightWristRigAttachment = self.Parts.RightLowerArm:WaitForChild("RightWristRigAttachment"),
+            RightElbowRigAttachment = self.Parts.RightLowerArm:WaitForChild("RightElbowRigAttachment") :: Attachment,
+            RightWristRigAttachment = self.Parts.RightLowerArm:WaitForChild("RightWristRigAttachment") :: Attachment,
         },
         RightHand = {
-            RightWristRigAttachment = self.Parts.RightHand:WaitForChild("RightWristRigAttachment"),
+            RightWristRigAttachment = self.Parts.RightHand:WaitForChild("RightWristRigAttachment") :: Attachment,
         },
         LeftUpperArm = {
-            LeftShoulderRigAttachment = self.Parts.LeftUpperArm:WaitForChild("LeftShoulderRigAttachment"),
-            LeftElbowRigAttachment = self.Parts.LeftUpperArm:WaitForChild("LeftElbowRigAttachment"),
+            LeftShoulderRigAttachment = self.Parts.LeftUpperArm:WaitForChild("LeftShoulderRigAttachment") :: Attachment,
+            LeftElbowRigAttachment = self.Parts.LeftUpperArm:WaitForChild("LeftElbowRigAttachment") :: Attachment,
         },
         LeftLowerArm = {
-            LeftElbowRigAttachment = self.Parts.LeftLowerArm:WaitForChild("LeftElbowRigAttachment"),
-            LeftWristRigAttachment = self.Parts.LeftLowerArm:WaitForChild("LeftWristRigAttachment"),
+            LeftElbowRigAttachment = self.Parts.LeftLowerArm:WaitForChild("LeftElbowRigAttachment") :: Attachment,
+            LeftWristRigAttachment = self.Parts.LeftLowerArm:WaitForChild("LeftWristRigAttachment") :: Attachment,
         },
         LeftHand = {
-            LeftWristRigAttachment = self.Parts.LeftHand:WaitForChild("LeftWristRigAttachment"),
+            LeftWristRigAttachment = self.Parts.LeftHand:WaitForChild("LeftWristRigAttachment") :: Attachment,
         },
         RightUpperLeg = {
-            RightHipRigAttachment = self.Parts.RightUpperLeg:WaitForChild("RightHipRigAttachment"),
-            RightKneeRigAttachment = self.Parts.RightUpperLeg:WaitForChild("RightKneeRigAttachment"),
+            RightHipRigAttachment = self.Parts.RightUpperLeg:WaitForChild("RightHipRigAttachment") :: Attachment,
+            RightKneeRigAttachment = self.Parts.RightUpperLeg:WaitForChild("RightKneeRigAttachment") :: Attachment,
         },
         RightLowerLeg = {
-            RightKneeRigAttachment = self.Parts.RightLowerLeg:WaitForChild("RightKneeRigAttachment"),
-            RightAnkleRigAttachment = self.Parts.RightLowerLeg:WaitForChild("RightAnkleRigAttachment"),
+            RightKneeRigAttachment = self.Parts.RightLowerLeg:WaitForChild("RightKneeRigAttachment") :: Attachment,
+            RightAnkleRigAttachment = self.Parts.RightLowerLeg:WaitForChild("RightAnkleRigAttachment") :: Attachment,
         },
         RightFoot = {
-            RightAnkleRigAttachment = self.Parts.RightFoot:WaitForChild("RightAnkleRigAttachment"),
-            RightFootAttachment = self.Parts.RightFoot:FindFirstChild("RightFootAttachment"),
+            RightAnkleRigAttachment = self.Parts.RightFoot:WaitForChild("RightAnkleRigAttachment") :: Attachment,
+            RightFootAttachment = self.Parts.RightFoot:FindFirstChild("RightFootAttachment") :: Attachment,
         },
         LeftUpperLeg = {
-            LeftHipRigAttachment = self.Parts.LeftUpperLeg:WaitForChild("LeftHipRigAttachment"),
-            LeftKneeRigAttachment = self.Parts.LeftUpperLeg:WaitForChild("LeftKneeRigAttachment"),
+            LeftHipRigAttachment = self.Parts.LeftUpperLeg:WaitForChild("LeftHipRigAttachment") :: Attachment,
+            LeftKneeRigAttachment = self.Parts.LeftUpperLeg:WaitForChild("LeftKneeRigAttachment") :: Attachment,
         },
         LeftLowerLeg = {
-            LeftKneeRigAttachment = self.Parts.LeftLowerLeg:WaitForChild("LeftKneeRigAttachment"),
-            LeftAnkleRigAttachment = self.Parts.LeftLowerLeg:WaitForChild("LeftAnkleRigAttachment"),
+            LeftKneeRigAttachment = self.Parts.LeftLowerLeg:WaitForChild("LeftKneeRigAttachment") :: Attachment,
+            LeftAnkleRigAttachment = self.Parts.LeftLowerLeg:WaitForChild("LeftAnkleRigAttachment") :: Attachment,
         },
         LeftFoot = {
-            LeftAnkleRigAttachment = self.Parts.LeftFoot:WaitForChild("LeftAnkleRigAttachment"),
-            LeftFootAttachment = self.Parts.LeftFoot:FindFirstChild("LeftFootAttachment"),
+            LeftAnkleRigAttachment = self.Parts.LeftFoot:WaitForChild("LeftAnkleRigAttachment") :: Attachment,
+            LeftFootAttachment = self.Parts.LeftFoot:FindFirstChild("LeftFootAttachment") :: Attachment,
         },
     }
 
@@ -245,12 +254,16 @@ function Character:SetUpVRParts()
         self.LeftLeg = Appendage.FromPreset("LeftLeg", CharacterModel, false, self.TweenComponents and 0.1 or 0)
         self.RightLeg = Appendage.FromPreset("RightLeg", CharacterModel, false, self.TweenComponents and 0.1 or 0)
     else
-        self.LeftArm = AppendageLegacy.new(CharacterModel:WaitForChild("LeftUpperArm") :: BasePart, CharacterModel:WaitForChild("LeftLowerArm") :: BasePart, CharacterModel:WaitForChild("LeftHand") :: BasePart, "LeftShoulderRigAttachment", "LeftElbowRigAttachment", "LeftWristRigAttachment", "LeftGripAttachment", PreventArmDisconnection)
-        self.RightArm = AppendageLegacy.new(CharacterModel:WaitForChild("RightUpperArm") :: BasePart, CharacterModel:WaitForChild("RightLowerArm") :: BasePart, CharacterModel:WaitForChild("RightHand") :: BasePart, "RightShoulderRigAttachment", "RightElbowRigAttachment", "RightWristRigAttachment", "RightGripAttachment", PreventArmDisconnection)
-        self.LeftLeg = AppendageLegacy.new(CharacterModel:WaitForChild("LeftUpperLeg") :: BasePart, CharacterModel:WaitForChild("LeftLowerLeg") :: BasePart, CharacterModel:WaitForChild("LeftFoot") :: BasePart, "LeftHipRigAttachment", "LeftKneeRigAttachment", "LeftAnkleRigAttachment", "LeftFootAttachment", true)
-        self.LeftLeg.InvertBendDirection = true
-        self.RightLeg = AppendageLegacy.new(CharacterModel:WaitForChild("RightUpperLeg") :: BasePart, CharacterModel:WaitForChild("RightLowerLeg") :: BasePart, CharacterModel:WaitForChild("RightFoot") :: BasePart, "RightHipRigAttachment", "RightKneeRigAttachment", "RightAnkleRigAttachment", "RightFootAttachment", true)
-        self.RightLeg.InvertBendDirection = true
+        local LeftArm = AppendageLegacy.new(CharacterModel:WaitForChild("LeftUpperArm") :: BasePart, CharacterModel:WaitForChild("LeftLowerArm") :: BasePart, CharacterModel:WaitForChild("LeftHand") :: BasePart, "LeftShoulderRigAttachment", "LeftElbowRigAttachment", "LeftWristRigAttachment", "LeftGripAttachment", PreventArmDisconnection)
+        local RightArm = AppendageLegacy.new(CharacterModel:WaitForChild("RightUpperArm") :: BasePart, CharacterModel:WaitForChild("RightLowerArm") :: BasePart, CharacterModel:WaitForChild("RightHand") :: BasePart, "RightShoulderRigAttachment", "RightElbowRigAttachment", "RightWristRigAttachment", "RightGripAttachment", PreventArmDisconnection)
+        local LeftLeg = AppendageLegacy.new(CharacterModel:WaitForChild("LeftUpperLeg") :: BasePart, CharacterModel:WaitForChild("LeftLowerLeg") :: BasePart, CharacterModel:WaitForChild("LeftFoot") :: BasePart, "LeftHipRigAttachment", "LeftKneeRigAttachment", "LeftAnkleRigAttachment", "LeftFootAttachment", true)
+        LeftLeg.InvertBendDirection = true
+        local RightLeg = AppendageLegacy.new(CharacterModel:WaitForChild("RightUpperLeg") :: BasePart, CharacterModel:WaitForChild("RightLowerLeg") :: BasePart, CharacterModel:WaitForChild("RightFoot") :: BasePart, "RightHipRigAttachment", "RightKneeRigAttachment", "RightAnkleRigAttachment", "RightFootAttachment", true)
+        RightLeg.InvertBendDirection = true
+        self.LeftArm = LeftArm :: any
+        self.RightArm = RightArm :: any
+        self.LeftLeg = LeftLeg :: any
+        self.RightLeg = RightLeg :: any
     end
     self.FootPlanter = FootPlanter:CreateSolver(CharacterModel:WaitForChild("LowerTorso"), self.Humanoid:FindFirstChild("BodyHeightScale"))
 end

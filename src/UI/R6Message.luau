@@ -1,8 +1,4 @@
---[[
-TheNexusAvenger
-
-Displays a message if R6 is used.
---]]
+--Displays a message if R6 is used.
 --!strict
 
 local MESSAGE_OPEN_TIME = 0.25
@@ -22,15 +18,16 @@ local ScreenGui = NexusVRCore:GetResource("Container.ScreenGui")
 local R6Message = {}
 R6Message.__index = R6Message
 
+export type R6Message = {
+    ScreenGui: any,
+} & typeof(setmetatable({}, R6Message))
+
 
 
 --[[
 Creates the R6 message.
 --]]
-function R6Message.new(): any
-    local self = {}
-    setmetatable(self, R6Message)
-
+function R6Message.new(): R6Message
     --Set up the ScreenGui.
     local MessageScreenGui = ScreenGui.new()
     MessageScreenGui.ResetOnSpawn = false
@@ -38,7 +35,11 @@ function R6Message.new(): any
     MessageScreenGui.CanvasSize = Vector2.new(500, 500)
     MessageScreenGui.FieldOfView = 0
     MessageScreenGui.Easing = 0.25
-    self.ScreenGui = MessageScreenGui
+
+    --Create the object.
+    local self = setmetatable({
+        ScreenGui = MessageScreenGui,
+    }, R6Message) :: R6Message
 
     --Create the logo and message.
     local Logo = Instance.new("ImageLabel")
@@ -92,7 +93,7 @@ end
 --[[
 Sets the window open or closed.
 --]]
-function R6Message:SetOpen(Open: boolean): ()
+function R6Message.SetOpen(self: R6Message, Open: boolean): ()
     --Determine the start and end values.
     local StartFieldOfView, EndFieldOfView = (Open and 0 or math.rad(40)), (Open and math.rad(40) or 0)
 
@@ -119,7 +120,7 @@ end
 --[[
 Opens the message.
 --]]
-function R6Message:Open(): ()
+function R6Message.Open(self: R6Message): ()
     self:SetOpen(true)
 end
 

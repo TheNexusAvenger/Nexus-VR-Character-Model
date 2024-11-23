@@ -1,8 +1,4 @@
---[[
-TheNexusAvenger
-
-Tests the Head class.
---]]
+--Tests the Head class.
 --!strict
 --$NexusUnitTestExtensions
 
