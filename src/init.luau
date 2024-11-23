@@ -1,8 +1,4 @@
---[[
-TheNexusAvenger
-
-Loads Nexus VR Character Model.
---]]
+--Loads Nexus VR Character Model.
 --!strict
 
 --Version information should be set right before distribution (not committed).

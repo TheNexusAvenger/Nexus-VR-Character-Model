@@ -1,8 +1,4 @@
---[[
-TheNexusAvenger
-
-Main module for creating the usable API.
---]]
+--Main module for creating the usable API.
 --!strict
 
 local RunService = game:GetService("RunService")
@@ -22,7 +18,7 @@ return function()
     --]]
     function API:Register(ApiName: string, Api: any): ()
         if self[ApiName] ~= nil then
-            error("API already registered: "..tostring(ApiName))
+            error(`API already registered: {ApiName}`)
         end
         self[ApiName] = Api
         self.Registered:Fire(ApiName)
@@ -92,7 +88,7 @@ return function()
             end
             function ControllerAPI:SetControllerInputEnabled(Hand: Enum.UserCFrame, Enabled: boolean): ()
                 if Hand ~= Enum.UserCFrame.LeftHand and Hand ~= Enum.UserCFrame.RightHand then
-                    error("The following UserCFrame is invalid and can't be disabled: "..tostring(Hand))
+                    error(`The following UserCFrame is invalid and can't be disabled: {Hand}`)
                 end
                 ActiveControllers[Hand] = (Enabled ~= false)
             end
@@ -104,7 +100,7 @@ return function()
             end
             function ControllerAPI:IsControllerInputEnabled(Hand: Enum.UserCFrame): boolean
                 if Hand ~= Enum.UserCFrame.LeftHand and Hand ~= Enum.UserCFrame.RightHand then
-                    error("The following UserCFrame is invalid and can't be disabled: "..tostring(Hand))
+                    error(`The following UserCFrame is invalid and can't be disabled: {Hand}`)
                 end
                 return ActiveControllers[Hand] ~= false
             end

@@ -1,9 +1,5 @@
---[[
-TheNexusAvenger
-
-Loads Nexus VR Character Model.
-GitHub: TheNexusAvenger/Nexus-VR-Character-Model
---]]
+--Loads Nexus VR Character Model.
+--GitHub: TheNexusAvenger/Nexus-VR-Character-Model
 
 local Configuration = {
     Appearance = {
