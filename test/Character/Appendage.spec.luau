@@ -1,11 +1,27 @@
 --Tests the Appendage class.
 --!strict
---$NexusUnitTestExtensions
 
 local NexusVRCharacterModel = game:GetService("ServerScriptService"):WaitForChild("NexusVRCharacterModelLoader"):WaitForChild("MainModule"):WaitForChild("NexusVRCharacterModel")
 local Appendage = require(NexusVRCharacterModel:WaitForChild("Character"):WaitForChild("Appendage"))
 
 return function()
+    local function expectNear(Actual: Vector3, Expected: Vector3): ()
+        local ActualValues, ExpectedValues = {Actual.X, Actual.Y, Actual.Z}, {Expected.X, Expected.Y, Expected.Z}
+        for i, ActualValue in ActualValues do
+            expect(math.abs(ActualValue - ExpectedValues[i]) < 0.001).to.equal(true)
+        end
+    end
+
+    local function expectNeverNear(Actual: Vector3, Expected: Vector3): ()
+        local ActualValues, ExpectedValues = {Actual.X, Actual.Y, Actual.Z}, {Expected.X, Expected.Y, Expected.Z}
+        local IsNear = true
+        for i, ActualValue in ActualValues do
+            if math.abs(ActualValue - ExpectedValues[i]) < 0.001 then continue end
+            IsNear = false
+        end
+        expect(IsNear).to.equal(false)
+    end
+
     describe("An appendage instance", function()
         it("should return the expected CFrames.", function()
             --Create the test appendages.
@@ -51,31 +67,31 @@ return function()
 
             --Assert that an unextended arm is valid with prevent disconnection true.
             local UpperCFrame, LowerCFrame, EndCFrame = TestAppendage1:GetAppendageCFrames(CFrame.new(), CFrame.new(0, -2, 0))
-            expect((UpperCFrame * CFrame.new(-0.5, 0.5, 0)).Position).to.be.near(Vector3.new(0, 0, 0), 0.001)
-            expect((UpperCFrame * CFrame.new(0, -0.5, 0)).Position).to.be.near((LowerCFrame * CFrame.new(0, 0.5, 0)).Position, 0.001)
-            expect((LowerCFrame * CFrame.new(0, -0.5, 0)).Position).to.be.near((EndCFrame * CFrame.new(0, 0.5, 0)).Position, 0.001)
-            expect((EndCFrame * CFrame.new(0, -0.5,0)).Position).to.be.near(Vector3.new(0, -2, 0), 0.001)
+            expectNear((UpperCFrame * CFrame.new(-0.5, 0.5, 0)).Position, Vector3.new(0, 0, 0))
+            expectNear((UpperCFrame * CFrame.new(0, -0.5, 0)).Position, (LowerCFrame * CFrame.new(0, 0.5, 0)).Position)
+            expectNear((LowerCFrame * CFrame.new(0, -0.5, 0)).Position, (EndCFrame * CFrame.new(0, 0.5, 0)).Position)
+            expectNear((EndCFrame * CFrame.new(0, -0.5,0)).Position, Vector3.new(0, -2, 0))
 
             --Assert that an unextended arm is valid with prevent disconnection false.
             UpperCFrame, LowerCFrame, EndCFrame = TestAppendage2:GetAppendageCFrames(CFrame.new(), CFrame.new(0, -2, 0))
-            expect((UpperCFrame * CFrame.new(-0.5, 0.5, 0)).Position).to.be.near(Vector3.new(0, 0, 0), 0.001)
-            expect((UpperCFrame * CFrame.new(0, -0.5, 0)).Position).to.be.near((LowerCFrame * CFrame.new(0, 0.5, 0)).Position, 0.001)
-            expect((LowerCFrame * CFrame.new(0, -0.5, 0)).Position).to.be.near((EndCFrame * CFrame.new(0, 0.5, 0)).Position, 0.001)
-            expect((EndCFrame * CFrame.new(0, -0.5,0)).Position).to.be.near(Vector3.new(0, -2, 0), 0.001)
+            expectNear((UpperCFrame * CFrame.new(-0.5, 0.5, 0)).Position, Vector3.new(0, 0, 0))
+            expectNear((UpperCFrame * CFrame.new(0, -0.5, 0)).Position, (LowerCFrame * CFrame.new(0, 0.5, 0)).Position)
+            expectNear((LowerCFrame * CFrame.new(0, -0.5, 0)).Position, (EndCFrame * CFrame.new(0, 0.5, 0)).Position)
+            expectNear((EndCFrame * CFrame.new(0, -0.5,0)).Position, Vector3.new(0, -2, 0))
 
             --Assert that an extended arm is valid with prevent disconnection true.
             UpperCFrame, LowerCFrame, EndCFrame = TestAppendage1:GetAppendageCFrames(CFrame.new(), CFrame.new(0, -4, 0))
-            expect((UpperCFrame * CFrame.new(-0.5, 0.5, 0)).Position).to.be.near(Vector3.new(0, 0, 0), 0.001)
-            expect((UpperCFrame * CFrame.new(0, -0.5, 0)).Position).to.be.near((LowerCFrame * CFrame.new(0, 0.5, 0)).Position, 0.001)
-            expect((LowerCFrame * CFrame.new(0, -0.5, 0)).Position).to.be.near((EndCFrame * CFrame.new(0, 0.5, 0)).Position, 0.001)
-            expect((EndCFrame * CFrame.new(0, -0.5,0)).Position).to.never.be.near(Vector3.new(0, -2, 0), 0.001)
+            expectNear((UpperCFrame * CFrame.new(-0.5, 0.5, 0)).Position, Vector3.new(0, 0, 0))
+            expectNear((UpperCFrame * CFrame.new(0, -0.5, 0)).Position, (LowerCFrame * CFrame.new(0, 0.5, 0)).Position)
+            expectNear((LowerCFrame * CFrame.new(0, -0.5, 0)).Position, (EndCFrame * CFrame.new(0, 0.5, 0)).Position)
+            expectNeverNear((EndCFrame * CFrame.new(0, -0.5,0)).Position, Vector3.new(0, -2, 0))
 
             --Assert that an extended arm is valid with prevent disconnection false.
             UpperCFrame, LowerCFrame, EndCFrame = TestAppendage2:GetAppendageCFrames(CFrame.new(), CFrame.new(0, -4, 0))
-            expect((UpperCFrame * CFrame.new(-0.5, 0.5, 0)).Position).to.never.be.near(Vector3.new(0, 0, 0), 0.001)
-            expect((UpperCFrame * CFrame.new(0, -0.5, 0)).Position).to.be.near((LowerCFrame * CFrame.new(0, 0.5, 0)).Position, 0.001)
-            expect((LowerCFrame * CFrame.new(0, -0.5, 0)).Position).to.be.near((EndCFrame * CFrame.new(0, 0.5, 0)).Position, 0.001)
-            expect((EndCFrame * CFrame.new(0, -0.5,0)).Position).to.be.near(Vector3.new(0, -4, 0), 0.001)
+            expectNeverNear((UpperCFrame * CFrame.new(-0.5, 0.5, 0)).Position, Vector3.new(0, 0, 0))
+            expectNear((UpperCFrame * CFrame.new(0, -0.5, 0)).Position, (LowerCFrame * CFrame.new(0, 0.5, 0)).Position)
+            expectNear((LowerCFrame * CFrame.new(0, -0.5, 0)).Position, (EndCFrame * CFrame.new(0, 0.5, 0)).Position)
+            expectNear((EndCFrame * CFrame.new(0, -0.5,0)).Position, Vector3.new(0, -4, 0))
         end)
     end)
 end

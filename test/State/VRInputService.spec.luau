@@ -1,11 +1,17 @@
 --Tests the VRInputService class.
 --!strict
---$NexusUnitTestExtensions
 
 local NexusVRCharacterModel = game:GetService("ServerScriptService"):WaitForChild("NexusVRCharacterModelLoader"):WaitForChild("MainModule"):WaitForChild("NexusVRCharacterModel")
 local VRInputService = require(NexusVRCharacterModel:WaitForChild("State"):WaitForChild("VRInputService"))
 
 return function()
+    local function expectNear(Actual: CFrame, Expected: CFrame): ()
+        local ActualValues, ExpectedValues = {Actual:GetComponents()}, {Expected:GetComponents()}
+        for i, ActualValue in ActualValues do
+            expect(math.abs(ActualValue - ExpectedValues[i]) < 0.001).to.equal(true)
+        end
+    end
+    
     local MockVRService, TestVRInputService = nil, nil
     beforeEach(function()
         --Create the mock VRSevice.
@@ -29,57 +35,57 @@ return function()
     describe("The VR input service", function()
         it("should get the VR inputs.", function()
             MockVRService.HeadCFrame = CFrame.new(0, 2, 0)
-            expect(TestVRInputService:GetVRInputs()[Enum.UserCFrame.Head]).to.be.near(CFrame.new(0, 0, 0))
+            expectNear(TestVRInputService:GetVRInputs()[Enum.UserCFrame.Head], CFrame.new(0, 0, 0))
             MockVRService.HeadCFrame = CFrame.new(0, 1, 0)
-            expect(TestVRInputService:GetVRInputs()[Enum.UserCFrame.Head]).to.be.near(CFrame.new(0, -1, 0))
+            expectNear(TestVRInputService:GetVRInputs()[Enum.UserCFrame.Head], CFrame.new(0, -1, 0))
             MockVRService.HeadCFrame = CFrame.new(0, 1, 0) * CFrame.Angles(0, math.rad(50), 0)
-            expect(TestVRInputService:GetVRInputs()[Enum.UserCFrame.Head]).to.be.near(CFrame.new(0, -1, 0) * CFrame.Angles(0, math.rad(50), 0))
+            expectNear(TestVRInputService:GetVRInputs()[Enum.UserCFrame.Head], CFrame.new(0, -1, 0) * CFrame.Angles(0, math.rad(50), 0))
             MockVRService.HeadCFrame = CFrame.new(0, 2, 0)
-            expect(TestVRInputService:GetVRInputs()[Enum.UserCFrame.Head]).to.be.near(CFrame.new(0, 0, 0))
+            expectNear(TestVRInputService:GetVRInputs()[Enum.UserCFrame.Head], CFrame.new(0, 0, 0))
             MockVRService.HeadCFrame = CFrame.new(0, 3, 0)
-            expect(TestVRInputService:GetVRInputs()[Enum.UserCFrame.Head]).to.be.near(CFrame.new(0, 0, 0))
+            expectNear(TestVRInputService:GetVRInputs()[Enum.UserCFrame.Head], CFrame.new(0, 0, 0))
             MockVRService.HeadCFrame = CFrame.new(0, 2, 0)
-            expect(TestVRInputService:GetVRInputs()[Enum.UserCFrame.Head]).to.be.near(CFrame.new(0, -1, 0))
+            expectNear(TestVRInputService:GetVRInputs()[Enum.UserCFrame.Head], CFrame.new(0, -1, 0))
             MockVRService.HeadCFrame = CFrame.new(0, 2, 0) * CFrame.Angles(math.rad(20), 0, 0) * CFrame.new(0, 0, -0.5)
-            expect(TestVRInputService:GetVRInputs()[Enum.UserCFrame.Head]).to.be.near(CFrame.new(0, -1, 0) * CFrame.Angles(math.rad(20), 0, 0) * CFrame.new(0, 0, -0.5))
+            expectNear(TestVRInputService:GetVRInputs()[Enum.UserCFrame.Head], CFrame.new(0, -1, 0) * CFrame.Angles(math.rad(20), 0, 0) * CFrame.new(0, 0, -0.5))
             MockVRService.HeadCFrame = CFrame.new(0, 3, 0) * CFrame.Angles(math.rad(20), 0, 0) * CFrame.new(0, 0, -0.5)
-            expect(TestVRInputService:GetVRInputs()[Enum.UserCFrame.Head]).to.be.near(CFrame.Angles(math.rad(20), 0, 0) * CFrame.new(0, 0, -0.5))
+            expectNear(TestVRInputService:GetVRInputs()[Enum.UserCFrame.Head], CFrame.Angles(math.rad(20), 0, 0) * CFrame.new(0, 0, -0.5))
             MockVRService.HeadCFrame = CFrame.new(0, 2, 0)
-            expect(TestVRInputService:GetVRInputs()[Enum.UserCFrame.Head]).to.be.near(CFrame.new(0, -1, 0))
+            expectNear(TestVRInputService:GetVRInputs()[Enum.UserCFrame.Head], CFrame.new(0, -1, 0))
         end)
 
         it("should recenter.", function()
             MockVRService.HeadCFrame = CFrame.new(1, 2, 1)
-            expect(TestVRInputService:GetVRInputs()[Enum.UserCFrame.Head]).to.be.near(CFrame.new(1, 0, 1))
+            expectNear(TestVRInputService:GetVRInputs()[Enum.UserCFrame.Head], CFrame.new(1, 0, 1))
 
             --Recenter without rotation twice and assert the results are correct.
             TestVRInputService:Recenter()
-            expect(TestVRInputService:GetVRInputs()[Enum.UserCFrame.Head]).to.be.near(CFrame.new(0, 0, 0))
+            expectNear(TestVRInputService:GetVRInputs()[Enum.UserCFrame.Head], CFrame.new(0, 0, 0))
             MockVRService.HeadCFrame = CFrame.new(2, 2, 2)
-            expect(TestVRInputService:GetVRInputs()[Enum.UserCFrame.Head]).to.be.near(CFrame.new(1, 0, 1))
+            expectNear(TestVRInputService:GetVRInputs()[Enum.UserCFrame.Head], CFrame.new(1, 0, 1))
             TestVRInputService:Recenter()
-            expect(TestVRInputService:GetVRInputs()[Enum.UserCFrame.Head]).to.be.near(CFrame.new(0, 0, 0))
+            expectNear(TestVRInputService:GetVRInputs()[Enum.UserCFrame.Head], CFrame.new(0, 0, 0))
             MockVRService.HeadCFrame = CFrame.new(3, 2, 3) * CFrame.Angles(0, math.rad(45), 0)
-            expect(TestVRInputService:GetVRInputs()[Enum.UserCFrame.Head]).to.be.near(CFrame.new(1, 0, 1) * CFrame.Angles(0, math.rad(45), 0))
+            expectNear(TestVRInputService:GetVRInputs()[Enum.UserCFrame.Head], CFrame.new(1, 0, 1) * CFrame.Angles(0, math.rad(45), 0))
 
             --Recenter with rotation and assert the results are correct.
             TestVRInputService:Recenter()
-            expect(TestVRInputService:GetVRInputs()[Enum.UserCFrame.Head]).to.be.near(CFrame.new(0, 0, 0))
+            expectNear(TestVRInputService:GetVRInputs()[Enum.UserCFrame.Head], CFrame.new(0, 0, 0))
             MockVRService.HeadCFrame = CFrame.new(3, 2, 3) * CFrame.Angles(0, math.rad(45), 0) * CFrame.new(1, 0, 1)
-            expect(TestVRInputService:GetVRInputs()[Enum.UserCFrame.Head]).to.be.near(CFrame.new(1, 0, 1))
+            expectNear(TestVRInputService:GetVRInputs()[Enum.UserCFrame.Head], CFrame.new(1, 0, 1))
         end)
 
         it("should set the eye level.", function()
             MockVRService.HeadCFrame = CFrame.new(1, 2, 1)
-            expect(TestVRInputService:GetVRInputs()[Enum.UserCFrame.Head]).to.be.near(CFrame.new(1, 0, 1))
+            expectNear(TestVRInputService:GetVRInputs()[Enum.UserCFrame.Head], CFrame.new(1, 0, 1))
 
             --Set the eye level and assert the values are normalized to it.
             TestVRInputService:SetEyeLevel()
-            expect(TestVRInputService:GetVRInputs()[Enum.UserCFrame.Head]).to.be.near(CFrame.new(1, 0, 1))
+            expectNear(TestVRInputService:GetVRInputs()[Enum.UserCFrame.Head], CFrame.new(1, 0, 1))
             MockVRService.HeadCFrame = CFrame.new(1, 1, 1)
-            expect(TestVRInputService:GetVRInputs()[Enum.UserCFrame.Head]).to.be.near(CFrame.new(1, -1, 1))
+            expectNear(TestVRInputService:GetVRInputs()[Enum.UserCFrame.Head], CFrame.new(1, -1, 1))
             MockVRService.HeadCFrame = CFrame.new(1, 3, 1)
-            expect(TestVRInputService:GetVRInputs()[Enum.UserCFrame.Head]).to.be.near(CFrame.new(1, 1, 1))
+            expectNear(TestVRInputService:GetVRInputs()[Enum.UserCFrame.Head], CFrame.new(1, 1, 1))
         end)
 
         it("should get thumbstick positions.", function()
