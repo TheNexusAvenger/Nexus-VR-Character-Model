@@ -48,7 +48,7 @@ end
 Returns the CFrames of the joints for
 the appendages.
 --]]
-function Torso.GetAppendageJointCFrames(self: Torso, LowerTorsoCFrame: CFrame, UpperTorsoCFrame: CFrame): {CFrame}
+function Torso.GetAppendageJointCFrames(self: Torso, LowerTorsoCFrame: CFrame, UpperTorsoCFrame: CFrame): {[string]: CFrame}
     return {
         RightShoulder = UpperTorsoCFrame * self:GetAttachmentCFrame(self.UpperTorso, "RightShoulderRigAttachment"),
         LeftShoulder = UpperTorsoCFrame * self:GetAttachmentCFrame(self.UpperTorso, "LeftShoulderRigAttachment"),
