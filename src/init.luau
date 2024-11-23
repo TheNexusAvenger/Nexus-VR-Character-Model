@@ -10,12 +10,9 @@ local VERSION_COMMIT = "00000000"
 --briefly, such as an unstable connection.
 local REPLICATION_RATE_LIMIT = 35
 
-
-
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Players = game:GetService("Players")
 local HttpService = game:GetService("HttpService")
-local StarterPlayer = game:GetService("StarterPlayer")
 
 local Settings = require(script:WaitForChild("State"):WaitForChild("Settings")).GetInstance()
 local RateLimiter = require(script:WaitForChild("State"):WaitForChild("RateLimiter"))
@@ -81,19 +78,7 @@ function NexusVRCharacterModel.Load(self: NexusVRCharacterModel): ()
     (require(ReplicatedStorage:WaitForChild("NexusVRCharacterModel"):WaitForChild("Util"):WaitForChild("Warnings")) :: any)()
 
     --Set up the client scripts.
-    local NexusVRCharacterModelClientLoader = script:WaitForChild("NexusVRCharacterModelClientLoader")
-    for _, Player in Players:GetPlayers() do
-        task.spawn(function()
-            --Create and store a ScreenGui with the script.
-            --This prevents the script disappearing on respawn.
-            local ScreenGui = Instance.new("ScreenGui")
-            ScreenGui.ResetOnSpawn = false
-            ScreenGui.Name = "NexusVRCharacterModelClientLoader"
-            NexusVRCharacterModelClientLoader:Clone().Parent = ScreenGui
-            ScreenGui.Parent = Player:WaitForChild("PlayerGui")
-        end)
-    end
-    NexusVRCharacterModelClientLoader:Clone().Parent = StarterPlayer:WaitForChild("StarterPlayerScripts")
+    script:WaitForChild("NexusVRCharacterModelClientLoader").Parent = ReplicatedStorage
 
     --Set up replication.
     local ReadyPlayers = {}
