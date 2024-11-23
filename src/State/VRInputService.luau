@@ -1,10 +1,6 @@
---[[
-TheNexusAvenger
-
-Manages VR inputs. This normalizes the inputs from
-the headsets as the Y position of the inputs is arbitrary,
-meaning it can be the floor, eye level, or random.
---]]
+--Manages VR inputs. This normalizes the inputs from
+--the headsets as the Y position of the inputs is arbitrary,
+--meaning it can be the floor, eye level, or random.
 --!strict
 
 local NexusVRCharacterModel = script.Parent.Parent
@@ -15,16 +11,15 @@ VRInputService.__index = VRInputService
 local StaticInstance = nil
 
 export type VRInputService = {
-    new: (VRService: VRService?, UserInputService: UserInputService?) -> (VRInputService),
-    GetInstance: () -> (VRInputService),
-
+    RecenterOffset: CFrame,
+    ManualNormalHeadLevel: number?,
+    HighestHeadHeight: number?,
+    ThumbstickValues: {[Enum.KeyCode]: Vector3},
+    VRService: VRService,
+    UserInputService: UserInputService,
     Recentered: TypedEvent.TypedEvent<>,
     EyeLevelSet: TypedEvent.TypedEvent<>,
-    GetVRInputs: (self: VRInputService) -> ({[Enum.UserCFrame]: CFrame}),
-    Recenter: (self: VRInputService) -> (),
-    SetEyeLevel: (self: VRInputService) -> (),
-    GetThumbstickPosition: (self: VRInputService, Thumbsick: Enum.KeyCode) -> (Vector3),
-}
+} & typeof(setmetatable({}, VRInputService))
 
 
 
@@ -33,24 +28,19 @@ Creates a settings object.
 --]]
 function VRInputService.new(VRService: VRService?, UserInputService: UserInputService?): VRInputService
     --Create the object.
-    local self = {
+    local self = setmetatable({
         RecenterOffset = CFrame.identity,
-    }
-    setmetatable(self, VRInputService)
-
-    --Store the services for testing.
-    self.VRService = VRService or game:GetService("VRService")
-    self.UserInputService = UserInputService or game:GetService("UserInputService")
-
-    --Create the events.
-    self.Recentered = TypedEvent.new()
-    self.EyeLevelSet = TypedEvent.new()
+        ThumbstickValues = {
+            [Enum.KeyCode.Thumbstick1] = Vector3.zero,
+            [Enum.KeyCode.Thumbstick2] = Vector3.zero,
+        },
+        VRService = VRService or game:GetService("VRService"),
+        UserInputService = UserInputService or game:GetService("UserInputService"),
+        Recentered = TypedEvent.new(),
+        EyeLevelSet = TypedEvent.new(),
+    }, VRInputService) :: VRInputService
 
     --Connect updating the thumbsticks.
-    self.ThumbstickValues = {
-        [Enum.KeyCode.Thumbstick1] = Vector3.zero,
-        [Enum.KeyCode.Thumbstick2] = Vector3.zero,
-    }
     self.UserInputService.InputEnded:Connect(function(Input)
         if self.ThumbstickValues[Input.KeyCode] then
             self.ThumbstickValues[Input.KeyCode] = Vector3.zero
@@ -63,7 +53,7 @@ function VRInputService.new(VRService: VRService?, UserInputService: UserInputSe
     end)
 
     --Return the object.
-    return (self :: any) :: VRInputService
+    return self
 end
 
 --[[
@@ -80,7 +70,7 @@ end
 Returns the VR inputs to use. The inputs are normalized
 so that 0 is the head height.
 --]]
-function VRInputService:GetVRInputs(): {[Enum.UserCFrame]: CFrame}
+function VRInputService.GetVRInputs(self: VRInputService): {[Enum.UserCFrame]: CFrame}
     --Get the head input.
     local VRInputs = {
         [Enum.UserCFrame.Head] = self.VRService:GetUserCFrame(Enum.UserCFrame.Head),
@@ -110,7 +100,7 @@ function VRInputService:GetVRInputs(): {[Enum.UserCFrame]: CFrame}
         if not self.HighestHeadHeight or CurrentVRHeadHeight > self.HighestHeadHeight then
             self.HighestHeadHeight = CurrentVRHeadHeight
         end
-        HeightOffset = -self.HighestHeadHeight
+        HeightOffset = -self.HighestHeadHeight :: number
     end
 
     --Normalize the CFrame heights.
@@ -127,7 +117,7 @@ end
 Recenters the service.
 Does not alter the Y axis.
 --]]
-function VRInputService:Recenter(): ()
+function VRInputService.Recenter(self: VRInputService): ()
     local HeadCFrame = self.VRService:GetUserCFrame(Enum.UserCFrame.Head)
     self.RecenterOffset = CFrame.Angles(0, -math.atan2(-HeadCFrame.LookVector.X, -HeadCFrame.LookVector.Z), 0) * CFrame.new(-HeadCFrame.X, 0, -HeadCFrame.Z)
     self.Recentered:Fire()
@@ -136,7 +126,7 @@ end
 --[[
 Sets the eye level.
 --]]
-function VRInputService:SetEyeLevel(): ()
+function VRInputService.SetEyeLevel(self: VRInputService): ()
     self.ManualNormalHeadLevel = self.VRService:GetUserCFrame(Enum.UserCFrame.Head).Y
     self.EyeLevelSet:Fire()
 end
@@ -144,7 +134,7 @@ end
 --[[
 Returns the current value for a thumbstick.
 --]]
-function VRInputService:GetThumbstickPosition(Thumbsick: Enum.KeyCode): Vector3
+function VRInputService.GetThumbstickPosition(self: VRInputService, Thumbsick: Enum.KeyCode): Vector3
     return self.ThumbstickValues[Thumbsick] or Vector3.zero
 end
 

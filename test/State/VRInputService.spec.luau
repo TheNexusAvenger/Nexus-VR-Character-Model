@@ -1,8 +1,4 @@
---[[
-TheNexusAvenger
-
-Tests the VRInputService class.
---]]
+--Tests the VRInputService class.
 --!strict
 --$NexusUnitTestExtensions
 

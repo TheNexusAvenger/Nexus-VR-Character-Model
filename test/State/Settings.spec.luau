@@ -1,8 +1,4 @@
---[[
-TheNexusAvenger
-
-Tests the Settings class.
---]]
+--Tests the Settings class.
 --!strict
 
 local NexusVRCharacterModel = game:GetService("ServerScriptService"):WaitForChild("NexusVRCharacterModelLoader"):WaitForChild("MainModule"):WaitForChild("NexusVRCharacterModel")

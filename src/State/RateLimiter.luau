@@ -1,8 +1,4 @@
---[[
-TheNexusAvenger
-
-Performs rate limit checks on inputs.
---]]
+--Performs rate limit checks on inputs.
 --!strict
 
 local Players = game:GetService("Players")
@@ -11,10 +7,13 @@ local RateLimiter = {}
 RateLimiter.__index = RateLimiter
 
 export type RateLimiter = {
-    new: (RateLimit: number?, RefrestDuration: number?) -> (RateLimiter),
-
-    RateLimitReached: (self: RateLimiter, Key: any) -> (boolean),
-}
+    RateLimit: number,
+    RefrestDuration: number,
+    UsedLimits: {[Player]: {
+        StartTime: number,
+        Count: number,
+    }},
+} & typeof(setmetatable({}, RateLimiter))
 
 
 
@@ -24,12 +23,11 @@ The rate limit must be >=1.
 --]]
 function RateLimiter.new(RateLimit: number?, RefrestDuration: number?): RateLimiter
     --Create the object.
-    local self = {
+    local self = setmetatable({
         RateLimit = RateLimit or 1,
         RefrestDuration = RefrestDuration or 1,
         UsedLimits = {}
-    }
-    setmetatable(self, RateLimiter)
+    }, RateLimiter) :: RateLimiter
 
     --Connect removing player keys.
     Players.PlayerRemoving:Connect(function(Player: Player)
@@ -39,14 +37,14 @@ function RateLimiter.new(RateLimit: number?, RefrestDuration: number?): RateLimi
     end)
 
     --Return the object.
-    return (self :: any) :: RateLimiter
+    return self
 end
 
 --[[
 Returns if the rate limit was reached
 for a given key.
 --]]
-function RateLimiter:RateLimitReached(Key: any): boolean
+function RateLimiter.RateLimitReached(self: RateLimiter, Key: any): boolean
     --Add the key if it isn't defined.
     if not self.UsedLimits[Key] then
         self.UsedLimits[Key] = {
@@ -70,4 +68,4 @@ end
 
 
 
-return (RateLimiter :: any) :: RateLimiter
+return RateLimiter

@@ -204,7 +204,7 @@ function EnigmaView.UpdateText(self: EnigmaView): ()
                 if SUPPORTED_PROTOCOL_VERSIONS[EnigmaVersion] then
                     Text = `{Text}\n\nProtocol version: {EnigmaVersion}`
                 else
-                    Text = `{Text}\n\nProtocol version: {AddColor(EnigmaVersion.." (Unsupported)", 200, 150, 0)}`
+                    Text = `{Text}\n\nProtocol version: {AddColor(`{EnigmaVersion} (Unsupported)`, 200, 150, 0)}`
                 end
             end
         else

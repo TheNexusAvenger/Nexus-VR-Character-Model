@@ -1,19 +1,9 @@
---[[
-TheNexusAvenger
-
-Helper function that ray casts to
-find a collidable part.
---]]
+--Helper function that ray casts to find a collidable part.
 --!strict
 
 local Workspace = game:GetService("Workspace")
 
-
-
---[[
-Ray casts to find a collidable part.
---]]
-local function FindCollidablePartOnRay(StartPosition: Vector3, Direction: Vector3, IgnoreList: Instance | {Instance}?, CollisionGroup: string?): (BasePart?, Vector3)
+return function(StartPosition: Vector3, Direction: Vector3, IgnoreList: Instance | {Instance}?, CollisionGroup: string?): (BasePart?, Vector3)
     --Convert the collision group.
     if typeof(CollisionGroup) == "Instance" and CollisionGroup:IsA("BasePart") then
         CollisionGroup = CollisionGroup.CollisionGroup
@@ -47,7 +37,3 @@ local function FindCollidablePartOnRay(StartPosition: Vector3, Direction: Vector
         return HitPart, EndPosition
     end
 end
-
-
-
-return FindCollidablePartOnRay

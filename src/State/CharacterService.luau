@@ -1,8 +1,4 @@
---[[
-TheNexusAvenger
-
-Manages VR characters.
---]]
+--Manages VR characters.
 --!strict
 
 local Players = game:GetService("Players")
@@ -15,12 +11,11 @@ CharacterService.__index = CharacterService
 local StaticInstance = nil
 
 export type CharacterService = {
-    new: () -> (CharacterService),
-    GetInstance: () -> (CharacterService),
-
-    GetCharacter: (self: CharacterService, Player: Player) -> (Character.Character?),
-    RefreshAllCharacters: (self: CharacterService) -> (),
-}
+    Characters: {[Player]: {
+        Character: Model,
+        VRCharacter: Character.Character,
+    }},
+} & typeof(setmetatable({}, CharacterService))
 
 
 
@@ -29,10 +24,9 @@ Creates a character service.
 --]]
 function CharacterService.new(): CharacterService
     --Create the object.
-    local self = {
+    local self = setmetatable({
         Characters = {},
-    }
-    setmetatable(self, CharacterService)
+    }, CharacterService) :: CharacterService
 
     --Connect clearing players.
     Players.PlayerRemoving:Connect(function(Player)
@@ -40,7 +34,7 @@ function CharacterService.new(): CharacterService
     end)
 
     --Return the object.
-    return (self :: any) :: CharacterService
+    return self
 end
 
 --[[
@@ -56,14 +50,15 @@ end
 --[[
 Returns the VR character for a player.
 --]]
-function CharacterService:GetCharacter(Player: Player): Character.Character?
+function CharacterService.GetCharacter(self: CharacterService, Player: Player): Character.Character?
     --Return if the character is nil.
     if not Player.Character or not Player.Character:FindFirstChild("Head") then
         return nil
     end
 
     --Create the VR character if it isn't valid.
-    if not self.Characters[Player] or self.Characters[Player].Character ~= Player.Character then
+    local PlayerCharacter = self.Characters[Player]
+    if not PlayerCharacter or PlayerCharacter.Character ~= Player.Character then
         self.Characters[Player] = {
             Character = Player.Character,
             VRCharacter = Character.new(Player.Character :: Model),
@@ -77,7 +72,7 @@ end
 --[[
 Refreshes all the characters.
 --]]
-function CharacterService:RefreshAllCharacters(): ()
+function CharacterService.RefreshAllCharacters(self: CharacterService): ()
     for _, Character in self.Characters do
         Character.VRCharacter:RefreshCharacter()
     end
@@ -85,4 +80,4 @@ end
 
 
 
-return (CharacterService :: any) :: CharacterService
+return CharacterService

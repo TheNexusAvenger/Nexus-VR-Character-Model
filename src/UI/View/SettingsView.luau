@@ -117,7 +117,7 @@ function SettingsView.new(View: BaseApiView.NexusInstanceApiBaseView): ()
     VersionText.Size = UDim2.new(0.8, 0, 0.04, 0)
     VersionText.Position = UDim2.new(0.5, 0, 1, 0)
     VersionText.Font = Enum.Font.SourceSansBold
-    VersionText.Text = "Version "..tostring(Settings:GetSetting("Version.Tag")).." ("..tostring(Settings:GetSetting("Version.Commit"))..")"
+    VersionText.Text = `Version {Settings:GetSetting("Version.Tag")} ({Settings:GetSetting("Version.Commit")})`
     VersionText.TextScaled = true
     VersionText.TextColor3 = Color3.fromRGB(255, 255, 255)
     VersionText.TextStrokeColor3 = Color3.fromRGB(0, 0, 0)

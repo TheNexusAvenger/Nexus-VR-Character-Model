@@ -1,8 +1,4 @@
---[[
-TheNexusAvenger
-
-Manages controlling the local characters.
---]]
+--Manages controlling the local characters.
 --!strict
 
 local NexusVRCharacterModel = script.Parent.Parent
@@ -15,14 +11,10 @@ ControlService.__index = ControlService
 local StaticInstance = nil
 
 export type ControlService = {
-    new: () -> (ControlService),
-    GetInstance: () -> (ControlService),
-
+    RegisteredControllers: {[string]: ControllerInterface},
     ActiveController: string,
-    RegisterController: (self: ControlService, Name: string, Controller: ControllerInterface) -> (),
-    SetActiveController: (self: ControlService, Name: string) -> (),
-    UpdateCharacter: (self: ControlService) -> (),
-}
+    CurrentController: ControllerInterface?,
+} & typeof(setmetatable({}, ControlService))
 
 export type ControllerInterface = {
     Disable: (self: ControllerInterface) -> (),
@@ -37,18 +29,17 @@ Creates a control service.
 --]]
 function ControlService.new(): ControlService
     --Create the object.
-    local self = {
+    local self = setmetatable({
         RegisteredControllers = {},
-    }
-    setmetatable(self, ControlService)
+    }, ControlService) :: ControlService
 
     --Register the default controllers.
-    self:RegisterController("None", BaseController.new())
-    self:RegisterController("Teleport", TeleportController.new())
-    self:RegisterController("SmoothLocomotion", SmoothLocomotionController.new())
+    self:RegisterController("None", BaseController.new() :: any)
+    self:RegisterController("Teleport", TeleportController.new() :: any)
+    self:RegisterController("SmoothLocomotion", SmoothLocomotionController.new() :: any)
 
     --Return the object.
-    return (self :: any) :: ControlService
+    return self 
 end
 
 --[[
@@ -64,14 +55,14 @@ end
 --[[
 Registers a controller.
 --]]
-function ControlService:RegisterController(Name: string, Controller: any): ()
+function ControlService.RegisterController(self: ControlService, Name: string, Controller: ControllerInterface): ()
     self.RegisteredControllers[Name] = Controller
 end
 
 --[[
 Sets the active controller.
 --]]
-function ControlService:SetActiveController(Name: string): ()
+function ControlService.SetActiveController(self: ControlService, Name: string): ()
     --Return if the controller didn't change.
     if self.ActiveController == Name then return end
     self.ActiveController = Name
@@ -86,7 +77,7 @@ function ControlService:SetActiveController(Name: string): ()
     if self.CurrentController then
         self.CurrentController:Enable()
     elseif Name ~= nil then
-        warn("Nexus VR Character Model controller \""..tostring(Name).."\" is not registered.")
+        warn(`Nexus VR Character Model controller \"{Name}\" is not registered.`)
     end
 end
 
@@ -101,4 +92,4 @@ end
 
 
 
-return (ControlService :: any) :: ControlService
+return ControlService

@@ -1,8 +1,4 @@
---[[
-TheNexusAvenger
-
-Tests the RateLimiter class.
---]]
+--Tests the RateLimiter class.
 --!strict
 
 local NexusVRCharacterModel = game:GetService("ServerScriptService"):WaitForChild("NexusVRCharacterModelLoader"):WaitForChild("MainModule"):WaitForChild("NexusVRCharacterModel")

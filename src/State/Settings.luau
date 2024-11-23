@@ -1,8 +1,4 @@
---[[
-TheNexusAvenger
-
-Stores settings.
---]]
+--Stores settings.
 --!strict
 
 local NexusVRCharacterModel = script.Parent.Parent
@@ -13,16 +9,11 @@ Settings.__index = Settings
 local StaticInstance = nil
 
 export type Settings ={
-    new: () -> (Settings),
-    GetInstance: () -> (Settings),
-
-    GetSetting: (self: Settings, Setting: string) -> (any),
-    SetSetting: (self: Settings, Setting: string, Value: any) -> (),
-    SetDefaults: (self: Settings, Defaults: {[string]: any}) -> (),
-    SetOverrides: (self: Settings, Overrides: {[string]: any}) -> (),
-    GetSettingsChangedSignal: (self: Settings, Setting: string) -> (TypedEvent.TypedEvent<>),
-    Destroy: (self: Settings) -> (),
-}
+    Defaults: any,
+    Overrides: any,
+    SettingsChangeEvents: {[string]: TypedEvent.TypedEvent<>},
+    SettingsCache: {[string]: any},
+} & typeof(setmetatable({}, Settings))
 
 
 
@@ -30,12 +21,12 @@ export type Settings ={
 Creates a settings object.
 --]]
 function Settings.new(): Settings
-    return (setmetatable({
+    return setmetatable({
         Defaults = {},
         Overrides = {},
         SettingsChangeEvents = {},
         SettingsCache = {},
-    }, Settings) :: any) :: Settings
+    }, Settings) :: Settings
 end
 
 --[[
@@ -51,7 +42,7 @@ end
 --[[
 Returns the value of a setting.
 --]]
-function Settings:GetSetting(Setting: string): any
+function Settings.GetSetting(self: Settings, Setting: string): any
     --Return a cached entry if one exists.
     if self.SettingsCache[Setting] ~= nil then
         return self.SettingsCache[Setting]
@@ -77,7 +68,7 @@ end
 --[[
 Sets the value of a setting.
 --]]
-function Settings:SetSetting(Setting: string, Value: any): ()
+function Settings.SetSetting(self: Settings, Setting: string, Value: any): ()
     --Set the setting.
     local Overrides = self.Overrides
     local SplitSettingNames = string.split(Setting,".")
@@ -100,35 +91,35 @@ end
 --[[
 Sets all the defaults.
 --]]
-function Settings:SetDefaults(Defaults: {[string]: any}): ()
+function Settings.SetDefaults(self: Settings, Defaults: {[string]: any}): ()
     --Set the defaults.
     self.Defaults = Defaults
     self.SettingsCache = {}
 
     --Fire all the event changes.
     for _, Event in self.SettingsChangeEvents do
-        Event:Fire()
+        (Event :: TypedEvent.TypedEvent<>):Fire()
     end
 end
 
 --[[
 Sets all the overrides.
 --]]
-function Settings:SetOverrides(Overrides: {[string]: any}): ()
+function Settings.SetOverrides(self: Settings, Overrides: {[string]: any}): ()
     --Set the overrides.
     self.Overrides = Overrides
     self.SettingsCache = {}
 
     --Fire all the event changes.
     for _, Event in self.SettingsChangeEvents do
-        Event:Fire()
+        (Event :: TypedEvent.TypedEvent<>):Fire()
     end
 end
 
 --[[
 Returns a changed signal for a setting.
 --]]
-function Settings:GetSettingsChangedSignal(Overrides: string): TypedEvent.TypedEvent<>
+function Settings.GetSettingsChangedSignal(self: Settings, Overrides: string): TypedEvent.TypedEvent<>
     Overrides = string.lower(Overrides)
 
     --Create the event if none exists.
@@ -143,10 +134,10 @@ end
 --[[
 Destroys the settings.
 --]]
-function Settings:Destroy(): ()
+function Settings.Destroy(self: Settings): ()
     --Disconnect the settings.
     for _,Event in self.SettingsChangeEvents do
-        Event:Disconnect()
+        (Event :: TypedEvent.TypedEvent<>):Destroy()
     end
     self.SettingsChangeEvents = {}
 end

@@ -1,8 +1,4 @@
---[[
-TheNexusAvenger
-
-Displays warnings when loading Nexus VR Character Model.
---]]
+--Displays warnings when loading Nexus VR Character Model.
 --!strict
 
 local V2_DEPRECATION_WARNING = "Nexus VR Character Model V.2 will be migrated to V.3 later this year to use VRService.AvatarGestures.\nNo action is required to migrate to V3 automatically, but if you rely on behavior of V2 (camera rolling or crouching, for example), make sure to require module id 10728820003 instead of 10728814921.\nSee the V3 migration guide to determine if you need to stay on V2: https://github.com/TheNexusAvenger/Nexus-VR-Character-Model/blob/AvatarGestures/docs/v3-migration.md"
@@ -61,7 +57,7 @@ return function(): ()
     for _, Warning in Warnings do
         if not SupressedWarnings[string.lower(Warning.Key)] and Warning.Condition() then
             warn(Warning.Message)
-            warn("\tThis warning can be disabled by adding \""..Warning.Key.."\" or \"All\" to Output.SuppressWarnings in the configuration of Nexus VR Character Model.")
+            warn(`\tThis warning can be disabled by adding \"{Warning.Key}\" or \"All\" to Output.SuppressWarnings in the configuration of Nexus VR Character Model.`)
         end
     end
 end
