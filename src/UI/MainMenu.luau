@@ -1,8 +1,4 @@
---[[
-TheNexusAvenger
-
-Main menu for Nexus VR Character Model.
---]]
+--Main menu for Nexus VR Character Model.
 --!strict
 
 local MENU_OPEN_TIME_REQUIREMENT = 1
@@ -21,7 +17,6 @@ local NexusVRCharacterModel = script.Parent.Parent
 local Settings = require(NexusVRCharacterModel:WaitForChild("State"):WaitForChild("Settings")).GetInstance()
 local VRInputService = require(NexusVRCharacterModel:WaitForChild("State"):WaitForChild("VRInputService")).GetInstance()
 local ApiBaseView = require(NexusVRCharacterModel:WaitForChild("UI"):WaitForChild("View"):WaitForChild("ApiBaseView"))
-local ChatView = require(NexusVRCharacterModel:WaitForChild("UI"):WaitForChild("View"):WaitForChild("ChatView"))
 local EnigmaView = require(NexusVRCharacterModel:WaitForChild("UI"):WaitForChild("View"):WaitForChild("EnigmaView"))
 local SettingsView = require(NexusVRCharacterModel:WaitForChild("UI"):WaitForChild("View"):WaitForChild("SettingsView"))
 local TextButtonFactory = require(NexusVRCharacterModel:WaitForChild("NexusButton"):WaitForChild("Factory"):WaitForChild("TextButtonFactory")).CreateDefault(Color3.fromRGB(0, 170, 255))
@@ -105,7 +100,6 @@ function MainMenu.new(): any
     self.Views = {}
     (SettingsView :: any).new(self:CreateView("Settings"));
     (EnigmaView :: any).new(self:CreateView("Enigma"), self);
-    (ChatView :: any).new(self:CreateView("Chat"))
     self:UpdateVisibleView()
 
     --Connect changing views.

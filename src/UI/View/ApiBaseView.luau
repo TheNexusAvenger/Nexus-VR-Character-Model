@@ -1,39 +1,31 @@
---[[
-TheNexusAvenger
-
-Base view for the menu intended to be used with the API.
---]]
+--Base view for the menu intended to be used with the API.
 --!strict
 
 local GuiService = game:GetService("GuiService")
 
 local NexusVRCharacterModel = script.Parent.Parent.Parent
-local NexusInstance = require(NexusVRCharacterModel:WaitForChild("NexusInstance"):WaitForChild("NexusInstance"))
-local NexusEvent = require(NexusVRCharacterModel:WaitForChild("NexusInstance"):WaitForChild("Event"):WaitForChild("NexusEvent"))
+local NexusInstance = require(NexusVRCharacterModel:WaitForChild("NexusInstance"))
+local TypedEvent = require(NexusVRCharacterModel:WaitForChild("NexusInstance"):WaitForChild("Event"):WaitForChild("TypedEvent"))
 
-local ApiBaseView = NexusInstance:Extend()
-ApiBaseView:SetClassName("ApiBaseView")
+local ApiBaseView = {}
+ApiBaseView.__index = ApiBaseView
 
 export type ApiBaseView = {
-    new: (InitialName: string) -> ApiBaseView,
-    Extend: (self: ApiBaseView) -> ApiBaseView,
-
     Name: string,
     Visible: boolean,
-    Destroyed: NexusEvent.NexusEvent<>,
-    GetContainer: (self: ApiBaseView) -> (Frame),
-    AddBackground: (self: ApiBaseView) -> (),
-} & NexusInstance.NexusInstance
+    Destroyed: TypedEvent.TypedEvent<>,
+    Frame: Frame,
+} & typeof(setmetatable({}, ApiBaseView))
+export type NexusInstanceApiBaseView = NexusInstance.NexusInstance<ApiBaseView>
 
 
 
 --[[
 Creates the view.
 --]]
-function ApiBaseView:__new(InitialName: string): ()
-    NexusInstance.__new(self)
+function ApiBaseView.__new(self: NexusInstanceApiBaseView, InitialName: string): ()
     self.Name = InitialName
-    self.Destroyed = NexusEvent.new()
+    self.Destroyed = self:CreateEvent()
 
     self.Frame = Instance.new("Frame")
     self.Frame.Name = tostring(self.Name)
@@ -53,14 +45,14 @@ end
 --[[
 Returns the containing frame.
 --]]
-function ApiBaseView:GetContainer(): Frame
+function ApiBaseView.GetContainer(self: NexusInstanceApiBaseView): Frame
     return self.Frame
 end
 
 --[[
 Adds the background of the frame.
 --]]
-function ApiBaseView:AddBackground(): ()
+function ApiBaseView.AddBackground(self: NexusInstanceApiBaseView): ()
     --Add the corner.
     local UICorner = Instance.new("UICorner")
     UICorner.CornerRadius = UDim.new(0.05, 0)
@@ -76,12 +68,11 @@ end
 --[[
 Destroys the view.
 --]]
-function ApiBaseView:Destroy(): ()
-    ApiBaseView.Destroy(self)
+function ApiBaseView.Destroy(self: NexusInstanceApiBaseView): ()
     self.Destroyed:Fire()
-    self.Destroyed:Disconnect()
+    self.Frame:Destroy()
 end
 
 
 
-return (ApiBaseView :: any) :: ApiBaseView
+return NexusInstance.ToInstance(ApiBaseView) :: NexusInstance.NexusInstanceClass<typeof(ApiBaseView), (InitialName: string) -> (NexusInstanceApiBaseView)>

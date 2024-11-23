@@ -1,32 +1,34 @@
---[[
-TheNexusAvenger
-
-View for the user settings.
---]]
+--View for the user settings.
 --!strict
 
 local NexusVRCharacterModel = script.Parent.Parent.Parent
-local NexusInstance = require(NexusVRCharacterModel:WaitForChild("NexusInstance"):WaitForChild("NexusInstance"))
 local CameraService = require(NexusVRCharacterModel:WaitForChild("State"):WaitForChild("CameraService")).GetInstance()
 local ControlService = require(NexusVRCharacterModel:WaitForChild("State"):WaitForChild("ControlService")).GetInstance()
 local DefaultCursorService = require(NexusVRCharacterModel:WaitForChild("State"):WaitForChild("DefaultCursorService")).GetInstance()
 local Settings = require(NexusVRCharacterModel:WaitForChild("State"):WaitForChild("Settings")).GetInstance()
 local VRInputService = require(NexusVRCharacterModel:WaitForChild("State"):WaitForChild("VRInputService")).GetInstance()
+local BaseApiView = require(NexusVRCharacterModel:WaitForChild("UI"):WaitForChild("View"):WaitForChild("ApiBaseView"))
 
 local TextButtonFactory = require(NexusVRCharacterModel:WaitForChild("NexusButton"):WaitForChild("Factory"):WaitForChild("TextButtonFactory")).CreateDefault(Color3.fromRGB(0, 170, 255))
 TextButtonFactory:SetDefault("Theme", "RoundedCorners")
 
-local SettingsView = NexusInstance:Extend()
-SettingsView:SetClassName("SettingsView")
+local SettingsView = {}
+SettingsView.__index = SettingsView
+
+export type SettingsView = {
+
+} & typeof(setmetatable({}, SettingsView))
 
 
 
 --[[
 Creates the settings view.
 --]]
-function SettingsView:__new(View: any): ()
-    NexusInstance.__new(self)
+function SettingsView.new(View: BaseApiView.NexusInstanceApiBaseView): ()
     View:AddBackground()
+
+    --Create the object.
+    local self = setmetatable({}, SettingsView) :: SettingsView
 
     --Create the header.
     local Container = View:GetContainer()
@@ -121,12 +123,15 @@ function SettingsView:__new(View: any): ()
     VersionText.TextStrokeColor3 = Color3.fromRGB(0, 0, 0)
     VersionText.TextStrokeTransparency = 0
     VersionText.Parent = Container
+
+    --Return the object.
+    return SettingsView
 end
 
 --[[
 Popuulates a setting frame.
 --]]
-function SettingsView:PopulateSettingsFrame(ContainerFrame: Frame, HeaderName: string, GetOptionsSettings: () -> ({string}), GetValueFunction: () -> (string), SetValueFunction: (string) -> ()?): ()
+function SettingsView.PopulateSettingsFrame(self: SettingsView, ContainerFrame: Frame, HeaderName: string, GetOptionsSettings: string | () -> ({string}), GetValueFunction: () -> (string), SetValueFunction: (string) -> ()?): ()
     --Converrt the GetOptionsSettings callback if it is a string.
     local OptionsSetting = nil
     if typeof(GetOptionsSettings) == "string" then
@@ -182,7 +187,7 @@ function SettingsView:PopulateSettingsFrame(ContainerFrame: Frame, HeaderName: s
         --Get the current value id.
         local InitialValueName = GetValueFunction()
         local CurrentValue = 1
-        local Options = GetOptionsSettings()
+        local Options = (GetOptionsSettings :: () -> ({string}))()
         for i,Option in pairs(Options) do
             if Option == InitialValueName then
                 CurrentValue = i

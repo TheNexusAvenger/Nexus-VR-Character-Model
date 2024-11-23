@@ -6,7 +6,7 @@ Stores settings.
 --!strict
 
 local NexusVRCharacterModel = script.Parent.Parent
-local NexusEvent = require(NexusVRCharacterModel:WaitForChild("NexusInstance"):WaitForChild("Event"):WaitForChild("NexusEvent"))
+local TypedEvent = require(NexusVRCharacterModel:WaitForChild("NexusInstance"):WaitForChild("Event"):WaitForChild("TypedEvent"))
 
 local Settings ={}
 Settings.__index = Settings
@@ -20,7 +20,7 @@ export type Settings ={
     SetSetting: (self: Settings, Setting: string, Value: any) -> (),
     SetDefaults: (self: Settings, Defaults: {[string]: any}) -> (),
     SetOverrides: (self: Settings, Overrides: {[string]: any}) -> (),
-    GetSettingsChangedSignal: (self: Settings, Setting: string) -> (NexusEvent.NexusEvent<>),
+    GetSettingsChangedSignal: (self: Settings, Setting: string) -> (TypedEvent.TypedEvent<>),
     Destroy: (self: Settings) -> (),
 }
 
@@ -128,12 +128,12 @@ end
 --[[
 Returns a changed signal for a setting.
 --]]
-function Settings:GetSettingsChangedSignal(Overrides: string): NexusEvent.NexusEvent<>
+function Settings:GetSettingsChangedSignal(Overrides: string): TypedEvent.TypedEvent<>
     Overrides = string.lower(Overrides)
 
     --Create the event if none exists.
     if not self.SettingsChangeEvents[Overrides] then
-        self.SettingsChangeEvents[Overrides] = NexusEvent.new()
+        self.SettingsChangeEvents[Overrides] = TypedEvent.new()
     end
 
     --Return the event.

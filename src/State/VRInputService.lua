@@ -8,7 +8,7 @@ meaning it can be the floor, eye level, or random.
 --!strict
 
 local NexusVRCharacterModel = script.Parent.Parent
-local NexusEvent = require(NexusVRCharacterModel:WaitForChild("NexusInstance"):WaitForChild("Event"):WaitForChild("NexusEvent"))
+local TypedEvent = require(NexusVRCharacterModel:WaitForChild("NexusInstance"):WaitForChild("Event"):WaitForChild("TypedEvent"))
 
 local VRInputService = {}
 VRInputService.__index = VRInputService
@@ -18,8 +18,8 @@ export type VRInputService = {
     new: (VRService: VRService?, UserInputService: UserInputService?) -> (VRInputService),
     GetInstance: () -> (VRInputService),
 
-    Recentered: NexusEvent.NexusEvent<>,
-    EyeLevelSet: NexusEvent.NexusEvent<>,
+    Recentered: TypedEvent.TypedEvent<>,
+    EyeLevelSet: TypedEvent.TypedEvent<>,
     GetVRInputs: (self: VRInputService) -> ({[Enum.UserCFrame]: CFrame}),
     Recenter: (self: VRInputService) -> (),
     SetEyeLevel: (self: VRInputService) -> (),
@@ -43,8 +43,8 @@ function VRInputService.new(VRService: VRService?, UserInputService: UserInputSe
     self.UserInputService = UserInputService or game:GetService("UserInputService")
 
     --Create the events.
-    self.Recentered = NexusEvent.new()
-    self.EyeLevelSet = NexusEvent.new()
+    self.Recentered = TypedEvent.new()
+    self.EyeLevelSet = TypedEvent.new()
 
     --Connect updating the thumbsticks.
     self.ThumbstickValues = {

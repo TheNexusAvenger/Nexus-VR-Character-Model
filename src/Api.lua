@@ -12,9 +12,9 @@ local UserInputService = game:GetService("UserInputService")
 
 return function()
     local NexusVRCharacterModel = script.Parent
-    local NexusEvent = require(NexusVRCharacterModel:WaitForChild("NexusInstance"):WaitForChild("Event"):WaitForChild("NexusEvent"))
+    local TypedEvent = require(NexusVRCharacterModel:WaitForChild("NexusInstance"):WaitForChild("Event"):WaitForChild("TypedEvent"))
     local API = {} :: any
-    API.Registered = NexusEvent.new()
+    API.Registered = TypedEvent.new()
 
     --[[
     Stores an API that can be referenced. If the API is already stored,

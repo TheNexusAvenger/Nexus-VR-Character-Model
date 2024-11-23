@@ -14,17 +14,25 @@ local VRService = game:GetService("VRService")
 
 local NexusVRCharacterModel = script.Parent.Parent.Parent
 local Enigma = require(NexusVRCharacterModel:WaitForChild("Enigma"))
+local NexusButton = require(NexusVRCharacterModel:WaitForChild("NexusButton"))
 local EnigmaTrackerRoles = require(NexusVRCharacterModel:WaitForChild("Enigma"):WaitForChild("Data"):WaitForChild("TrackerRole"))
-local NexusInstance = require(NexusVRCharacterModel:WaitForChild("NexusInstance"):WaitForChild("NexusInstance"))
 local CharacterService = require(NexusVRCharacterModel:WaitForChild("State"):WaitForChild("CharacterService")).GetInstance()
 local EnigmaService = require(NexusVRCharacterModel:WaitForChild("State"):WaitForChild("EnigmaService")).GetInstance()
 local Settings = require(NexusVRCharacterModel:WaitForChild("State"):WaitForChild("Settings")).GetInstance()
+local BaseApiView = require(NexusVRCharacterModel:WaitForChild("UI"):WaitForChild("View"):WaitForChild("ApiBaseView"))
 
 local TextButtonFactory = require(NexusVRCharacterModel:WaitForChild("NexusButton"):WaitForChild("Factory"):WaitForChild("TextButtonFactory")).CreateDefault(Color3.fromRGB(0, 170, 255))
 TextButtonFactory:SetDefault("Theme", "RoundedCorners")
 
-local EnigmaView = NexusInstance:Extend()
-EnigmaView:SetClassName("EnigmaView")
+local EnigmaView = {}
+EnigmaView.__index = EnigmaView
+
+export type EnigmaView = {
+    EnigmaText: TextLabel,
+    ShowTrackersButton: NexusButton.NexusInstanceNexusButton?,
+    DebugTrackersVisible: boolean?,
+    CalibrateButton: NexusButton.NexusInstanceNexusButton?,
+} & typeof(setmetatable({}, EnigmaView))
 
 
 
@@ -38,11 +46,10 @@ end
 --[[
 Creates the Enigma view.
 --]]
-function EnigmaView:__new(View: any, Menu: any): ()
-    NexusInstance.__new(self)
+function EnigmaView.new(View: BaseApiView.NexusInstanceApiBaseView, Menu: any): EnigmaView
     View:AddBackground()
 
-    --Create the calibrate view.
+    --Create the view.
     local Container = View:GetContainer()
     local EnigmaText = Instance.new("TextLabel")
     EnigmaText.BackgroundTransparency = 1
@@ -58,10 +65,16 @@ function EnigmaView:__new(View: any, Menu: any): ()
     EnigmaText.TextSize = 28
     EnigmaText.TextYAlignment = Enum.TextYAlignment.Top
     EnigmaText.Parent = Container
-    self.EnigmaText = EnigmaText
+
+    --Create the object.
+    local self = setmetatable({
+        EnigmaText = EnigmaText,
+    }, EnigmaView) :: EnigmaView
+
+    --Return the object early if Enigma is not enabled.
     if Settings:GetSetting("Extra.EnigmaEnabled") == false then
         EnigmaText.Text = "This game has disabled Enigma (Beta)."
-        return
+        return self
     end
 
     local ShowTrackersButton, ShowTrackersText = TextButtonFactory:Create()
@@ -151,12 +164,15 @@ function EnigmaView:__new(View: any, Menu: any): ()
             task.wait()
         end
     end)
+
+    --Return the object.
+    return self
 end
 
 --[[
 Updates the Enigma text.
 --]]
-function EnigmaView:UpdateText(): ()
+function EnigmaView.UpdateText(self: EnigmaView): ()
     --Add the tracker information.
     local Text = ""
     if Enigma.Enabled and Enigma:GetUserCFrameEnabled("LeftFoot") then
@@ -195,13 +211,21 @@ function EnigmaView:UpdateText(): ()
             Text = `{Text}\nData transfer: {AddColor("Inactive", 200, 0, 0)}`
         end
         Text = `{Text}\n\nTo calibrate, stand up straight with your head level and facing forward with your feet next to each other pointing forward.`
-        self.ShowTrackersButton.Visible = true
-        self.CalibrateButton.Visible = true
+        if self.ShowTrackersButton then
+            self.ShowTrackersButton.Visible = true
+        end
+        if self.CalibrateButton then
+            self.CalibrateButton.Visible = true
+        end
     else
         Text = `{Text}\nData transfer: {AddColor("Inactive", 200, 150, 0)}`
         Text = `{Text}\n\n⚠️ Enigma requires a desktop application. There may be experience-specific issues when Enigma is active.`
-        self.ShowTrackersButton.Visible = false
-        self.CalibrateButton.Visible = false
+        if self.ShowTrackersButton then
+            self.ShowTrackersButton.Visible = false
+        end
+        if self.CalibrateButton then
+            self.CalibrateButton.Visible = false
+        end
     end
 
     --Set the text.
@@ -211,7 +235,7 @@ end
 --[[
 Shows debug trackers.
 --]]
-function EnigmaView:ShowDebugTrackers(): ()
+function EnigmaView.ShowDebugTrackers(self: EnigmaView): ()
     if not Enigma.Enabled then return end
     local TrackerParts, TrackerLabels = {}, {}
     local TrackersPartsFolder = Instance.new("Folder")
