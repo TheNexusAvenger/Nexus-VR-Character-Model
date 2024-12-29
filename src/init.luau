@@ -5,17 +5,13 @@
 local VERSION_TAG = "dev"
 local VERSION_COMMIT = "00000000"
 
---Client should send replication at 30hz.
---A buffer is added in case this rate is exceeded
---briefly, such as an unstable connection.
-local REPLICATION_RATE_LIMIT = 35
-
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
-local Players = game:GetService("Players")
 local HttpService = game:GetService("HttpService")
 
+local BufferedRemoteEventSender = require(script:WaitForChild("NexusBufferedReplication"):WaitForChild("Sender"):WaitForChild("BufferedRemoteEventSender"))
+local EnrollableRemoteEvent = require(script:WaitForChild("NexusBufferedReplication"):WaitForChild("Sender"):WaitForChild("EnrollableRemoteEvent"))
 local Settings = require(script:WaitForChild("State"):WaitForChild("Settings")).GetInstance()
-local RateLimiter = require(script:WaitForChild("State"):WaitForChild("RateLimiter"))
+local BufferProtocol = require(script:WaitForChild("Util"):WaitForChild("BufferProtocol"))
 
 local NexusVRCharacterModel = {}
 
@@ -29,11 +25,12 @@ run once by the server.
 --]]
 function NexusVRCharacterModel.SetConfiguration(self: NexusVRCharacterModel, Configuration: any): ()
     --Create the value.
-    local ConfigurationValue = script:FindFirstChild("Configuration")
+    local ConfigurationValue = script:FindFirstChild("Configuration") :: StringValue
     if not ConfigurationValue then
-        ConfigurationValue = Instance.new("StringValue")
-        ConfigurationValue.Name = "Configuration"
-        ConfigurationValue.Parent = script
+        local NewConfigurationValue = Instance.new("StringValue")
+        NewConfigurationValue.Name = "Configuration"
+        NewConfigurationValue.Parent = script
+        ConfigurationValue = NewConfigurationValue
     end
 
     --Add the version.
@@ -81,9 +78,6 @@ function NexusVRCharacterModel.Load(self: NexusVRCharacterModel): ()
     script:WaitForChild("NexusVRCharacterModelClientLoader").Parent = ReplicatedStorage
 
     --Set up replication.
-    local ReadyPlayers = {}
-    local UpdateRateLimiter = RateLimiter.new(REPLICATION_RATE_LIMIT)
-
     local UpdateInputsEvent = Instance.new("UnreliableRemoteEvent")
     UpdateInputsEvent.Name = "UpdateInputs"
     UpdateInputsEvent.Parent = script
@@ -92,38 +86,19 @@ function NexusVRCharacterModel.Load(self: NexusVRCharacterModel): ()
     ReplicationReadyEvent.Name = "ReplicationReady"
     ReplicationReadyEvent.Parent = script
 
-    UpdateInputsEvent.OnServerEvent:Connect(function(Player, HeadCFrame: CFrame, LeftHandCFrame: CFrame, RightHandCFrame: CFrame, UpdateTime: number?, CurrentWalkspeed: number?, TrackerData: {[string]: CFrame}?)
-        --Ignore the input if 3 CFrames aren't given.
-        if typeof(HeadCFrame) ~= "CFrame" then return end
-        if typeof(LeftHandCFrame) ~= "CFrame" then return end
-        if typeof(RightHandCFrame) ~= "CFrame" then return end
-        if UpdateTime and typeof(UpdateTime) ~= "number" then return end
-        if UpdateTime and typeof(CurrentWalkspeed) ~= "number" then return end
-        if TrackerData then
-            if typeof(TrackerData) ~= "table" then return end
-            for Key, Value in TrackerData do
-                if Key ~= "LeftFoot" and Key ~= "RightFoot" then return end
-                if typeof(Value) ~= "CFrame" then return end
-            end
-        end
+    local EnrollableUpdateInputsEvent = EnrollableRemoteEvent.new(UpdateInputsEvent)
+    local UpdateInputsBufferedRemoteEventSender = BufferedRemoteEventSender.WithPlayerKeys(EnrollableUpdateInputsEvent :: any, function(Data: BufferProtocol.BufferProtocolData)
+        return BufferProtocol.Serialize(Data)
+    end)
+    UpdateInputsBufferedRemoteEventSender:StartDataSendingWithDelay(1 / 30)
 
-        --Ignore if the rate limit was reached.
-        if UpdateRateLimiter:RateLimitReached(Player) then return end
-
-        --Replicate the CFrames to the other players.
-        for _,OtherPlayer in Players:GetPlayers() do
-            if Player ~= OtherPlayer and ReadyPlayers[OtherPlayer] then
-                UpdateInputsEvent:FireClient(OtherPlayer, Player, HeadCFrame, LeftHandCFrame, RightHandCFrame, UpdateTime, CurrentWalkspeed, TrackerData)
-            end
-        end
+    UpdateInputsEvent.OnServerEvent:Connect(function(Player, Data: BufferProtocol.BufferProtocolData)
+        if typeof(Data) ~= "table" then return end
+        UpdateInputsBufferedRemoteEventSender:QueueData(Player, Data)
     end)
 
     ReplicationReadyEvent.OnServerEvent:Connect(function(Player)
-        ReadyPlayers[Player] = true
-    end)
-
-    Players.PlayerRemoving:Connect(function(Player)
-        ReadyPlayers[Player] = nil
+        EnrollableUpdateInputsEvent:EnrollPlayer(Player)
     end)
 
     --Load Nexus VR Backpack.

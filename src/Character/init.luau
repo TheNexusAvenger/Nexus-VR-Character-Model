@@ -39,6 +39,9 @@ export type Character = {
     CurrentMotor6DTransforms: {CFrame},
     LastMotor6DTransforms: {CFrame},
     LastRefreshTime: number,
+    ReplicationCFrames: {[string]: CFrame}?,
+    LastReplicationCFrames: {[string]: CFrame}?,
+    ReplicationTrackerData: {[string]: CFrame}?,
     AppearanceChangedConnection: RBXScriptConnection?,
 } & typeof(setmetatable({}, Character))
 
@@ -93,11 +96,19 @@ function Character.new(CharacterModel: Model): Character
         task.spawn(function()
             while (self.Humanoid :: Humanoid).Health > 0 do
                 --Send the new CFrames if the CFrames changed.
-                local ReplicationCFrames = (self :: any).ReplicationCFrames :: {CFrame}
-                if (self :: any).LastReplicationCFrames ~= ReplicationCFrames then
-                    (self :: any).LastReplicationCFrames = ReplicationCFrames
-                    local ReplicationTrackerData = (self :: any).ReplicationTrackerData :: {[string]: CFrame}?
-                    UpdateInputs:FireServer(ReplicationCFrames[1], ReplicationCFrames[2], ReplicationCFrames[3], tick(), self.CurrentWalkspeed, ReplicationTrackerData)
+                local ReplicationCFrames = self.ReplicationCFrames
+                if ReplicationCFrames and self.LastReplicationCFrames ~= ReplicationCFrames then
+                    self.LastReplicationCFrames = ReplicationCFrames
+                    local ReplicationTrackerData = self.ReplicationTrackerData
+                    UpdateInputs:FireServer({
+                        UpdateTime = tick(),
+                        CurrentWalkspeed = self.CurrentWalkspeed,
+                        HeadCFrame = ReplicationCFrames.HeadCFrame,
+                        LeftHandCFrame = ReplicationCFrames.LeftHandCFrame,
+                        RightHandCFrame = ReplicationCFrames.RightHandCFrame,
+                        LeftFootCFrame = ReplicationTrackerData and ReplicationTrackerData.LeftFoot,
+                        RightFootCFrame = ReplicationTrackerData and ReplicationTrackerData.RightFoot,
+                    })
                 end
 
                 --Wait 1/30th of a second to send the next set of CFrames.
@@ -499,7 +510,11 @@ function Character:UpdateFromInputs(HeadControllerCFrame: CFrame, LeftHandContro
 
     --Replicate the changes to the server.
     if IsLocalCharacter then
-        self.ReplicationCFrames = {HeadControllerCFrame, LeftHandControllerCFrame, RightHandControllerCFrame}
+        self.ReplicationCFrames = {
+            HeadCFrame = HeadControllerCFrame,
+            LeftHandCFrame = LeftHandControllerCFrame,
+            RightHandCFrame = RightHandControllerCFrame,
+        }
     end
 end
 
@@ -553,7 +568,11 @@ function Character:UpdateFromInputsSeated(HeadControllerCFrame: CFrame, LeftHand
 
     --Replicate the changes to the server.
     if Players.LocalPlayer and Players.LocalPlayer.Character == self.CharacterModel then
-        self.ReplicationCFrames = {HeadControllerCFrame, LeftHandControllerCFrame, RightHandControllerCFrame}
+        self.ReplicationCFrames = {
+            HeadCFrame = HeadControllerCFrame,
+            LeftHandCFrame = LeftHandControllerCFrame,
+            RightHandCFrame = RightHandControllerCFrame,
+        }
     end
 end
 

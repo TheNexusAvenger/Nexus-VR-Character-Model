@@ -1,23 +1,26 @@
 {
     "name": "NexusVRCharacterModel",
     "tree": {
-        "$path": "./MainModule.lua",
+        "$path": "./MainModule.luau",
         "NexusVRCharacterModel": {
             "$path": "./src",
             "Enigma": {
                 "$path": "./module/Enigma/"
+            },
+            "NexusAppendage": {
+                "$path": "./module/Nexus-Appendage/"
+            },
+            "NexusBufferedReplication": {
+                "$path": "./module/Nexus-Buffered-Replication/"
+            },
+            "NexusButton": {
+                "$path": "./module/Nexus-Button/"
             },
             "NexusInstance": {
                 "$path": "./module/Nexus-Instance/"
             },
             "NexusVRCore": {
                 "$path": "./module/Nexus-VR-Core/"
-            },
-            "NexusButton": {
-                "$path": "./module/Nexus-Button/"
-            },
-            "NexusAppendage": {
-                "$path": "./module/Nexus-Appendage/"
             }
         }
     }

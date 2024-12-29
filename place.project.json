@@ -5,7 +5,7 @@
         "ServerScriptService": {
             "$className": "ServerScriptService",
             "NexusVRCharacterModelLoader": {
-                "$path": "./NexusVRCharacterModelLoader.server.lua",
+                "$path": "./NexusVRCharacterModelLoader.server.luau",
                 "MainModule": {
                     "$path": "."
                 }

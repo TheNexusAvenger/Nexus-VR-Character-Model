@@ -10,12 +10,14 @@ local UserInputService = game:GetService("UserInputService")
 local VRService = game:GetService("VRService")
 
 local NexusVRCharacterModel = ReplicatedStorage:WaitForChild("NexusVRCharacterModel") :: ModuleScript
+local PlayerBufferedRemoteEventReceiver = require(NexusVRCharacterModel:WaitForChild("NexusBufferedReplication"):WaitForChild("Receiver"):WaitForChild("PlayerBufferedRemoteEventReceiver")) :: any
 local CameraService = (require(NexusVRCharacterModel:WaitForChild("State"):WaitForChild("CameraService")) :: any).GetInstance()
 local CharacterService = (require(NexusVRCharacterModel:WaitForChild("State"):WaitForChild("CharacterService")) :: any).GetInstance()
 local ControlService = (require(NexusVRCharacterModel:WaitForChild("State"):WaitForChild("ControlService")) :: any).GetInstance()
 local DefaultCursorService = (require(NexusVRCharacterModel:WaitForChild("State"):WaitForChild("DefaultCursorService")) :: any).GetInstance()
 local EnigmaService = (require(NexusVRCharacterModel:WaitForChild("State"):WaitForChild("EnigmaService")) :: any).GetInstance()
 local Settings = (require(NexusVRCharacterModel:WaitForChild("State"):WaitForChild("Settings")) :: any).GetInstance()
+local BufferProtocol = require(NexusVRCharacterModel:WaitForChild("Util"):WaitForChild("BufferProtocol")) :: any
 local UpdateInputs = NexusVRCharacterModel:WaitForChild("UpdateInputs") :: UnreliableRemoteEvent
 local ReplicationReady = NexusVRCharacterModel:WaitForChild("ReplicationReady") :: RemoteEvent
 
@@ -34,9 +36,15 @@ Settings:SetDefaults(HttpService:JSONDecode((NexusVRCharacterModel:WaitForChild(
 
 --Connect replication for other players.
 local LastPlayerUpdates = {} :: {[Player]: number}
-UpdateInputs.OnClientEvent:Connect(function(Player: Player, HeadCFrame: CFrame, LeftHandCFrame: CFrame, RightHandCFrame: CFrame, UpdateTime: number?, CurrentWalkspeed: number?, TrackerData: {[string]: CFrame}?)
+local UpdateInputsPlayerBufferedRemoteEventReceiver = PlayerBufferedRemoteEventReceiver.new(UpdateInputs, function(Buffer)
+    return BufferProtocol.Deserialize(Buffer)
+end)
+UpdateInputsPlayerBufferedRemoteEventReceiver:OnDataReceived(function(Player: Player, Data)
+    if Player == Players.LocalPlayer then return end
+
     --Return if the update is after the latest update.
     --Unreliable events do not guarentee order.
+    local UpdateTime = Data.UpdateTime
     if UpdateTime then
         if LastPlayerUpdates[Player] and UpdateTime < LastPlayerUpdates[Player] then return end
         LastPlayerUpdates[Player] = UpdateTime
@@ -45,7 +53,10 @@ UpdateInputs.OnClientEvent:Connect(function(Player: Player, HeadCFrame: CFrame, 
     --Update the character.
     local Character = CharacterService:GetCharacter(Player)
     if Character then
-        Character:UpdateFromInputs(HeadCFrame, LeftHandCFrame, RightHandCFrame, CurrentWalkspeed, TrackerData)
+        Character:UpdateFromInputs(Data.HeadCFrame, Data.LeftHandCFrame, Data.RightHandCFrame, Data.CurrentWalkspeed, {
+            LeftFoot = Data.LeftFootCFrame,
+            RightFoot = Data.RightFootCFrame,
+        })
     end
 end)
 Players.PlayerRemoving:Connect(function(Player)
