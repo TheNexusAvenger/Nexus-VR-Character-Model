@@ -73,7 +73,7 @@ function EnigmaView.new(View: BaseApiView.NexusInstanceApiBaseView, Menu: any): 
 
     --Return the object early if Enigma is not enabled.
     if Settings:GetSetting("Extra.EnigmaEnabled") == false then
-        EnigmaText.Text = "This game has disabled Enigma (Beta)."
+        EnigmaText.Text = "This game has disabled Enigma."
         return self
     end
 
@@ -175,7 +175,8 @@ Updates the Enigma text.
 function EnigmaView.UpdateText(self: EnigmaView): ()
     --Add the tracker information.
     local Text = ""
-    if Enigma.Enabled and Enigma:GetUserCFrameEnabled("LeftFoot") then
+    local HasLeftFoot, HasRightFoot = Enigma:GetUserCFrameEnabled("LeftFoot"), Enigma:GetUserCFrameEnabled("RightFoot")
+    if Enigma.Enabled and HasLeftFoot then
         if EnigmaService.Offsets.LeftFoot then
             Text = `{Text}Left Foot Tracker: {AddColor("Active", 0, 200, 0)}`
         else
@@ -184,7 +185,7 @@ function EnigmaView.UpdateText(self: EnigmaView): ()
     else
         Text = `{Text}Left Foot Tracker: {AddColor("Inactive", 200, 0, 0)}`
     end
-    if Enigma.Enabled and Enigma:GetUserCFrameEnabled("RightFoot") then
+    if Enigma.Enabled and HasRightFoot then
         if EnigmaService.Offsets.RightFoot then
             Text = `{Text}\nRight Foot Tracker: {AddColor("Active", 0, 200, 0)}`
         else
@@ -210,7 +211,11 @@ function EnigmaView.UpdateText(self: EnigmaView): ()
         else
             Text = `{Text}\nData transfer: {AddColor("Inactive", 200, 0, 0)}`
         end
-        Text = `{Text}\n\nTo calibrate, stand up straight with your head level and facing forward with your feet next to each other pointing forward.`
+        if not HasLeftFoot and not HasRightFoot and Enigma:GetUserCFrameEnabled("None") then
+            Text = `{Text}\n\n⚠️ Trackers are detected, but the role in SteamVR is "None". They need to have assigned roles through the SteamVR menu.`
+        else
+            Text = `{Text}\n\nTo calibrate, stand up straight with your head level and facing forward with your feet next to each other pointing forward.`
+        end
         if self.ShowTrackersButton then
             self.ShowTrackersButton.Visible = true
         end
