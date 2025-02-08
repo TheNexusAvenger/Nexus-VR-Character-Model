@@ -5,6 +5,7 @@ local SMOOTHING_DURATION_SECONDS = 1 / 30
 
 local Players = game:GetService("Players")
 local TweenService = game:GetService("TweenService")
+local VRService = game:GetService("VRService")
 
 local NexusVRCharacterModel = script.Parent
 local Head = require(NexusVRCharacterModel:WaitForChild("Character"):WaitForChild("Head"))
@@ -42,6 +43,7 @@ export type Character = {
     ReplicationCFrames: {[string]: CFrame}?,
     LastReplicationCFrames: {[string]: CFrame}?,
     ReplicationTrackerData: {[string]: CFrame}?,
+    LastReplicationTrackerData: {[string]: CFrame}?,
     AppearanceChangedConnection: RBXScriptConnection?,
 } & typeof(setmetatable({}, Character))
 
@@ -97,18 +99,22 @@ function Character.new(CharacterModel: Model): Character
             while (self.Humanoid :: Humanoid).Health > 0 do
                 --Send the new CFrames if the CFrames changed.
                 local ReplicationCFrames = self.ReplicationCFrames
-                if ReplicationCFrames and self.LastReplicationCFrames ~= ReplicationCFrames then
+                local ReplicationTrackerData = self.ReplicationTrackerData
+                if ReplicationCFrames and self.LastReplicationCFrames ~= ReplicationCFrames and self.LastReplicationTrackerData ~= ReplicationTrackerData then
                     self.LastReplicationCFrames = ReplicationCFrames
-                    local ReplicationTrackerData = self.ReplicationTrackerData
-                    UpdateInputs:FireServer({
+                    self.LastReplicationTrackerData = ReplicationTrackerData
+                    local NewTrackerData = {
                         UpdateTime = tick(),
                         CurrentWalkspeed = self.CurrentWalkspeed,
-                        HeadCFrame = ReplicationCFrames.HeadCFrame,
-                        LeftHandCFrame = ReplicationCFrames.LeftHandCFrame,
-                        RightHandCFrame = ReplicationCFrames.RightHandCFrame,
                         LeftFootCFrame = ReplicationTrackerData and ReplicationTrackerData.LeftFoot,
                         RightFootCFrame = ReplicationTrackerData and ReplicationTrackerData.RightFoot,
-                    })
+                    }
+                    if not VRService.AvatarGestures then
+                        NewTrackerData.HeadCFrame = ReplicationCFrames.HeadCFrame
+                        NewTrackerData.LeftHandCFrame = ReplicationCFrames.LeftHandCFrame
+                        NewTrackerData.RightHandCFrame = ReplicationCFrames.RightHandCFrame
+                    end
+                    UpdateInputs:FireServer(NewTrackerData)
                 end
 
                 --Wait 1/30th of a second to send the next set of CFrames.
@@ -430,7 +436,8 @@ function Character.UpdateFromInputs(self: Character, HeadControllerCFrame: CFram
 
     --Get the tracker CFrames from Enigma and fallback feet CFrames.
     local IsLocalCharacter = (Players.LocalPlayer and Players.LocalPlayer.Character == self.CharacterModel)
-    local LeftFoot: CFrame, RightFoot: CFrame = self.FootPlanter:GetFeetCFrames()
+    local FootPlanterLeftFoot: CFrame, FootPlanterRightFoot: CFrame = self.FootPlanter:GetFeetCFrames()
+    local LeftFoot, RightFoot = FootPlanterLeftFoot, FootPlanterRightFoot
     if TrackerData and TrackerData.LeftFoot then
         LeftFoot = TrackerData.LeftFoot
     else
@@ -459,52 +466,65 @@ function Character.UpdateFromInputs(self: Character, HeadControllerCFrame: CFram
     --HumanoidRootParts must always face up. This makes the math more complicated.
     --Setting the CFrame directly to something not facing directly up will result in the physics
     --attempting to correct that within the next frame, causing the character to appear to move.
+    local AvatarGesturesEnabled = VRService.AvatarGestures
     local IsWalking = ((CurrentWalkspeed or self.CurrentWalkspeed) > 0.1)
     local TargetHumanoidRootPartCFrame = LowerTorsoCFrame * self.Attachments.LowerTorso.RootRigAttachment.CFrame * self.Attachments.HumanoidRootPart.RootRigAttachment.CFrame:Inverse()
     local ActualHumanoidRootPartCFrame: CFrame = self.Parts.HumanoidRootPart.CFrame
     local HumanoidRootPartHeightDifference = ActualHumanoidRootPartCFrame.Y - TargetHumanoidRootPartCFrame.Y
     local NewTargetHumanoidRootPartCFrame = CFrame.new(TargetHumanoidRootPartCFrame.Position) * CFrame.Angles(0, math.atan2(TargetHumanoidRootPartCFrame.LookVector.X, TargetHumanoidRootPartCFrame.LookVector.Z) + math.pi, 0)
-    self:SetCFrameProperty(self.Parts.HumanoidRootPart, "CFrame", CFrame.new(0, HumanoidRootPartHeightDifference, 0) * NewTargetHumanoidRootPartCFrame)
-    self:SetCFrameProperty(self.Motors.Root, "Transform", CFrame.new(0, -HumanoidRootPartHeightDifference, 0) * (NewTargetHumanoidRootPartCFrame * self.Attachments.HumanoidRootPart.RootRigAttachment.CFrame):Inverse() * LowerTorsoCFrame * self.Attachments.LowerTorso.RootRigAttachment.CFrame)
-    self:SetTransform("Neck", "NeckRigAttachment", "UpperTorso", "Head", UpperTorsoCFrame, HeadCFrame)
-    self:SetTransform("Waist", "WaistRigAttachment", "LowerTorso", "UpperTorso", LowerTorsoCFrame, UpperTorsoCFrame)
+    if not AvatarGesturesEnabled then
+        self:SetCFrameProperty(self.Parts.HumanoidRootPart, "CFrame", CFrame.new(0, HumanoidRootPartHeightDifference, 0) * NewTargetHumanoidRootPartCFrame)
+        self:SetCFrameProperty(self.Motors.Root, "Transform", CFrame.new(0, -HumanoidRootPartHeightDifference, 0) * (NewTargetHumanoidRootPartCFrame * self.Attachments.HumanoidRootPart.RootRigAttachment.CFrame):Inverse() * LowerTorsoCFrame * self.Attachments.LowerTorso.RootRigAttachment.CFrame)
+        self:SetTransform("Neck", "NeckRigAttachment", "UpperTorso", "Head", UpperTorsoCFrame, HeadCFrame)
+        self:SetTransform("Waist", "WaistRigAttachment", "LowerTorso", "UpperTorso", LowerTorsoCFrame, UpperTorsoCFrame)
+    end
     if self.UseIKControl then
-        self.LeftArm:MoveToWorld(LeftHandControllerCFrame)
-        self.RightArm:MoveToWorld(RightHandControllerCFrame)
-        if not IsWalking then
+        if not AvatarGesturesEnabled then
+            self.LeftArm:MoveToWorld(LeftHandControllerCFrame)
+            self.RightArm:MoveToWorld(RightHandControllerCFrame)
+        end
+        if IsWalking and (not AvatarGesturesEnabled or FootPlanterLeftFoot ~= LeftFoot) then
             self.LeftLeg:MoveToWorld(LeftFoot)
-            self.RightLeg:MoveToWorld(RightFoot)
             self.LeftLeg:Enable()
-            self.RightLeg:Enable()
         else
             self.LeftLeg:Disable()
+        end
+        if IsWalking and (not AvatarGesturesEnabled or FootPlanterRightFoot ~= RightFoot) then
+            self.RightLeg:MoveToWorld(RightFoot)
+            self.RightLeg:Enable()
+        else
             self.RightLeg:Disable()
         end
     else
-        local LeftUpperArmCFrame, LeftLowerArmCFrame, LeftHandCFrame = (self.LeftArm :: any):GetAppendageCFrames(JointCFrames["LeftShoulder"], LeftHandControllerCFrame)
-        local RightUpperArmCFrame, RightLowerArmCFrame, RightHandCFrame = (self.RightArm :: any):GetAppendageCFrames(JointCFrames["RightShoulder"], RightHandControllerCFrame)
-        self:SetTransform("RightShoulder", "RightShoulderRigAttachment", "UpperTorso", "RightUpperArm", UpperTorsoCFrame, RightUpperArmCFrame)
-        self:SetTransform("RightElbow", "RightElbowRigAttachment", "RightUpperArm", "RightLowerArm", RightUpperArmCFrame, RightLowerArmCFrame)
-        self:SetTransform("RightWrist", "RightWristRigAttachment", "RightLowerArm", "RightHand", RightLowerArmCFrame, RightHandCFrame)
-        self:SetTransform("LeftShoulder", "LeftShoulderRigAttachment", "UpperTorso", "LeftUpperArm", UpperTorsoCFrame, LeftUpperArmCFrame)
-        self:SetTransform("LeftElbow", "LeftElbowRigAttachment", "LeftUpperArm", "LeftLowerArm", LeftUpperArmCFrame, LeftLowerArmCFrame)
-        self:SetTransform("LeftWrist", "LeftWristRigAttachment", "LeftLowerArm", "LeftHand", LeftLowerArmCFrame, LeftHandCFrame)
-        if not IsWalking then
+        if not AvatarGesturesEnabled then
+            local LeftUpperArmCFrame, LeftLowerArmCFrame, LeftHandCFrame = (self.LeftArm :: any):GetAppendageCFrames(JointCFrames["LeftShoulder"], LeftHandControllerCFrame)
+            local RightUpperArmCFrame, RightLowerArmCFrame, RightHandCFrame = (self.RightArm :: any):GetAppendageCFrames(JointCFrames["RightShoulder"], RightHandControllerCFrame)
+            self:SetTransform("RightShoulder", "RightShoulderRigAttachment", "UpperTorso", "RightUpperArm", UpperTorsoCFrame, RightUpperArmCFrame)
+            self:SetTransform("RightElbow", "RightElbowRigAttachment", "RightUpperArm", "RightLowerArm", RightUpperArmCFrame, RightLowerArmCFrame)
+            self:SetTransform("RightWrist", "RightWristRigAttachment", "RightLowerArm", "RightHand", RightLowerArmCFrame, RightHandCFrame)
+            self:SetTransform("LeftShoulder", "LeftShoulderRigAttachment", "UpperTorso", "LeftUpperArm", UpperTorsoCFrame, LeftUpperArmCFrame)
+            self:SetTransform("LeftElbow", "LeftElbowRigAttachment", "LeftUpperArm", "LeftLowerArm", LeftUpperArmCFrame, LeftLowerArmCFrame)
+            self:SetTransform("LeftWrist", "LeftWristRigAttachment", "LeftLowerArm", "LeftHand", LeftLowerArmCFrame, LeftHandCFrame)
+        end
+        if IsWalking and (not AvatarGesturesEnabled or FootPlanterLeftFoot ~= LeftFoot) then
             local LeftUpperLegCFrame, LeftLowerLegCFrame, LeftFootCFrame = (self.LeftLeg :: any):GetAppendageCFrames(JointCFrames["LeftHip"], LeftFoot)
-            local RightUpperLegCFrame, RightLowerLegCFrame, RightFootCFrame = (self.RightLeg :: any):GetAppendageCFrames(JointCFrames["RightHip"], RightFoot)
-            self:SetTransform("RightHip", "RightHipRigAttachment", "LowerTorso", "RightUpperLeg", LowerTorsoCFrame, RightUpperLegCFrame)
-            self:SetTransform("RightKnee", "RightKneeRigAttachment", "RightUpperLeg", "RightLowerLeg", RightUpperLegCFrame, RightLowerLegCFrame)
-            self:SetTransform("RightAnkle", "RightAnkleRigAttachment", "RightLowerLeg", "RightFoot", RightLowerLegCFrame, RightFootCFrame)
             self:SetTransform("LeftHip", "LeftHipRigAttachment", "LowerTorso", "LeftUpperLeg", LowerTorsoCFrame, LeftUpperLegCFrame)
             self:SetTransform("LeftKnee", "LeftKneeRigAttachment", "LeftUpperLeg", "LeftLowerLeg", LeftUpperLegCFrame, LeftLowerLegCFrame)
             self:SetTransform("LeftAnkle", "LeftAnkleRigAttachment", "LeftLowerLeg", "LeftFoot", LeftLowerLegCFrame, LeftFootCFrame)
         else
-            self.CurrentMotor6DTransforms[self.Motors.RightHip] = nil
             self.CurrentMotor6DTransforms[self.Motors.LeftHip] = nil
-            self.CurrentMotor6DTransforms[self.Motors.RightKnee] = nil
             self.CurrentMotor6DTransforms[self.Motors.LeftKnee] = nil
-            self.CurrentMotor6DTransforms[self.Motors.RightAnkle] = nil
             self.CurrentMotor6DTransforms[self.Motors.LeftAnkle] = nil
+        end
+        if IsWalking and (not AvatarGesturesEnabled or FootPlanterRightFoot ~= RightFoot) then
+            local RightUpperLegCFrame, RightLowerLegCFrame, RightFootCFrame = (self.RightLeg :: any):GetAppendageCFrames(JointCFrames["RightHip"], RightFoot)
+            self:SetTransform("RightHip", "RightHipRigAttachment", "LowerTorso", "RightUpperLeg", LowerTorsoCFrame, RightUpperLegCFrame)
+            self:SetTransform("RightKnee", "RightKneeRigAttachment", "RightUpperLeg", "RightLowerLeg", RightUpperLegCFrame, RightLowerLegCFrame)
+            self:SetTransform("RightAnkle", "RightAnkleRigAttachment", "RightLowerLeg", "RightFoot", RightLowerLegCFrame, RightFootCFrame)
+        else
+            self.CurrentMotor6DTransforms[self.Motors.RightHip] = nil
+            self.CurrentMotor6DTransforms[self.Motors.RightKnee] = nil
+            self.CurrentMotor6DTransforms[self.Motors.RightAnkle] = nil
         end
     end
 
@@ -526,6 +546,9 @@ since the seat maintains the global space.
 function Character.UpdateFromInputsSeated(self: Character,  HeadControllerCFrame: CFrame, LeftHandControllerCFrame: CFrame, RightHandControllerCFrame: CFrame): ()
     --Return if the humanoid is dead.
     if self.Humanoid.Health <= 0 then
+        return
+    end
+    if VRService.AvatarGestures then
         return
     end
 

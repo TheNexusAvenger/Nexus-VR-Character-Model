@@ -11,6 +11,7 @@ local HIDDEN_ACCESSORIES = {
 }
 
 local Players = game:GetService("Players")
+local VRService = game:GetService("VRService")
 
 local NexusVRCharacterModel = script.Parent.Parent.Parent
 local CommonCamera = require(NexusVRCharacterModel:WaitForChild("Character"):WaitForChild("Camera"):WaitForChild("CommonCamera"))
@@ -114,6 +115,11 @@ function DefaultCamera.Enable(self: DefaultCamera): ()
         self:Disable()
         self:Enable()
     end) :: any)
+
+    --Keep the camera in first person.
+    if VRService.AvatarGestures then
+        Players.LocalPlayer.CameraMaxZoomDistance = Players.LocalPlayer.CameraMinZoomDistance
+    end
 end
 
 --[[
@@ -142,6 +148,7 @@ end
 Updates the camera.
 --]]
 function DefaultCamera.UpdateCamera(self: DefaultCamera, HeadsetCFrameWorld: CFrame): ()
+    if VRService.AvatarGestures then return end
     self:SetCFrame(HeadsetCFrameWorld)
 end
 

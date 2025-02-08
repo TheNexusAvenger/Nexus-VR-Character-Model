@@ -1,6 +1,8 @@
 --Local character controller using teleporting.
 --!strict
 
+local VRService = game:GetService("VRService")
+
 local BaseController = require(script.Parent:WaitForChild("BaseController"))
 
 local SmoothLocomotionController = {}
@@ -39,6 +41,11 @@ end
 Updates the local character. Must also update the camara.
 --]]
 function SmoothLocomotionController.UpdateCharacter(self: SmoothLocomotionController): ()
+    --Return if AvatarGestures is active.
+    if VRService.AvatarGestures then
+        return
+    end
+
     --Update the base character.
     BaseController.UpdateCharacter(self)
     if not self.Character then

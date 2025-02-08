@@ -14,6 +14,8 @@ local USER_CFRAME_TO_THUMBSTICK = {
 
 local Workspace = game:GetService("Workspace")
 local Players = game:GetService("Players")
+local HttpService = game:GetService("HttpService")
+local ContextActionService = game:GetService("ContextActionService")
 local TweenService = game:GetService("TweenService")
 
 local NexusVRCharacterModel = script.Parent.Parent.Parent
@@ -28,6 +30,9 @@ local BaseController = {}
 BaseController.__index = BaseController
 
 export type BaseController = {
+    Active: boolean,
+    ActionsToLock: {Enum.KeyCode},
+    ActionsToUnbind: {Enum.KeyCode}?,
     Character: Character.Character?,
     Connections: {RBXScriptConnection}?,
     LastHeadCFrame: CFrame?,
@@ -47,7 +52,10 @@ end
 Creates a base controller object.
 --]]
 function BaseController.new(): BaseController
-    return setmetatable({}, BaseController) :: BaseController
+    return setmetatable({
+        Active = false,
+        ActionsToLock = {Enum.KeyCode.ButtonR3},
+    }, BaseController) :: BaseController
 end
 
 --[[
@@ -67,6 +75,17 @@ Enables the controller.
 --]]
 function BaseController.Enable(self: BaseController): ()
     if not self.Connections then self.Connections = {} end
+    self.Active = true
+
+    --Bind the actions to sink inputs from the PlayerScripts.
+    if not self.ActionsToUnbind then self.ActionsToUnbind = {} end
+    for _, KeyCode in self.ActionsToLock do
+        local ActionName = HttpService:GenerateGUID()
+        ContextActionService:BindActionAtPriority(ActionName, function()
+            return self.Active and Enum.ContextActionResult.Sink or Enum.ContextActionResult.Pass
+        end, false, Enum.ContextActionPriority.High.Value, KeyCode)
+        table.insert(self.ActionsToUnbind :: {Enum.KeyCode}, ActionName)
+    end
 
     --Update the character and return if the character is nil.
     self:UpdateCharacterReference()
@@ -100,12 +119,18 @@ end
 Disables the controller.
 --]]
 function BaseController.Disable(self: BaseController): ()
+    self.Active = false
     self.Character = nil
     self.LastHeadCFrame = nil
     self.LastRotationUpdateTick = nil
     if self.Connections then
         for _, Connection in self.Connections do
             Connection:Disconnect()
+        end
+    end
+    if self.ActionsToUnbind then
+        for _, ActionName in self.ActionsToUnbind do
+            ContextActionService:UnbindAction(ActionName)
         end
     end
     self.Connections = nil
