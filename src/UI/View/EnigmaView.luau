@@ -175,8 +175,8 @@ Updates the Enigma text.
 function EnigmaView.UpdateText(self: EnigmaView): ()
     --Add the tracker information.
     local Text = ""
-    local HasLeftFoot, HasRightFoot = Enigma:GetUserCFrameEnabled("LeftFoot"), Enigma:GetUserCFrameEnabled("RightFoot")
-    if Enigma.Enabled and HasLeftFoot then
+    local HasLeftFoot, HasRightFoot = Enigma.Enabled and Enigma:GetUserCFrameEnabled("LeftFoot"), Enigma.Enabled and Enigma:GetUserCFrameEnabled("RightFoot")
+    if HasLeftFoot then
         if EnigmaService.Offsets.LeftFoot then
             Text = `{Text}Left Foot Tracker: {AddColor("Active", 0, 200, 0)}`
         else
@@ -185,7 +185,7 @@ function EnigmaView.UpdateText(self: EnigmaView): ()
     else
         Text = `{Text}Left Foot Tracker: {AddColor("Inactive", 200, 0, 0)}`
     end
-    if Enigma.Enabled and HasRightFoot then
+    if HasRightFoot then
         if EnigmaService.Offsets.RightFoot then
             Text = `{Text}\nRight Foot Tracker: {AddColor("Active", 0, 200, 0)}`
         else
