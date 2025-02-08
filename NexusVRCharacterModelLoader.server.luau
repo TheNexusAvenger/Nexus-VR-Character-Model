@@ -50,7 +50,7 @@ local Configuration = {
         },
 
         --Default movement method.
-        DefaultMovementMethod = "Teleport",
+        DefaultMovementMethod = "SmoothLocomotion",
 
         --Blur effect for snap turning and teleports.
         SnapTeleportBlur = true,
