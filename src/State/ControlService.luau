@@ -34,7 +34,9 @@ function ControlService.new(): ControlService
     }, ControlService) :: ControlService
 
     --Register the default controllers.
-    self:RegisterController("None", BaseController.new() :: any)
+    local EmptyController = BaseController.new()
+    EmptyController.ActionsToLock = {Enum.KeyCode.Thumbstick1, Enum.KeyCode.Thumbstick2, Enum.KeyCode.ButtonR3, Enum.KeyCode.ButtonA}
+    self:RegisterController("None", EmptyController :: any)
     self:RegisterController("Teleport", TeleportController.new() :: any)
     self:RegisterController("SmoothLocomotion", SmoothLocomotionController.new() :: any)
 
