@@ -36,8 +36,8 @@ export type Character = {
     Parts: {[string]: BasePart},
     Motors: {[string]: Motor6D},
     Attachments: {[string]: {[string]: Attachment}},
-    CurrentMotor6DTransforms: {CFrame},
-    LastMotor6DTransforms: {CFrame},
+    CurrentMotor6DTransforms: {[Motor6D]: CFrame},
+    LastMotor6DTransforms: {[Motor6D]: CFrame},
     LastRefreshTime: number,
     ReplicationCFrames: {[string]: CFrame}?,
     LastReplicationCFrames: {[string]: CFrame}?,
@@ -124,7 +124,7 @@ end
 Set up Character Parts for VR.
 This is also used, to refresh character parts.
 --]]
-function Character:SetUpVRParts()
+function Character.SetUpVRParts(self: Character): ()
     local CharacterModel = self.CharacterModel
     local PreventArmDisconnection = self.PreventArmDisconnection
 
@@ -288,7 +288,7 @@ end
 This sets up a connection that fires when HumanoidDescription is added
 under a Humanoid, to listen for appearance changes to refresh the character parts.
 --]]
-function Character:SetUpAppearanceChanged()
+function Character.SetUpAppearanceChanged(self: Character): ()
     local CharacterModel = self.CharacterModel
     local Humanoid = CharacterModel:WaitForChild("Humanoid") :: Humanoid
 
@@ -311,7 +311,7 @@ end
 --[[
 Returns the scale value of the humanoid, or the default value.
 --]]
-function Character:GetHumanoidScale(ScaleName: string): number
+function Character.GetHumanoidScale(self: Character, ScaleName: string): number
     local Value = self.Humanoid:FindFirstChild(ScaleName) :: NumberValue
     if Value then
         return Value.Value
@@ -325,7 +325,7 @@ SeatPart is not replicated to new players, which results in
 strange movements of character.
 https://devforum.roblox.com/t/seat-occupant-and-humanoid-seatpart-not-replicating-to-new-players-to-a-server/261545
 --]]
-function Character:GetHumanoidSeatPart(): BasePart?
+function Character.GetHumanoidSeatPart(self: Character): BasePart?
     --Return nil if the Humanoid is not sitting.
     if not self.Humanoid.Sit then
         return nil
@@ -345,12 +345,13 @@ function Character:GetHumanoidSeatPart(): BasePart?
     end
     return nil
 end
+
 --[[
 Sets a property. The property will either be
 set instantly or tweened depending on how
 it is configured.
 --]]
-function Character:SetCFrameProperty(Object: Instance, PropertyName: string, PropertyValue: any): ()
+function Character.SetCFrameProperty(self: Character, Object: Instance, PropertyName: string, PropertyValue: any): ()
     if self.TweenComponents and PropertyName ~= "Transform" then
         TweenService:Create(
             Object,
@@ -363,14 +364,14 @@ function Character:SetCFrameProperty(Object: Instance, PropertyName: string, Pro
         (Object :: any)[PropertyName] = PropertyValue
     end
     if PropertyName == "Transform" then
-        self.CurrentMotor6DTransforms[Object] = PropertyValue
+        self.CurrentMotor6DTransforms[Object :: Motor6D] = PropertyValue
     end
 end
 
 --[[
 Sets the transform of a motor.
 --]]
-function Character:SetTransform(MotorName: string, AttachmentName: string, StartLimbName: string, EndLimbName: string, StartCFrame: CFrame, EndCFrame: CFrame): ()
+function Character.SetTransform(self: Character, MotorName: string, AttachmentName: string, StartLimbName: string, EndLimbName: string, StartCFrame: CFrame, EndCFrame: CFrame): ()
     self:SetCFrameProperty(self.Motors[MotorName], "Transform", (StartCFrame * self.Attachments[StartLimbName][AttachmentName].CFrame):Inverse() * (EndCFrame * self.Attachments[EndLimbName][AttachmentName].CFrame))
 end
 
@@ -378,7 +379,7 @@ end
 Refreshes the Motor6D Transforms.
 Intended to be run for the local character after Stepped to override the animations.
 --]]
-function Character:RefreshCharacter(): ()
+function Character.RefreshCharacter(self: Character): ()
     if self.TweenComponents then
         local CurrentRefreshTime = tick()
         local SmoothRatio = math.min((CurrentRefreshTime - self.LastRefreshTime) / SMOOTHING_DURATION_SECONDS, 1)
@@ -400,7 +401,7 @@ end
 --[[
 Updates the character from the inputs.
 --]]
-function Character:UpdateFromInputs(HeadControllerCFrame: CFrame, LeftHandControllerCFrame: CFrame, RightHandControllerCFrame: CFrame, CurrentWalkspeed: number?, TrackerData: {[string]: CFrame}?): ()
+function Character.UpdateFromInputs(self: Character, HeadControllerCFrame: CFrame, LeftHandControllerCFrame: CFrame, RightHandControllerCFrame: CFrame, CurrentWalkspeed: number?, TrackerData: {[string]: CFrame}?): ()
     --Return if the humanoid is dead.
     if self.Humanoid.Health <= 0 then
         return
@@ -451,7 +452,7 @@ function Character:UpdateFromInputs(HeadControllerCFrame: CFrame, LeftHandContro
         self.ReplicationTrackerData = {
             LeftFoot = NewTrackerCFrames.LeftFoot,
             RightFoot = NewTrackerCFrames.RightFoot,
-        }
+        } :: {[string]: CFrame}
     end
 
     --Set the character CFrames.
@@ -480,8 +481,8 @@ function Character:UpdateFromInputs(HeadControllerCFrame: CFrame, LeftHandContro
             self.RightLeg:Disable()
         end
     else
-        local LeftUpperArmCFrame, LeftLowerArmCFrame, LeftHandCFrame = self.LeftArm:GetAppendageCFrames(JointCFrames["LeftShoulder"], LeftHandControllerCFrame)
-        local RightUpperArmCFrame, RightLowerArmCFrame, RightHandCFrame = self.RightArm:GetAppendageCFrames(JointCFrames["RightShoulder"], RightHandControllerCFrame)
+        local LeftUpperArmCFrame, LeftLowerArmCFrame, LeftHandCFrame = (self.LeftArm :: any):GetAppendageCFrames(JointCFrames["LeftShoulder"], LeftHandControllerCFrame)
+        local RightUpperArmCFrame, RightLowerArmCFrame, RightHandCFrame = (self.RightArm :: any):GetAppendageCFrames(JointCFrames["RightShoulder"], RightHandControllerCFrame)
         self:SetTransform("RightShoulder", "RightShoulderRigAttachment", "UpperTorso", "RightUpperArm", UpperTorsoCFrame, RightUpperArmCFrame)
         self:SetTransform("RightElbow", "RightElbowRigAttachment", "RightUpperArm", "RightLowerArm", RightUpperArmCFrame, RightLowerArmCFrame)
         self:SetTransform("RightWrist", "RightWristRigAttachment", "RightLowerArm", "RightHand", RightLowerArmCFrame, RightHandCFrame)
@@ -489,8 +490,8 @@ function Character:UpdateFromInputs(HeadControllerCFrame: CFrame, LeftHandContro
         self:SetTransform("LeftElbow", "LeftElbowRigAttachment", "LeftUpperArm", "LeftLowerArm", LeftUpperArmCFrame, LeftLowerArmCFrame)
         self:SetTransform("LeftWrist", "LeftWristRigAttachment", "LeftLowerArm", "LeftHand", LeftLowerArmCFrame, LeftHandCFrame)
         if not IsWalking then
-            local LeftUpperLegCFrame, LeftLowerLegCFrame, LeftFootCFrame = self.LeftLeg:GetAppendageCFrames(JointCFrames["LeftHip"], LeftFoot)
-            local RightUpperLegCFrame, RightLowerLegCFrame, RightFootCFrame = self.RightLeg:GetAppendageCFrames(JointCFrames["RightHip"], RightFoot)
+            local LeftUpperLegCFrame, LeftLowerLegCFrame, LeftFootCFrame = (self.LeftLeg :: any):GetAppendageCFrames(JointCFrames["LeftHip"], LeftFoot)
+            local RightUpperLegCFrame, RightLowerLegCFrame, RightFootCFrame = (self.RightLeg :: any):GetAppendageCFrames(JointCFrames["RightHip"], RightFoot)
             self:SetTransform("RightHip", "RightHipRigAttachment", "LowerTorso", "RightUpperLeg", LowerTorsoCFrame, RightUpperLegCFrame)
             self:SetTransform("RightKnee", "RightKneeRigAttachment", "RightUpperLeg", "RightLowerLeg", RightUpperLegCFrame, RightLowerLegCFrame)
             self:SetTransform("RightAnkle", "RightAnkleRigAttachment", "RightLowerLeg", "RightFoot", RightLowerLegCFrame, RightFootCFrame)
@@ -522,7 +523,7 @@ Updates the character from the inputs while seated.
 The CFrames are in the local space instead of global space
 since the seat maintains the global space.
 --]]
-function Character:UpdateFromInputsSeated(HeadControllerCFrame: CFrame, LeftHandControllerCFrame: CFrame, RightHandControllerCFrame: CFrame): ()
+function Character.UpdateFromInputsSeated(self: Character,  HeadControllerCFrame: CFrame, LeftHandControllerCFrame: CFrame, RightHandControllerCFrame: CFrame): ()
     --Return if the humanoid is dead.
     if self.Humanoid.Health <= 0 then
         return
@@ -547,8 +548,8 @@ function Character:UpdateFromInputsSeated(HeadControllerCFrame: CFrame, LeftHand
         self.LeftLeg:Disable()
         self.RightLeg:Disable()
     else
-        local LeftUpperArmCFrame, LeftLowerArmCFrame, LeftHandCFrame = self.LeftArm:GetAppendageCFrames(JointCFrames["LeftShoulder"], LeftHandControllerCFrame)
-        local RightUpperArmCFrame, RightLowerArmCFrame, RightHandCFrame = self.RightArm:GetAppendageCFrames(JointCFrames["RightShoulder"], RightHandControllerCFrame)
+        local LeftUpperArmCFrame, LeftLowerArmCFrame, LeftHandCFrame = (self.LeftArm:: any):GetAppendageCFrames(JointCFrames["LeftShoulder"], LeftHandControllerCFrame)
+        local RightUpperArmCFrame, RightLowerArmCFrame, RightHandCFrame = (self.RightArm:: any):GetAppendageCFrames(JointCFrames["RightShoulder"], RightHandControllerCFrame)
         self:SetTransform("RightShoulder", "RightShoulderRigAttachment", "UpperTorso", "RightUpperArm", UpperTorsoCFrame, RightUpperArmCFrame)
         self:SetTransform("RightElbow", "RightElbowRigAttachment", "RightUpperArm", "RightLowerArm", RightUpperArmCFrame, RightLowerArmCFrame)
         self:SetTransform("RightWrist", "RightWristRigAttachment", "RightLowerArm", "RightHand", RightLowerArmCFrame, RightHandCFrame)
@@ -577,4 +578,4 @@ end
 
 
 
-return (Character :: any) :: Character
+return Character
