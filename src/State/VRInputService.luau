@@ -140,4 +140,4 @@ end
 
 
 
-return (VRInputService :: any) :: VRInputService
+return VRInputService
