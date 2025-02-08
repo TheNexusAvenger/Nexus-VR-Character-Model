@@ -290,13 +290,7 @@ under a Humanoid, to listen for appearance changes to refresh the character part
 --]]
 function Character:SetUpAppearanceChanged()
     local CharacterModel = self.CharacterModel
-
     local Humanoid = CharacterModel:WaitForChild("Humanoid") :: Humanoid
-
-    if not Humanoid then
-        warn(`[NexusVRAppearanceFix] Humanoid was not found for {CharacterModel}`)
-        return
-    end
 
     --Reset connection if it already exists
     if self.AppearanceChangedConnection then
