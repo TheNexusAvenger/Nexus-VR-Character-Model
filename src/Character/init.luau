@@ -117,7 +117,7 @@ function Character.new(CharacterModel: Model): Character
         end)
     end
 
-    return (self :: any) :: Character
+    return self
 end
 
 --[[
@@ -229,6 +229,11 @@ function Character:SetUpVRParts()
             LeftFootAttachment = self.Parts.LeftFoot:FindFirstChild("LeftFootAttachment") :: Attachment,
         },
     }
+
+    --Force IKControl when AnimationConstraints is active.
+    if not self.Motors.Neck:IsA("Motor6D") then
+        self.UseIKControl = true
+    end
 
     --Add the missing attachments that not all rigs have.
     if not self.Attachments.RightFoot.RightFootAttachment then
