@@ -23,6 +23,18 @@ games.
 * The foot-planting code is old and could use a rewrite.
 * The menu gesture is not obvious. Most players may
   not know about it.
+* `VRService.AvatarGestures` support is incomplete.
+  * `ThirdPersonTrack` camera does not work and the camera
+    setting is restricted.
+  * [Crouching is not supported.](https://devforum.roblox.com/t/vrserviceavatargestures-to-allow-for-vr-crouching/3266565)
+  * [Teleporting players is broken with no workaround.](https://devforum.roblox.com/t/animating-your-avatar-in-vr/2954399/9)
+  * Rolling the camera with a seat (ex: rollercoaster,
+    plane) is not supported.
+  * Setting the eye level is unsupported  outside of
+    recentering, and the internal recenter APIs don't
+    work.
+  * The hands might not reach the controller's hands
+    due to not being able to disconnect the arms.
 
 ## Setup
 The repository can be synced into Roblox using
