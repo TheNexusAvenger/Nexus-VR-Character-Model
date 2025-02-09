@@ -311,12 +311,15 @@ Performs snap or smooth rotating based on the thumbstick input.
 --]]
 function BaseController.UpdateRotating(self: BaseController, Hand: Enum.UserCFrame, Direction: string, StateChange: string): ()
     if VRService.AvatarGestures then
+        self.LastRotationUpdateTick = nil
         return
     end
     if not self.Character or self.Character.Humanoid.Sit then
+        self.LastRotationUpdateTick = nil
         return
     end
     if Direction ~= "Left" and Direction ~= "Right" then
+        self.LastRotationUpdateTick = nil
         return
     end
 
@@ -326,15 +329,18 @@ function BaseController.UpdateRotating(self: BaseController, Hand: Enum.UserCFra
     end
 
     --Rotate the character.
-    local LastRotationUpdateTick = self.LastRotationUpdateTick or tick()
-    local CurrentRotationUpdateTick = tick()
-    local RotationUpdateDeltaTime = (CurrentRotationUpdateTick - LastRotationUpdateTick)
     local HumanoidRootPart = self.Character.Parts.HumanoidRootPart
     if UserSettings():GetService("UserGameSettings").VRSmoothRotationEnabled then
         --Smoothly rotate the character.
         local InputPosition = VRInputService:GetThumbstickPosition(USER_CFRAME_TO_THUMBSTICK[Hand])
         if math.abs(InputPosition.X) >= THUMBSTICK_SMOOTH_LOCOMOTION_DEADZONE then
+            local LastRotationUpdateTick = self.LastRotationUpdateTick or tick()
+            local CurrentRotationUpdateTick = tick()
+            local RotationUpdateDeltaTime = (CurrentRotationUpdateTick - LastRotationUpdateTick)
             HumanoidRootPart.CFrame = CFrame.new(HumanoidRootPart.Position) * CFrame.Angles(0, -InputPosition.X * THUMBSTICK_MANUAL_SMOOTH_ROTATION_RATE * RotationUpdateDeltaTime, 0) * (CFrame.new(-HumanoidRootPart.Position) * HumanoidRootPart.CFrame)
+            self.LastRotationUpdateTick = CurrentRotationUpdateTick
+        else
+            self.LastRotationUpdateTick = nil
         end
     else
         --Snap rotate the character.
@@ -350,7 +356,6 @@ function BaseController.UpdateRotating(self: BaseController, Hand: Enum.UserCFra
             end
         end
     end
-    self.LastRotationUpdateTick = CurrentRotationUpdateTick
 end
 
 
