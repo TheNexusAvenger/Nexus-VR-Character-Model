@@ -7,6 +7,7 @@ local Workspace = game:GetService("Workspace")
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 local UserInputService = game:GetService("UserInputService")
+local VRService = game:GetService("VRService")
 
 local NexusVRCharacterModel = script.Parent.Parent
 local Enigma = require(NexusVRCharacterModel:WaitForChild("Enigma"))
@@ -153,7 +154,9 @@ function EnigmaService.Enable(self: EnigmaService): ()
         local MovementReferenceWorldCFrame = Workspace.CurrentCamera:GetRenderCFrame()
         local MovementReferenceRotation = CFrame.new(-MovementReferenceWorldCFrame.Position) * MovementReferenceWorldCFrame
         local MoveDirection = (MovementReferenceRotation * CFrame.new(LastLeftThumbstick.X, 0, -LastLeftThumbstick.Y)).Position
-        Players.LocalPlayer:Move(MoveDirection, false)
+        if MoveDirection.Magnitude > 0.01 or not VRService.AvatarGestures then --Move is not overriden with AvatarGestures since it does continous movements when not walking.
+            Players.LocalPlayer:Move(MoveDirection, false)
+        end
         if ButtonADown then
             Humanoid.Jump = true
         end

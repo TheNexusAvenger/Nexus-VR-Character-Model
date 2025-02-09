@@ -436,15 +436,17 @@ function Character.UpdateFromInputs(self: Character, HeadControllerCFrame: CFram
 
     --Get the tracker CFrames from Enigma and fallback feet CFrames.
     local IsLocalCharacter = (Players.LocalPlayer and Players.LocalPlayer.Character == self.CharacterModel)
-    local FootPlanterLeftFoot: CFrame, FootPlanterRightFoot: CFrame = self.FootPlanter:GetFeetCFrames()
-    local LeftFoot, RightFoot = FootPlanterLeftFoot, FootPlanterRightFoot
+    local LeftFoot: CFrame, RightFoot: CFrame = self.FootPlanter:GetFeetCFrames()
+    local LeftFootTrackerActive, RightFootTrackerActive = false, false
     if TrackerData and TrackerData.LeftFoot then
         LeftFoot = TrackerData.LeftFoot
+        LeftFootTrackerActive = true
     else
         LeftFoot = LeftFoot * CFrame.Angles(0, math.pi, 0)
     end
     if TrackerData and TrackerData.RightFoot then
         RightFoot = TrackerData.RightFoot
+        RightFootTrackerActive = true
     else
         RightFoot = RightFoot * CFrame.Angles(0, math.pi, 0)
     end
@@ -452,9 +454,11 @@ function Character.UpdateFromInputs(self: Character, HeadControllerCFrame: CFram
         local NewTrackerCFrames = EnigmaService:GetCFrames(self)
         if NewTrackerCFrames.LeftFoot then
             LeftFoot = NewTrackerCFrames.LeftFoot
+            LeftFootTrackerActive = true
         end
         if NewTrackerCFrames.RightFoot then
             RightFoot = NewTrackerCFrames.RightFoot
+            RightFootTrackerActive = true
         end
         self.ReplicationTrackerData = {
             LeftFoot = NewTrackerCFrames.LeftFoot,
@@ -483,13 +487,13 @@ function Character.UpdateFromInputs(self: Character, HeadControllerCFrame: CFram
             self.LeftArm:MoveToWorld(LeftHandControllerCFrame)
             self.RightArm:MoveToWorld(RightHandControllerCFrame)
         end
-        if IsWalking and (not AvatarGesturesEnabled or FootPlanterLeftFoot ~= LeftFoot) then
+        if not IsWalking and (not AvatarGesturesEnabled or LeftFootTrackerActive) then
             self.LeftLeg:MoveToWorld(LeftFoot)
             self.LeftLeg:Enable()
         else
             self.LeftLeg:Disable()
         end
-        if IsWalking and (not AvatarGesturesEnabled or FootPlanterRightFoot ~= RightFoot) then
+        if not IsWalking and (not AvatarGesturesEnabled or RightFootTrackerActive) then
             self.RightLeg:MoveToWorld(RightFoot)
             self.RightLeg:Enable()
         else
@@ -506,7 +510,7 @@ function Character.UpdateFromInputs(self: Character, HeadControllerCFrame: CFram
             self:SetTransform("LeftElbow", "LeftElbowRigAttachment", "LeftUpperArm", "LeftLowerArm", LeftUpperArmCFrame, LeftLowerArmCFrame)
             self:SetTransform("LeftWrist", "LeftWristRigAttachment", "LeftLowerArm", "LeftHand", LeftLowerArmCFrame, LeftHandCFrame)
         end
-        if IsWalking and (not AvatarGesturesEnabled or FootPlanterLeftFoot ~= LeftFoot) then
+        if not IsWalking and (not AvatarGesturesEnabled or LeftFootTrackerActive) then
             local LeftUpperLegCFrame, LeftLowerLegCFrame, LeftFootCFrame = (self.LeftLeg :: any):GetAppendageCFrames(JointCFrames["LeftHip"], LeftFoot)
             self:SetTransform("LeftHip", "LeftHipRigAttachment", "LowerTorso", "LeftUpperLeg", LowerTorsoCFrame, LeftUpperLegCFrame)
             self:SetTransform("LeftKnee", "LeftKneeRigAttachment", "LeftUpperLeg", "LeftLowerLeg", LeftUpperLegCFrame, LeftLowerLegCFrame)
@@ -516,7 +520,7 @@ function Character.UpdateFromInputs(self: Character, HeadControllerCFrame: CFram
             self.CurrentMotor6DTransforms[self.Motors.LeftKnee] = nil
             self.CurrentMotor6DTransforms[self.Motors.LeftAnkle] = nil
         end
-        if IsWalking and (not AvatarGesturesEnabled or FootPlanterRightFoot ~= RightFoot) then
+        if not IsWalking and (not AvatarGesturesEnabled or RightFootTrackerActive) then
             local RightUpperLegCFrame, RightLowerLegCFrame, RightFootCFrame = (self.RightLeg :: any):GetAppendageCFrames(JointCFrames["RightHip"], RightFoot)
             self:SetTransform("RightHip", "RightHipRigAttachment", "LowerTorso", "RightUpperLeg", LowerTorsoCFrame, RightUpperLegCFrame)
             self:SetTransform("RightKnee", "RightKneeRigAttachment", "RightUpperLeg", "RightLowerLeg", RightUpperLegCFrame, RightLowerLegCFrame)

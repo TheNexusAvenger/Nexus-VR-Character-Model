@@ -1,6 +1,9 @@
 --View for the user settings.
 --!strict
 
+local UserInputService = game:GetService("UserInputService")
+local VRService = game:GetService("VRService")
+
 local NexusVRCharacterModel = script.Parent.Parent.Parent
 local CameraService = require(NexusVRCharacterModel:WaitForChild("State"):WaitForChild("CameraService")).GetInstance()
 local ControlService = require(NexusVRCharacterModel:WaitForChild("State"):WaitForChild("ControlService")).GetInstance()
@@ -57,7 +60,12 @@ function SettingsView.new(View: BaseApiView.NexusInstanceApiBaseView): ()
     CameraSettingFrame.Size = UDim2.new(0.8, 0,0.11, 0)
     CameraSettingFrame.Position = UDim2.new(0.1, 0, 0.325, 0)
     CameraSettingFrame.Parent = Container
-    self:PopulateSettingsFrame(CameraSettingFrame, "View", "Camera.EnabledCameraOptions", function()
+    self:PopulateSettingsFrame(CameraSettingFrame, "View", function()
+        if VRService.AvatarGestures then
+            return {"Default"} --TODO: Third-person camera setting is not supported with AvatarGestures.
+        end
+        return Settings:GetSetting("Camera.EnabledCameraOptions") or {}
+    end, function()
         return CameraService.ActiveCamera
     end, function(NewValue)
         CameraService:SetActiveCamera(NewValue)
@@ -88,27 +96,33 @@ function SettingsView.new(View: BaseApiView.NexusInstanceApiBaseView): ()
     end)
 
     --Create the callibration settings.
-    local RecenterButton,RecenterText = TextButtonFactory:Create()
+    local RecenterButton, RecenterText = TextButtonFactory:Create()
     RecenterButton.Size = UDim2.new(0.4, 0, 0.075, 0)
-    RecenterButton.Position = UDim2.new(0.075, 0, 0.85, 0)
+    RecenterButton.Position = UDim2.new((VRService.AvatarGestures and 0.3 or 0.075), 0, 0.85, 0)
     RecenterButton.SizeConstraint = Enum.SizeConstraint.RelativeYY
     RecenterButton.Parent = Container
     RecenterText.Text = "Recenter"
 
     RecenterButton.MouseButton1Down:Connect(function()
-        VRInputService:Recenter()
+        if not VRService.AvatarGestures then
+            VRInputService:Recenter()
+        else
+            UserInputService:RecenterUserHeadCFrame()
+        end
     end)
 
-    local SetEyeLevelButton,SetEyeLevelText = TextButtonFactory:Create()
-    SetEyeLevelButton.Size = UDim2.new(0.4, 0, 0.075, 0)
-    SetEyeLevelButton.Position = UDim2.new(0.525, 0, 0.85, 0)
-    SetEyeLevelButton.SizeConstraint = Enum.SizeConstraint.RelativeYY
-    SetEyeLevelButton.Parent = Container
-    SetEyeLevelText.Text = " Set Eye Level "
+    if not VRService.AvatarGestures then
+        local SetEyeLevelButton, SetEyeLevelText = TextButtonFactory:Create()
+        SetEyeLevelButton.Size = UDim2.new(0.4, 0, 0.075, 0)
+        SetEyeLevelButton.Position = UDim2.new(0.525, 0, 0.85, 0)
+        SetEyeLevelButton.SizeConstraint = Enum.SizeConstraint.RelativeYY
+        SetEyeLevelButton.Parent = Container
+        SetEyeLevelText.Text = " Set Eye Level "
 
-    SetEyeLevelButton.MouseButton1Down:Connect(function()
-        VRInputService:SetEyeLevel()
-    end)
+        SetEyeLevelButton.MouseButton1Down:Connect(function()
+            VRInputService:SetEyeLevel()
+        end)
+    end
 
     --Create the version information.
     local VersionText = Instance.new("TextLabel")

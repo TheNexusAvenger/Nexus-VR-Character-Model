@@ -17,6 +17,7 @@ local Players = game:GetService("Players")
 local HttpService = game:GetService("HttpService")
 local ContextActionService = game:GetService("ContextActionService")
 local TweenService = game:GetService("TweenService")
+local VRService = game:GetService("VRService")
 
 local NexusVRCharacterModel = script.Parent.Parent.Parent
 local NexusVRCharacterModelApi = require(NexusVRCharacterModel).Api
@@ -309,6 +310,9 @@ end
 Performs snap or smooth rotating based on the thumbstick input.
 --]]
 function BaseController.UpdateRotating(self: BaseController, Hand: Enum.UserCFrame, Direction: string, StateChange: string): ()
+    if VRService.AvatarGestures then
+        return
+    end
     if not self.Character or self.Character.Humanoid.Sit then
         return
     end
