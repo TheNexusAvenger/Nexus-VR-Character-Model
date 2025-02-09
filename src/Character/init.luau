@@ -411,7 +411,7 @@ end
 --[[
 Updates the character from the inputs.
 --]]
-function Character.UpdateFromInputs(self: Character, HeadControllerCFrame: CFrame, LeftHandControllerCFrame: CFrame, RightHandControllerCFrame: CFrame, CurrentWalkspeed: number?, TrackerData: {[string]: CFrame}?): ()
+function Character.UpdateFromInputs(self: Character, HeadControllerCFrame: CFrame?, LeftHandControllerCFrame: CFrame?, RightHandControllerCFrame: CFrame?, CurrentWalkspeed: number?, TrackerData: {[string]: CFrame}?): ()
     --Return if the humanoid is dead.
     if self.Humanoid.Health <= 0 then
         return
@@ -433,8 +433,9 @@ function Character.UpdateFromInputs(self: Character, HeadControllerCFrame: CFram
     self.LastRefreshTime = tick()
 
     --Get the CFrames.
-    local HeadCFrame = self.Head:GetHeadCFrame(HeadControllerCFrame)
-    local NeckCFrame = self.Head:GetNeckCFrame(HeadControllerCFrame)
+    local CurrentHeadControllerCFrame = HeadControllerCFrame or (self.Parts.Head.CFrame * self.Head:GetEyesOffset())
+    local HeadCFrame = self.Head:GetHeadCFrame(CurrentHeadControllerCFrame)
+    local NeckCFrame = self.Head:GetNeckCFrame(CurrentHeadControllerCFrame)
     local LowerTorsoCFrame: CFrame, UpperTorsoCFrame = self.Torso:GetTorsoCFrames(NeckCFrame)
     local JointCFrames = self.Torso:GetAppendageJointCFrames(LowerTorsoCFrame, UpperTorsoCFrame)
 
@@ -487,7 +488,7 @@ function Character.UpdateFromInputs(self: Character, HeadControllerCFrame: CFram
         self:SetTransform("Waist", "WaistRigAttachment", "LowerTorso", "UpperTorso", LowerTorsoCFrame, UpperTorsoCFrame)
     end
     if self.UseIKControl then
-        if not AvatarGesturesEnabled then
+        if not AvatarGesturesEnabled and LeftHandControllerCFrame and RightHandControllerCFrame then --CFrames aren't send with AvatarGestures. Checks included for typing.
             self.LeftArm:MoveToWorld(LeftHandControllerCFrame)
             self.RightArm:MoveToWorld(RightHandControllerCFrame)
         end
@@ -539,9 +540,9 @@ function Character.UpdateFromInputs(self: Character, HeadControllerCFrame: CFram
     --Replicate the changes to the server.
     if IsLocalCharacter then
         self.ReplicationCFrames = {
-            HeadCFrame = HeadControllerCFrame,
-            LeftHandCFrame = LeftHandControllerCFrame,
-            RightHandCFrame = RightHandControllerCFrame,
+            HeadCFrame = HeadControllerCFrame :: CFrame,
+            LeftHandCFrame = LeftHandControllerCFrame :: CFrame,
+            RightHandCFrame = RightHandControllerCFrame :: CFrame,
         }
     end
 end
@@ -551,12 +552,12 @@ Updates the character from the inputs while seated.
 The CFrames are in the local space instead of global space
 since the seat maintains the global space.
 --]]
-function Character.UpdateFromInputsSeated(self: Character,  HeadControllerCFrame: CFrame, LeftHandControllerCFrame: CFrame, RightHandControllerCFrame: CFrame): ()
+function Character.UpdateFromInputsSeated(self: Character, HeadControllerCFrame: CFrame?, LeftHandControllerCFrame: CFrame?, RightHandControllerCFrame: CFrame?): ()
     --Return if the humanoid is dead.
     if self.Humanoid.Health <= 0 then
         return
     end
-    if VRService.AvatarGestures then
+    if VRService.AvatarGestures or not HeadControllerCFrame or not LeftHandControllerCFrame or not RightHandControllerCFrame then --CFrames aren't send with AvatarGestures. Checks included for typing.
         return
     end
 
