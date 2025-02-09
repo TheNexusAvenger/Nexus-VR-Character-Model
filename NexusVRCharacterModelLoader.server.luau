@@ -9,21 +9,21 @@ local Configuration = {
         --If true, arms will be allowed to disconnect.
         --Recommended to be true locally so that the controllers match the hands,
         --and false for other players so that arms appear normal.
-        --Has no effect if VRService.AvatarGesturs is active.
+        --Has no effect if VRService.AvatarGestures is active.
         LocalAllowArmDisconnection = true,
         NonLocalAllowArmDisconnection = true,
 
         --Maximum angle the neck can turn before the torso turns.
-        --Has no effect if VRService.AvatarGesturs is active.
+        --Has no effect if VRService.AvatarGestures is active.
         MaxNeckRotation = math.rad(35),
         MaxNeckSeatedRotation = math.rad(60),
 
         --Maximum angle the neck can tilt before the torso tilts.
-        --Has no effect if VRService.AvatarGesturs is active.
+        --Has no effect if VRService.AvatarGestures is active.
         MaxNeckTilt = math.rad(60),
 
         --Maximum angle the center of the torso can bend.
-        --Has no effect if VRService.AvatarGesturs is active.
+        --Has no effect if VRService.AvatarGestures is active.
         MaxTorsoBend = math.rad(10),
     },
     Camera = {
@@ -39,7 +39,7 @@ local Configuration = {
 
         --If true, Workspace.CurrentCamera.HeadLocked will be locked to false.
         --A Roblox engineer requested keeping HeadLocked on (DisableHeadLocked = false). To keep backwards compatibility, this defaults to true.
-        --Has no effect if VRService.AvatarGesturs is active.
+        --Has no effect if VRService.AvatarGestures is active.
         DisableHeadLocked = false,
 
         --Disables FadeOutViewOnCollision (black screen when in parts).
