@@ -15,6 +15,7 @@ local Appendage = require(NexusVRCharacterModel:WaitForChild("NexusAppendage"):W
 local FootPlanter = require(NexusVRCharacterModel:WaitForChild("Character"):WaitForChild("FootPlanter"))
 local EnigmaService = require(NexusVRCharacterModel:WaitForChild("State"):WaitForChild("EnigmaService")).GetInstance()
 local Settings = require(NexusVRCharacterModel:WaitForChild("State"):WaitForChild("Settings")).GetInstance()
+local VRInputService = require(NexusVRCharacterModel:WaitForChild("State"):WaitForChild("VRInputService")).GetInstance()
 local UpdateInputs = NexusVRCharacterModel:WaitForChild("UpdateInputs") :: UnreliableRemoteEvent
 
 local Character = {}
@@ -78,6 +79,9 @@ function Character.new(CharacterModel: Model): Character
     self.Humanoid = CharacterModel:WaitForChild("Humanoid") :: Humanoid
     self.CurrentWalkspeed = 0
     self.Humanoid.Running:Connect(function(WalkSpeed)
+        if VRService.AvatarGestures and VRInputService:GetThumbstickPosition(Enum.KeyCode.Thumbstick1).Magnitude < 0.2 then
+            WalkSpeed = 0
+        end
         self.CurrentWalkspeed = WalkSpeed
     end)
 
