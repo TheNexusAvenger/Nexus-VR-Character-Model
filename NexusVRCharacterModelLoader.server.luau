@@ -9,17 +9,21 @@ local Configuration = {
         --If true, arms will be allowed to disconnect.
         --Recommended to be true locally so that the controllers match the hands,
         --and false for other players so that arms appear normal.
+        --Has no effect if VRService.AvatarGesturs is active.
         LocalAllowArmDisconnection = true,
         NonLocalAllowArmDisconnection = true,
 
         --Maximum angle the neck can turn before the torso turns.
+        --Has no effect if VRService.AvatarGesturs is active.
         MaxNeckRotation = math.rad(35),
         MaxNeckSeatedRotation = math.rad(60),
 
         --Maximum angle the neck can tilt before the torso tilts.
+        --Has no effect if VRService.AvatarGesturs is active.
         MaxNeckTilt = math.rad(60),
 
         --Maximum angle the center of the torso can bend.
+        --Has no effect if VRService.AvatarGesturs is active.
         MaxTorsoBend = math.rad(10),
     },
     Camera = {
@@ -35,6 +39,7 @@ local Configuration = {
 
         --If true, Workspace.CurrentCamera.HeadLocked will be locked to false.
         --A Roblox engineer requested keeping HeadLocked on (DisableHeadLocked = false). To keep backwards compatibility, this defaults to true.
+        --Has no effect if VRService.AvatarGesturs is active.
         DisableHeadLocked = false,
 
         --Disables FadeOutViewOnCollision (black screen when in parts).
@@ -94,10 +99,8 @@ local Configuration = {
         EnigmaEnabled = true,
 
         --If true, Nexus-Appendage with IKControl will be used.
-        --Workspace.IKControlConstraintSupport MUST be set to Enabled for proper results.
-        --In Team Create, it may not set correctly. Make sure to close and re-open
-        --Roblox Studio to verify it was set. Once this property defaults to Enabled
-        --or is removed, this setting will go away.
+        --Workspace.IKControlConstraintSupport MUST NOT be set to Disabled for proper results.
+        --This will be set to true if physics-based joints are enabled.
         TEMPORARY_UseIKControl = false,
     },
 }
