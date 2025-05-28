@@ -2,8 +2,10 @@
 --!strict
 
 local NexusVRCharacterModel = script.Parent.Parent
-local Limb = require(script.Parent.Parent:WaitForChild("NexusAppendage"):WaitForChild("Limb"))
+local NexusAppendage = require(script.Parent.Parent:WaitForChild("Packages"):WaitForChild("NexusAppendage"))
 local Settings = require(NexusVRCharacterModel:WaitForChild("State"):WaitForChild("Settings")).GetInstance()
+
+local Limb = NexusAppendage.Limb
 
 local Head = {}
 Head.__index = Head
@@ -12,7 +14,7 @@ setmetatable(Head, Limb)
 export type Head = {
     Head: BasePart,
     LastNeckRotationGlobal: number?,
-} & typeof(setmetatable({}, Head)) & Limb.Limb
+} & typeof(setmetatable({}, Head)) & NexusAppendage.Limb
 
 
 

@@ -4,7 +4,9 @@
 --!strict
 
 local NexusVRCharacterModel = script.Parent.Parent
-local TypedEvent = require(NexusVRCharacterModel:WaitForChild("NexusInstance"):WaitForChild("Event"):WaitForChild("TypedEvent"))
+local NexusInstance = require(NexusVRCharacterModel:WaitForChild("Packages"):WaitForChild("NexusInstance"))
+
+local TypedEvent = NexusInstance.TypedEvent
 
 local VRInputService = {}
 VRInputService.__index = VRInputService
@@ -17,8 +19,8 @@ export type VRInputService = {
     ThumbstickValues: {[Enum.KeyCode]: Vector3},
     VRService: VRService,
     UserInputService: UserInputService,
-    Recentered: TypedEvent.TypedEvent<>,
-    EyeLevelSet: TypedEvent.TypedEvent<>,
+    Recentered: NexusInstance.TypedEvent<>,
+    EyeLevelSet: NexusInstance.TypedEvent<>,
 } & typeof(setmetatable({}, VRInputService))
 
 

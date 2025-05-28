@@ -13,15 +13,14 @@ local UserInputService = game:GetService("UserInputService")
 local VRService = game:GetService("VRService")
 
 local NexusVRCharacterModel = script.Parent.Parent.Parent
-local Enigma = require(NexusVRCharacterModel:WaitForChild("Enigma"))
-local NexusButton = require(NexusVRCharacterModel:WaitForChild("NexusButton"))
-local EnigmaTrackerRoles = require(NexusVRCharacterModel:WaitForChild("Enigma"):WaitForChild("Data"):WaitForChild("TrackerRole"))
+local Enigma = require(NexusVRCharacterModel:WaitForChild("Packages"):WaitForChild("Enigma"))
+local NexusButton = require(NexusVRCharacterModel:WaitForChild("Packages"):WaitForChild("NexusButton"))
 local CharacterService = require(NexusVRCharacterModel:WaitForChild("State"):WaitForChild("CharacterService")).GetInstance()
 local EnigmaService = require(NexusVRCharacterModel:WaitForChild("State"):WaitForChild("EnigmaService")).GetInstance()
 local Settings = require(NexusVRCharacterModel:WaitForChild("State"):WaitForChild("Settings")).GetInstance()
 local BaseApiView = require(NexusVRCharacterModel:WaitForChild("UI"):WaitForChild("View"):WaitForChild("ApiBaseView"))
 
-local TextButtonFactory = require(NexusVRCharacterModel:WaitForChild("NexusButton"):WaitForChild("Factory"):WaitForChild("TextButtonFactory")).CreateDefault(Color3.fromRGB(0, 170, 255))
+local TextButtonFactory = NexusButton.TextButtonFactory.CreateDefault(Color3.fromRGB(0, 170, 255))
 TextButtonFactory:SetDefault("Theme", "RoundedCorners")
 
 local EnigmaView = {}
@@ -252,7 +251,7 @@ function EnigmaView.ShowDebugTrackers(self: EnigmaView): ()
         local ActiveInputs = {}
         local TotalInputs = 0
         local OriginWorldCFrame = Workspace.CurrentCamera:GetRenderCFrame() * VRService:GetUserCFrame(Enum.UserCFrame.Head):Inverse()
-        for _, UserCFrameName: EnigmaTrackerRoles.TrackerRole in EnigmaTrackerRoles do
+        for _, UserCFrameName: Enigma.TrackerRole in Enigma.TrackerRoles do
             local TrackerIndex = 1
             while Enigma:GetUserCFrameEnabled(UserCFrameName, TrackerIndex) do
                 local DisplayUserCFrame = (TrackerIndex == 1 and UserCFrameName or `{UserCFrameName} ({TrackerIndex})`)

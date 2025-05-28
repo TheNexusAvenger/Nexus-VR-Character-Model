@@ -1,7 +1,9 @@
  --Stores information about an appendage, such as an arm or a leg.
 --!strict
 
-local Limb = require(script.Parent.Parent:WaitForChild("NexusAppendage"):WaitForChild("Limb"))
+local NexusAppendage = require(script.Parent.Parent:WaitForChild("Packages"):WaitForChild("NexusAppendage"))
+
+local Limb = NexusAppendage.Limb
 
 local Appendage = {}
 Appendage.__index = Appendage
@@ -17,7 +19,7 @@ export type Appendage = {
     LimbHoldAttachment: string,
     InvertBendDirection: boolean,
     PreventDisconnection: boolean, 
-} & typeof(setmetatable({}, Appendage)) & Limb.Limb
+} & typeof(setmetatable({}, Appendage)) & NexusAppendage.Limb
 
 
 --[[

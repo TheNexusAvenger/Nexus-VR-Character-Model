@@ -13,15 +13,17 @@ local RunService = game:GetService("RunService")
 local TweenService = game:GetService("TweenService")
 
 local NexusVRCharacterModel = script.Parent.Parent
-local ScreenGui3D = require(NexusVRCharacterModel:WaitForChild("NexusVRCore"):WaitForChild("Container"):WaitForChild("ScreenGui3D"))
+local NexusButton = require(NexusVRCharacterModel:WaitForChild("Packages"):WaitForChild("NexusButton"))
+local NexusVRCore = require(NexusVRCharacterModel:WaitForChild("Packages"):WaitForChild("NexusVRCore"))
 local Settings = require(NexusVRCharacterModel:WaitForChild("State"):WaitForChild("Settings")).GetInstance()
 local VRInputService = require(NexusVRCharacterModel:WaitForChild("State"):WaitForChild("VRInputService")).GetInstance()
 local ApiBaseView = require(NexusVRCharacterModel:WaitForChild("UI"):WaitForChild("View"):WaitForChild("ApiBaseView"))
 local EnigmaView = require(NexusVRCharacterModel:WaitForChild("UI"):WaitForChild("View"):WaitForChild("EnigmaView"))
 local SettingsView = require(NexusVRCharacterModel:WaitForChild("UI"):WaitForChild("View"):WaitForChild("SettingsView"))
-local NexusButton = require(NexusVRCharacterModel:WaitForChild("NexusButton"))
-local TextButtonFactory = require(NexusVRCharacterModel:WaitForChild("NexusButton"):WaitForChild("Factory"):WaitForChild("TextButtonFactory")).CreateDefault(Color3.fromRGB(0, 170, 255))
+
+local TextButtonFactory = NexusButton.TextButtonFactory.CreateDefault(Color3.fromRGB(0, 170, 255))
 TextButtonFactory:SetDefault("Theme", "RoundedCorners")
+local ScreenGui3D = NexusVRCore.ScreenGui3D
 
 local MainMenu = {}
 MainMenu.__index = MainMenu
@@ -30,10 +32,10 @@ local StaticInstance = nil
 export type MainMenu = {
     CurrentView: number,
     Views: {any},
-    ScreenGui: ScreenGui3D.NexusInstanceScreenGui3D,
+    ScreenGui: NexusVRCore.NexusInstanceScreenGui3D,
     ViewAdornFrame: Frame,
-    LeftButton: NexusButton.NexusButton,
-    RightButton: NexusButton.NexusButton,
+    LeftButton: NexusButton.NexusInstanceNexusButton,
+    RightButton: NexusButton.NexusInstanceNexusButton,
     ViewTextLabel: TextLabel,
     LeftHandHintVisible: boolean,
     RightHandHintVisible: boolean,

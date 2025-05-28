@@ -10,7 +10,7 @@ local UserInputService = game:GetService("UserInputService")
 local VRService = game:GetService("VRService")
 
 local NexusVRCharacterModel = script.Parent.Parent
-local Enigma = require(NexusVRCharacterModel:WaitForChild("Enigma"))
+local Enigma = require(NexusVRCharacterModel:WaitForChild("Packages"):WaitForChild("Enigma"))
 local Head = require(NexusVRCharacterModel:WaitForChild("Character"):WaitForChild("Head"))
 
 local EnigmaService = {}

@@ -2,7 +2,9 @@
 --!strict
 
 local NexusVRCharacterModel = script.Parent.Parent
-local TypedEvent = require(NexusVRCharacterModel:WaitForChild("NexusInstance"):WaitForChild("Event"):WaitForChild("TypedEvent"))
+local NexusInstance = require(NexusVRCharacterModel:WaitForChild("Packages"):WaitForChild("NexusInstance"))
+
+local TypedEvent = NexusInstance.TypedEvent
 
 local Settings ={}
 Settings.__index = Settings
@@ -11,7 +13,7 @@ local StaticInstance = nil
 export type Settings ={
     Defaults: any,
     Overrides: any,
-    SettingsChangeEvents: {[string]: TypedEvent.TypedEvent<>},
+    SettingsChangeEvents: {[string]: NexusInstance.TypedEvent<>},
     SettingsCache: {[string]: any},
 } & typeof(setmetatable({}, Settings))
 
@@ -98,7 +100,7 @@ function Settings.SetDefaults(self: Settings, Defaults: {[string]: any}): ()
 
     --Fire all the event changes.
     for _, Event in self.SettingsChangeEvents do
-        (Event :: TypedEvent.TypedEvent<>):Fire()
+        (Event :: NexusInstance.TypedEvent<>):Fire()
     end
 end
 
@@ -112,14 +114,14 @@ function Settings.SetOverrides(self: Settings, Overrides: {[string]: any}): ()
 
     --Fire all the event changes.
     for _, Event in self.SettingsChangeEvents do
-        (Event :: TypedEvent.TypedEvent<>):Fire()
+        (Event :: NexusInstance.TypedEvent<>):Fire()
     end
 end
 
 --[[
 Returns a changed signal for a setting.
 --]]
-function Settings.GetSettingsChangedSignal(self: Settings, Overrides: string): TypedEvent.TypedEvent<>
+function Settings.GetSettingsChangedSignal(self: Settings, Overrides: string): NexusInstance.TypedEvent<>
     Overrides = string.lower(Overrides)
 
     --Create the event if none exists.
@@ -137,7 +139,7 @@ Destroys the settings.
 function Settings.Destroy(self: Settings): ()
     --Disconnect the settings.
     for _,Event in self.SettingsChangeEvents do
-        (Event :: TypedEvent.TypedEvent<>):Destroy()
+        (Event :: NexusInstance.TypedEvent<>):Destroy()
     end
     self.SettingsChangeEvents = {}
 end

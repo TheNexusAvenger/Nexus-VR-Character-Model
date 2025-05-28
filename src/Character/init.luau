@@ -11,12 +11,14 @@ local NexusVRCharacterModel = script.Parent
 local Head = require(NexusVRCharacterModel:WaitForChild("Character"):WaitForChild("Head"))
 local Torso = require(NexusVRCharacterModel:WaitForChild("Character"):WaitForChild("Torso"))
 local AppendageLegacy = require(NexusVRCharacterModel:WaitForChild("Character"):WaitForChild("Appendage"))
-local Appendage = require(NexusVRCharacterModel:WaitForChild("NexusAppendage"):WaitForChild("Appendage"))
 local FootPlanter = require(NexusVRCharacterModel:WaitForChild("Character"):WaitForChild("FootPlanter"))
 local EnigmaService = require(NexusVRCharacterModel:WaitForChild("State"):WaitForChild("EnigmaService")).GetInstance()
 local Settings = require(NexusVRCharacterModel:WaitForChild("State"):WaitForChild("Settings")).GetInstance()
 local VRInputService = require(NexusVRCharacterModel:WaitForChild("State"):WaitForChild("VRInputService")).GetInstance()
+local NexusAppendage = require(NexusVRCharacterModel:WaitForChild("Packages"):WaitForChild("NexusAppendage"))
 local UpdateInputs = NexusVRCharacterModel:WaitForChild("UpdateInputs") :: UnreliableRemoteEvent
+
+local Appendage = NexusAppendage.Appendage
 
 local Character = {}
 Character.__index = Character
@@ -26,10 +28,10 @@ export type Character = {
     Humanoid: Humanoid,
     Head: Head.Head,
     Torso: Torso.Torso,
-    LeftArm: Appendage.Appendage,
-    RightArm: Appendage.Appendage,
-    LeftLeg: Appendage.Appendage,
-    RightLeg: Appendage.Appendage,
+    LeftArm: NexusAppendage.Appendage,
+    RightArm: NexusAppendage.Appendage,
+    LeftLeg: NexusAppendage.Appendage,
+    RightLeg: NexusAppendage.Appendage,
     FootPlanter: any,
     CurrentWalkspeed: number,
     TweenComponents: boolean,

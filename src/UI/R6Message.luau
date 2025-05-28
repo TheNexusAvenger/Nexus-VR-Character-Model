@@ -7,9 +7,12 @@ local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 
 local NexusVRCharacterModel = script.Parent.Parent
-local ScreenGui3D = require(NexusVRCharacterModel:WaitForChild("NexusVRCore"):WaitForChild("Container"):WaitForChild("ScreenGui3D"))
-local TextButtonFactory = require(NexusVRCharacterModel:WaitForChild("NexusButton"):WaitForChild("Factory"):WaitForChild("TextButtonFactory")).CreateDefault(Color3.fromRGB(0, 170, 255))
+local NexusButton = require(NexusVRCharacterModel:WaitForChild("Packages"):WaitForChild("NexusButton"))
+local NexusVRCore = require(NexusVRCharacterModel:WaitForChild("Packages"):WaitForChild("NexusVRCore"))
+
+local TextButtonFactory = NexusButton.TextButtonFactory.CreateDefault(Color3.fromRGB(0, 170, 255))
 TextButtonFactory:SetDefault("Theme", "RoundedCorners")
+local ScreenGui3D = NexusVRCore.ScreenGui3D
 
 local R6Message = {}
 R6Message.__index = R6Message

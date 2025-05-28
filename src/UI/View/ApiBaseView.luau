@@ -4,8 +4,7 @@
 local GuiService = game:GetService("GuiService")
 
 local NexusVRCharacterModel = script.Parent.Parent.Parent
-local NexusInstance = require(NexusVRCharacterModel:WaitForChild("NexusInstance"))
-local TypedEvent = require(NexusVRCharacterModel:WaitForChild("NexusInstance"):WaitForChild("Event"):WaitForChild("TypedEvent"))
+local NexusInstance = require(NexusVRCharacterModel:WaitForChild("Packages"):WaitForChild("NexusInstance"))
 
 local ApiBaseView = {}
 ApiBaseView.__index = ApiBaseView
@@ -13,7 +12,7 @@ ApiBaseView.__index = ApiBaseView
 export type ApiBaseView = {
     Name: string,
     Visible: boolean,
-    Destroyed: TypedEvent.TypedEvent<>,
+    Destroyed: NexusInstance.TypedEvent<>,
     Frame: Frame,
 } & typeof(setmetatable({}, ApiBaseView))
 export type NexusInstanceApiBaseView = NexusInstance.NexusInstance<ApiBaseView>
