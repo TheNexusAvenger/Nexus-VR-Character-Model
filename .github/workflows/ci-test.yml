@@ -1,0 +1,30 @@
+name: CI Test
+
+# Run the build on push.
+on:
+  push:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    # Checkout the repository.
+    - name: Checkout Repository
+      uses: actions/checkout@v4
+    # Run Aftman to install Rojo and Wally.
+    - name: Install Aftman
+      uses: ok-nick/setup-aftman@v0.4.2
+      with:
+        token: ${{ secrets.GITHUB_TOKEN }}
+    # Install Wally dependencies.
+    - name: Install Wally Dependencies
+      run: |
+        wally install
+        rojo sourcemap default.project.json --output sourcemap.json
+        wally-package-types --sourcemap sourcemap.json Packages/
+      shell: bash
+    # Run Avant.
+    - name: Run Avant Open Cloud
+      uses: Avant-Rbx/Avant-Open-Cloud@V.1.0.0
+      env:
+        OPEN_CLOUD_TEST_API_KEY: ${{ secrets.OPEN_CLOUD_TEST_API_KEY }}

@@ -1,0 +1,11 @@
+{
+    "RojoBuildStrategy": {
+        "ProjectFile": "place.project.json",
+        "AvantInjectionDirectory": "test/"
+    },
+    "OpenCloud": {
+        "ApiKeyEnvironmentVariable": "OPEN_CLOUD_TEST_API_KEY",
+        "UniverseId": 4310221419,
+        "PlaceId": 12232531998
+    }
+}
