@@ -1,8 +1,9 @@
 --Tests the Torso class.
 --!strict
 
-local NexusVRCharacterModel = game:GetService("ServerScriptService"):WaitForChild("NexusVRCharacterModelLoader"):WaitForChild("MainModule"):WaitForChild("NexusVRCharacterModel")
-local Torso = require(NexusVRCharacterModel:WaitForChild("Character"):WaitForChild("Torso"))
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+
+local Torso = require(ReplicatedStorage.Packages.NexusVRCharacterModel.NexusVRCharacterModel.Character.Torso)
 
 return function()
     describe("A torso instance", function()

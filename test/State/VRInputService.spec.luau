@@ -1,8 +1,9 @@
 --Tests the VRInputService class.
 --!strict
 
-local NexusVRCharacterModel = game:GetService("ServerScriptService"):WaitForChild("NexusVRCharacterModelLoader"):WaitForChild("MainModule"):WaitForChild("NexusVRCharacterModel")
-local VRInputService = require(NexusVRCharacterModel:WaitForChild("State"):WaitForChild("VRInputService"))
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+
+local VRInputService = require(ReplicatedStorage.Packages.NexusVRCharacterModel.NexusVRCharacterModel.State.VRInputService)
 
 return function()
     local function expectNear(Actual: CFrame, Expected: CFrame): ()

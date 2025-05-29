@@ -1,8 +1,9 @@
 --Tests the Head class.
 --!strict
 
-local NexusVRCharacterModel = game:GetService("ServerScriptService"):WaitForChild("NexusVRCharacterModelLoader"):WaitForChild("MainModule"):WaitForChild("NexusVRCharacterModel")
-local Head = require(NexusVRCharacterModel:WaitForChild("Character"):WaitForChild("Head"))
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+
+local Head = require(ReplicatedStorage.Packages.NexusVRCharacterModel.NexusVRCharacterModel.Character.Head)
 
 return function()
     local function expectNear(Actual: CFrame, Expected: CFrame): ()

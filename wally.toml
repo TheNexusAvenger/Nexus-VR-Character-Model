@@ -10,12 +10,12 @@ registry = "https://github.com/UpliftGames/wally-index"
 realm = "shared"
 
 exclude = ["**"]
-include = ["src", "src/*", "MainModule.luau", "Packages", "Packages/*", "default.project.json", "wally.lock", "wally.toml"]
+include = ["dist", "dist/*", "src", "src/*", "MainModule.luau", "default.project.json", "wally.lock", "wally.toml"]
 
 [dependencies]
 Enigma = "thenexusavenger/enigma@0.5.2"
 NexusAppendage = "thenexusavenger/nexus-appendage@1.2.0"
 NexusBufferedReplication = "thenexusavenger/nexus-buffered-replication@1.0.0"
-NexusButton = "thenexusavenger/nexus-button@2.5.1"
+NexusButton = "thenexusavenger/nexus-button@2.5.2"
 NexusInstance = "thenexusavenger/nexus-instance@4.1.2"
-NexusVRCore = "thenexusavenger/nexus-vr-core@2.2.1"
+NexusVRCore = "thenexusavenger/nexus-vr-core@2.2.2"

@@ -5,6 +5,7 @@ local UserInputService = game:GetService("UserInputService")
 local VRService = game:GetService("VRService")
 
 local NexusVRCharacterModel = script.Parent.Parent.Parent
+local NexusButton = require(NexusVRCharacterModel:WaitForChild("Packages"):WaitForChild("NexusButton"))
 local CameraService = require(NexusVRCharacterModel:WaitForChild("State"):WaitForChild("CameraService")).GetInstance()
 local ControlService = require(NexusVRCharacterModel:WaitForChild("State"):WaitForChild("ControlService")).GetInstance()
 local DefaultCursorService = require(NexusVRCharacterModel:WaitForChild("State"):WaitForChild("DefaultCursorService")).GetInstance()
@@ -12,7 +13,7 @@ local Settings = require(NexusVRCharacterModel:WaitForChild("State"):WaitForChil
 local VRInputService = require(NexusVRCharacterModel:WaitForChild("State"):WaitForChild("VRInputService")).GetInstance()
 local BaseApiView = require(NexusVRCharacterModel:WaitForChild("UI"):WaitForChild("View"):WaitForChild("ApiBaseView"))
 
-local TextButtonFactory = require(NexusVRCharacterModel:WaitForChild("NexusButton"):WaitForChild("Factory"):WaitForChild("TextButtonFactory")).CreateDefault(Color3.fromRGB(0, 170, 255))
+local TextButtonFactory = NexusButton.TextButtonFactory.CreateDefault(Color3.fromRGB(0, 170, 255))
 TextButtonFactory:SetDefault("Theme", "RoundedCorners")
 
 local SettingsView = {}

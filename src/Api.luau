@@ -8,7 +8,7 @@ local UserInputService = game:GetService("UserInputService")
 
 return function()
     local NexusVRCharacterModel = script.Parent
-    local TypedEvent = require(NexusVRCharacterModel:WaitForChild("NexusInstance"):WaitForChild("Event"):WaitForChild("TypedEvent"))
+    local TypedEvent = require(NexusVRCharacterModel:WaitForChild("Packages"):WaitForChild("NexusInstance")).TypedEvent
     local API = {} :: any
     API.Registered = TypedEvent.new()
 

@@ -10,7 +10,8 @@ local UserInputService = game:GetService("UserInputService")
 local VRService = game:GetService("VRService")
 
 local NexusVRCharacterModel = ReplicatedStorage:WaitForChild("NexusVRCharacterModel") :: ModuleScript
-local PlayerBufferedRemoteEventReceiver = require(NexusVRCharacterModel:WaitForChild("NexusBufferedReplication"):WaitForChild("Receiver"):WaitForChild("PlayerBufferedRemoteEventReceiver")) :: any
+local NexusBufferedReplication = require(NexusVRCharacterModel:WaitForChild("Packages"):WaitForChild("NexusBufferedReplication")) :: any
+local NexusVRCore = require(NexusVRCharacterModel:WaitForChild("Packages"):WaitForChild("NexusVRCore")) :: any
 local CameraService = (require(NexusVRCharacterModel:WaitForChild("State"):WaitForChild("CameraService")) :: any).GetInstance()
 local CharacterService = (require(NexusVRCharacterModel:WaitForChild("State"):WaitForChild("CharacterService")) :: any).GetInstance()
 local ControlService = (require(NexusVRCharacterModel:WaitForChild("State"):WaitForChild("ControlService")) :: any).GetInstance()
@@ -21,10 +22,12 @@ local BufferProtocol = require(NexusVRCharacterModel:WaitForChild("Util"):WaitFo
 local UpdateInputs = NexusVRCharacterModel:WaitForChild("UpdateInputs") :: UnreliableRemoteEvent
 local ReplicationReady = NexusVRCharacterModel:WaitForChild("ReplicationReady") :: RemoteEvent
 
+local PlayerBufferedRemoteEventReceiver = NexusBufferedReplication.Receiver.PlayerBufferedRemoteEventReceiver
+
 
 
 --Add the deprecation warning to the bundled Nexus VR Core.
-local BaseScreenGui = require(ReplicatedStorage:WaitForChild("NexusVRCore"):WaitForChild("Container"):WaitForChild("BaseScreenGui")) :: any
+local BaseScreenGui = NexusVRCore.BaseScreenGui
 local OriginalBaseScreenGuiConstructor = BaseScreenGui.__new
 BaseScreenGui.__new = function(...)
     warn("Using the bundled (automically loaded) Nexus VR Core with Nexus VR Character Model is deprecated.\nIt is recommended to move to a fixed version, which can be downloaded from GitHub.")

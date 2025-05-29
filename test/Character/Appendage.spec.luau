@@ -1,8 +1,9 @@
 --Tests the Appendage class.
 --!strict
 
-local NexusVRCharacterModel = game:GetService("ServerScriptService"):WaitForChild("NexusVRCharacterModelLoader"):WaitForChild("MainModule"):WaitForChild("NexusVRCharacterModel")
-local Appendage = require(NexusVRCharacterModel:WaitForChild("Character"):WaitForChild("Appendage"))
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+
+local Appendage = require(ReplicatedStorage.Packages.NexusVRCharacterModel.NexusVRCharacterModel.Character.Appendage)
 
 return function()
     local function expectNear(Actual: Vector3, Expected: Vector3): ()

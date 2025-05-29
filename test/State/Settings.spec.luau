@@ -1,8 +1,9 @@
 --Tests the Settings class.
 --!strict
 
-local NexusVRCharacterModel = game:GetService("ServerScriptService"):WaitForChild("NexusVRCharacterModelLoader"):WaitForChild("MainModule"):WaitForChild("NexusVRCharacterModel")
-local Settings = require(NexusVRCharacterModel:WaitForChild("State"):WaitForChild("Settings"))
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+
+local Settings = require(ReplicatedStorage.Packages.NexusVRCharacterModel.NexusVRCharacterModel.State.Settings)
 
 return function()
     local TestSettings = nil

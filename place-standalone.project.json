@@ -2,24 +2,13 @@
     "name": "Nexus-VR-Character-Model",
     "tree": {
         "$className": "DataModel",
-        "ReplicatedStorage": {
-            "Packages": {
-                "$path": "./Packages",
-                "NexusVRCharacterModel": {
-                    "$path": "."
-                }
-            }
-        },
         "ServerScriptService": {
             "$className": "ServerScriptService",
             "NexusVRCharacterModelLoader": {
                 "$path": "./NexusVRCharacterModelLoader.server.luau",
                 "MainModule": {
-                    "$path": "./test/MainModule.luau"
+                    "$path": "./default-standalone.project.json"
                 }
-            },
-            "NexusVRCharacterModelTest": {
-                "$path": "./test"
             }
         }
     }

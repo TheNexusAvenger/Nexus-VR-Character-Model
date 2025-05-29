@@ -1,8 +1,9 @@
 --Tests the BufferProtocol class.
 --!strict
 
-local NexusVRCharacterModel = game:GetService("ServerScriptService"):WaitForChild("NexusVRCharacterModelLoader"):WaitForChild("MainModule"):WaitForChild("NexusVRCharacterModel")
-local BufferProtocol = require(NexusVRCharacterModel:WaitForChild("Util"):WaitForChild("BufferProtocol"))
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+
+local BufferProtocol = require(ReplicatedStorage.Packages.NexusVRCharacterModel.NexusVRCharacterModel.Util.BufferProtocol)
 
 return function()
     describe("The buffer protocol", function()

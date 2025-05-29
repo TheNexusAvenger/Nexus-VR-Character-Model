@@ -8,10 +8,12 @@ local VERSION_COMMIT = "00000000"
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local HttpService = game:GetService("HttpService")
 
-local BufferedRemoteEventSender = require(script:WaitForChild("NexusBufferedReplication"):WaitForChild("Sender"):WaitForChild("BufferedRemoteEventSender"))
-local EnrollableRemoteEvent = require(script:WaitForChild("NexusBufferedReplication"):WaitForChild("Sender"):WaitForChild("EnrollableRemoteEvent"))
+local NexusBufferedReplication = require(script:WaitForChild("Packages"):WaitForChild("NexusBufferedReplication"))
 local Settings = require(script:WaitForChild("State"):WaitForChild("Settings")).GetInstance()
 local BufferProtocol = require(script:WaitForChild("Util"):WaitForChild("BufferProtocol"))
+
+local BufferedRemoteEventSender = NexusBufferedReplication.Sender.BufferedRemoteEventSender
+local EnrollableRemoteEvent = NexusBufferedReplication.Sender.EnrollableRemoteEvent
 
 local NexusVRCharacterModel = {}
 
@@ -67,8 +69,22 @@ function NexusVRCharacterModel.Load(self: NexusVRCharacterModel): ()
     script.Parent = ReplicatedStorage
 
     --Copy Nexus VR Core.
+    --This is a bit hacky, but the only good option in Wally.
     if not ReplicatedStorage:FindFirstChild("NexusVRCore") then
-        script:WaitForChild("NexusVRCore"):Clone().Parent = ReplicatedStorage
+        local Packages = script:FindFirstChild("Packages")
+        if Packages then
+            local NexusVRCore = Packages:FindFirstChild("nexus-vr-core", true)
+            local NexusInstance = Packages:FindFirstChild("nexus-instance", true)
+            if NexusVRCore and NexusInstance then
+                local NewNexusVRCore = NexusVRCore:Clone()
+                NewNexusVRCore.Name = "NexusVRCore"
+
+                local NewNexusInstance = NexusInstance:Clone()
+                NewNexusInstance.Name = "NexusInstance"
+                NewNexusInstance.Parent = NewNexusVRCore:WaitForChild("Packages")
+                NewNexusVRCore.Parent = ReplicatedStorage
+            end
+        end
     end
 
     --Output any warnings.
