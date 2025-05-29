@@ -78,6 +78,7 @@ function NexusVRCharacterModel.Load(self: NexusVRCharacterModel): ()
             if NexusVRCore and NexusInstance then
                 local NewNexusVRCore = NexusVRCore:Clone()
                 NewNexusVRCore.Name = "NexusVRCore"
+                NewNexusVRCore:WaitForChild("Packages"):WaitForChild("NexusInstance"):Destroy()
 
                 local NewNexusInstance = NexusInstance:Clone()
                 NewNexusInstance.Name = "NexusInstance"

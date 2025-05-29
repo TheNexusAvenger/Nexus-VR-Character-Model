@@ -4,7 +4,7 @@ repository = "https://github.com/TheNexusAvenger/Nexus-VR-Character-Model"
 description = "Maps Roblox characters to the VR inputs of players."
 license = "MIT"
 authors = ["TheNexusAvenger"]
-version = "2.14.2"
+version = "2.15.0"
 
 registry = "https://github.com/UpliftGames/wally-index"
 realm = "shared"
