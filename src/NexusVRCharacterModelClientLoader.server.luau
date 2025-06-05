@@ -28,10 +28,12 @@ local PlayerBufferedRemoteEventReceiver = NexusBufferedReplication.Receiver.Play
 --Add the deprecation warning to the bundled Nexus VR Core.
 local NexusVRCore = require(ReplicatedStorage:WaitForChild("NexusVRCore")) :: any
 local BaseScreenGui = NexusVRCore.BaseScreenGui
-local OriginalBaseScreenGuiConstructor = BaseScreenGui.__new
-BaseScreenGui.__new = function(...)
-    warn("Using the bundled (automically loaded) Nexus VR Core with Nexus VR Character Model is deprecated.\nIt is recommended to move to a fixed version, which can be downloaded from GitHub.")
-    return OriginalBaseScreenGuiConstructor(...)
+if BaseScreenGui then --Older versions (non-bundled versions) do not have this in the main module.
+    local OriginalBaseScreenGuiConstructor = BaseScreenGui.__new
+    BaseScreenGui.__new = function(...)
+        warn("Using the bundled (automically loaded) Nexus VR Core with Nexus VR Character Model is deprecated.\nIt is recommended to move to a fixed version, which can be downloaded from GitHub.")
+        return OriginalBaseScreenGuiConstructor(...)
+    end
 end
 
 --Load the settings.
